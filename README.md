@@ -1,18 +1,21 @@
-# VäNä AutoDyno v10 Blue Mobile
+# VäNä AutoDyno v7 UI Edition
 
-Tämä versio on tehty nimenomaan iPhone/mobiilin etunäkymää varten lähemmäs hyväksyttyä sinistä mallikuvaa.
+Tässä versiossa käyttöliittymä rakennettiin uudelleen hyväksytyn mallikuvan hengessä.
 
-Muutokset:
-- pyörä nostettu yläosaan näkyväksi
-- logo + pyörä + RPM-mittari samaan hero-kokonaisuuteen
-- isompi, näyttävämpi RPM-mittari
-- live-nopeus / teho / vääntö / G heti hero-osiossa
-- sensorit näkyvät ylhäällä kompakteina tiloina
-- alavalikko korostuu enemmän
-- sininen neon/racing-kontrasti vahvempi
-- info-napit säilyvät
-- kaikki v9:n mittaus- ja AutoTune-toiminnot säilyvät
+Mukana:
+- selkeämpi, huolitellumpi racing-UI
+- pehmeät pyöristetyt napit
+- aktiivinen/päällä näkyy värillä
+- uusi hero + iso RPM-gauge
+- live-stat-kortit
+- mittaus / vedot / analyysi / autotune / asetukset -näkymät
+- automaattinen veto
+- RPM-prioriteetit
+- mikrofoni, kamera, GPS, IMU
+- vertailu ja AutoTune-ehdotuspohja
 
-GitHub:
-Korvaa `index.html` ja pidä `bike.png` samassa juurikansiossa.
-Oikea versio näyttää tekstin `BUILD V10 BLUE MOBILE`.
+GitHub Pages:
+1. Pura ZIP.
+2. Lataa `index.html` ja `bike.png` repositorion juureen.
+3. Commit / push.
+4. Avaa sivu. V7 näyttää ylhäällä tekstin `BUILD V7 UI EDITION`.
