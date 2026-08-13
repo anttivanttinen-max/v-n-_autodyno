@@ -7,12 +7,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VäNä AutoDyno v7 UI Edition</title>
+<title>VäNä AutoDyno v9 Blue Edition</title>
 <style>
 :root{
   --bg:#06090f; --bg2:#0a111a; --panel:#0d1520; --panel2:#101a27; --line:#223446;
-  --text:#f6fbff; --muted:#8ea2b7; --cyan:#00e7ff; --blue:#3a7bff; --green:#3cf88f;
-  --yellow:#ffd44f; --red:#ff476f; --vio:#ae6eff; --orange:#ff9142; --off:#566575;
+  --text:#f6fbff; --muted:#8ea2b7; --cyan:#2de9ff; --blue:#2388ff; --green:#43f58f;
+  --yellow:#ffd44f; --red:#ff476f; --vio:#6e7cff; --orange:#ff9d3f; --off:#566575;
   --shadow:0 18px 48px rgba(0,0,0,.45);
   --radius:24px;
 }
@@ -22,9 +22,9 @@ body{
   margin:0; color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   background:
-    radial-gradient(circle at 12% -6%, rgba(0,231,255,.18), transparent 28%),
-    radial-gradient(circle at 88% 4%, rgba(174,110,255,.14), transparent 24%),
-    radial-gradient(circle at 45% 100%, rgba(255,71,111,.08), transparent 32%),
+    radial-gradient(circle at 12% -6%, rgba(35,136,255,.22), transparent 28%),
+    radial-gradient(circle at 88% 4%, rgba(45,233,255,.12), transparent 24%),
+    radial-gradient(circle at 45% 100%, rgba(35,136,255,.10), transparent 32%),
     linear-gradient(180deg, #05070d, #07101a 58%, #04070b);
   min-height:100vh;
 }
@@ -33,9 +33,9 @@ body{
   position:relative; min-height:290px; overflow:hidden;
   border-radius:30px; padding:18px;
   background:
-    linear-gradient(135deg, rgba(0,231,255,.14), rgba(57,123,255,.07) 34%, rgba(174,110,255,.10) 68%, rgba(255,71,111,.08)),
+    linear-gradient(135deg, rgba(35,136,255,.16), rgba(45,233,255,.07) 34%, rgba(110,124,255,.10) 68%, rgba(35,136,255,.10)),
     linear-gradient(180deg, #0e1825, #09121b);
-  border:1px solid #2a465b; box-shadow:var(--shadow);
+  border:1px solid #274e6a; box-shadow:var(--shadow);
 }
 .hero:before{
   content:""; position:absolute; inset:0;
@@ -47,7 +47,7 @@ body{
 .heroGrid{position:relative; z-index:2; display:grid; grid-template-columns:390px 1fr; gap:14px; min-height:254px}
 .brandBlock{display:flex; flex-direction:column; justify-content:space-between}
 .brand h1{margin:0; font-size:38px; letter-spacing:-1.8px; text-shadow:0 0 26px rgba(0,231,255,.16)}
-.brand .version{font-size:12px; letter-spacing:.14em; color:var(--cyan); font-weight:800}
+.brand .version{font-size:12px; letter-spacing:.14em; color:#7fefff; font-weight:800}
 .brand p{margin:6px 0 0; color:var(--muted); font-size:12px; max-width:320px}
 .build{
   display:inline-flex; align-items:center; gap:7px;
@@ -65,7 +65,7 @@ body{
 }
 .gauge{
   width:100%; height:100%; border-radius:50%; position:relative;
-  background:conic-gradient(from 210deg, var(--cyan) 0deg, var(--blue) 90deg, var(--vio) 160deg, var(--red) 230deg, rgba(255,255,255,.08) 230deg 240deg, transparent 240deg 360deg);
+  background:conic-gradient(from 210deg, #2de9ff 0deg, #2388ff 100deg, #6e7cff 180deg, #143c9e 230deg, rgba(255,255,255,.08) 230deg 240deg, transparent 240deg 360deg);
   -webkit-mask: radial-gradient(circle at 50% 50%, transparent 0 55%, #000 56%);
           mask: radial-gradient(circle at 50% 50%, transparent 0 55%, #000 56%);
   filter:drop-shadow(0 0 22px rgba(0,231,255,.24));
@@ -78,7 +78,7 @@ body{
 }
 .gaugeCenter .label{font-size:11px; color:var(--muted); letter-spacing:.14em}
 .gaugeCenter .value{font-size:42px; font-weight:900; line-height:1}
-.gaugeCenter .sub{font-size:11px; color:var(--cyan); margin-top:2px}
+.gaugeCenter .sub{font-size:11px; color:#7fefff; margin-top:2px}
 .heroRight{position:relative; display:flex; flex-direction:column; justify-content:space-between}
 .heroBike{position:absolute; right:-12px; bottom:-8px; width:min(56%,520px); filter:drop-shadow(0 18px 24px rgba(0,0,0,.6)); opacity:.98}
 .liveTop{
@@ -115,17 +115,17 @@ body{
 .cardHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px}
 .cardHead h2{margin:0; font-size:15px; display:flex; align-items:center; gap:8px}
 .cardHead h2:before{
-  content:""; width:5px; height:18px; border-radius:999px; background:linear-gradient(180deg,var(--cyan),var(--blue));
-  box-shadow:0 0 16px rgba(0,231,255,.35)
+  content:""; width:5px; height:18px; border-radius:999px; background:linear-gradient(180deg,#2de9ff,#2388ff);
+  box-shadow:0 0 16px rgba(35,136,255,.42)
 }
 .headTag{
-  padding:6px 10px; border-radius:999px; font-size:11px; color:var(--cyan);
-  border:1px solid #28465b; background:#08111a;
+  padding:6px 10px; border-radius:999px; font-size:11px; color:#7fefff;
+  border:1px solid #274e6a; background:#0c0f16;
 }
 .inputs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
 label{display:block; font-size:10px; color:var(--muted); margin-bottom:4px; letter-spacing:.03em}
 input,select{
-  width:100%; background:#08111a; color:var(--text); border:1px solid var(--line); border-radius:14px;
+  width:100%; background:#0c0f16; color:var(--text); border:1px solid var(--line); border-radius:14px;
   padding:10px 11px; font-size:15px; outline:none;
 }
 input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,255,.08)}
@@ -138,7 +138,7 @@ input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,2
 }
 .btn:active{transform:scale(.975)}
 .btn.off{background:#111925; color:#8190a0; border-color:#243240}
-.btn.blue.on{background:linear-gradient(135deg,#083650,#0a2742); color:#d1fbff; border-color:#1682ac; box-shadow:0 0 22px rgba(0,231,255,.12)}
+.btn.blue.on{background:linear-gradient(135deg,#083c5a,#0a263d); color:#d1fbff; border-color:#2679b9; box-shadow:0 0 22px rgba(35,136,255,.18)}
 .btn.green.on{background:linear-gradient(135deg,#0b412b,#0a2b1f); color:#c8ffdf; border-color:#2d8358; box-shadow:0 0 22px rgba(60,248,143,.12)}
 .btn.yellow.on{background:linear-gradient(135deg,#62490a,#362803); color:#fff2bf; border-color:#ab8420}
 .btn.violet.on{background:linear-gradient(135deg,#40205f,#26143d); color:#ead8ff; border-color:#7c4bb4}
@@ -146,7 +146,7 @@ input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,2
 .btn.red.on{background:linear-gradient(135deg,#b91a44,#73142f); border-color:#ff6285; color:#fff}
 .sensorRow{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:10px}
 .sensorBox{
-  padding:10px; border-radius:16px; border:1px solid var(--line); background:#08111a; text-align:center;
+  padding:10px; border-radius:16px; border:1px solid var(--line); background:#0c0f16; text-align:center;
 }
 .sensorBox span{display:block; font-size:10px; color:var(--muted)}
 .sensorBox strong{display:block; margin-top:3px; font-size:12px}
@@ -157,9 +157,9 @@ input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,2
 }
 .priority{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
 .prio{
-  border-radius:18px; padding:11px; border:1px solid var(--line); background:#08111a;
+  border-radius:18px; padding:11px; border:1px solid var(--line); background:#0c0f16;
 }
-.prio b{display:block; color:var(--cyan); font-size:11px; margin-bottom:6px}
+.prio b{display:block; color:#7fefff; font-size:11px; margin-bottom:6px}
 canvas{width:100%; height:310px; background:#060c12; border:1px solid var(--line); border-radius:18px}
 .note{font-size:11px; color:var(--muted); line-height:1.45; margin-top:8px}
 .videoWrap{display:none; margin-top:10px; border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#000}
@@ -167,18 +167,18 @@ canvas{width:100%; height:310px; background:#060c12; border:1px solid var(--line
 video{display:block; width:100%; max-height:240px; object-fit:cover}
 .run{
   display:flex; justify-content:space-between; gap:10px; padding:10px; margin-top:7px;
-  border-radius:16px; border:1px solid var(--line); background:#08111a; font-size:11px;
+  border-radius:16px; border:1px solid var(--line); background:#0c0f16; font-size:11px;
 }
 .run b{color:var(--cyan)}
 .meterGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
 .barCard{
-  padding:11px; border-radius:16px; border:1px solid var(--line); background:#08111a;
+  padding:11px; border-radius:16px; border:1px solid var(--line); background:#0c0f16;
 }
 .barCard .cap{font-size:10px; color:var(--muted); margin-bottom:7px}
 .bar{
   height:11px; border-radius:999px; background:#152130; overflow:hidden; border:1px solid #223240;
 }
-.fill{height:100%; width:0%; background:linear-gradient(90deg,var(--cyan),var(--blue))}
+.fill{height:100%; width:0%; background:linear-gradient(90deg,#2de9ff,#2388ff)}
 .fill.green{background:linear-gradient(90deg,#27d670,var(--green))}
 .fill.yellow{background:linear-gradient(90deg,#ffcb42,#ff8f42)}
 .nav{
@@ -190,9 +190,37 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
 .nav button{
   border:0; background:transparent; color:#7e90a3; border-radius:15px; padding:10px 4px; font-size:10px; font-weight:800;
 }
-.nav button.active{background:#102435; color:var(--cyan)}
+.nav button.active{background:#35101a; color:#7fefff; box-shadow:inset 0 0 0 1px #6c1d31}
 .screen{display:none}
 .screen.active{display:block}
+
+.infoBtn{
+  width:24px;height:24px;border-radius:50%;border:1px solid #31546f;
+  background:linear-gradient(180deg,#112438,#0b1825);color:#8fefff;
+  font-weight:900;font-size:13px;display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(35,136,255,.12);padding:0;cursor:pointer;
+}
+.infoBtn:active{transform:scale(.94)}
+.btnWrap{position:relative}
+.btnWrap .infoBtn{position:absolute;right:7px;top:7px;z-index:3;width:22px;height:22px;font-size:12px}
+.infoModal{
+  position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.58);backdrop-filter:blur(8px);z-index:50;padding:14px;
+}
+.infoModal.show{display:flex}
+.infoSheet{
+  width:min(100%,620px);border-radius:26px 26px 20px 20px;padding:18px;
+  background:linear-gradient(180deg,#0e1b29,#08111a);
+  border:1px solid #2b5370;box-shadow:0 -12px 48px rgba(0,0,0,.5),0 0 30px rgba(35,136,255,.08);
+}
+.infoSheet h3{margin:0 0 8px;font-size:19px}
+.infoSheet p{margin:0;color:var(--muted);line-height:1.5;font-size:13px}
+.infoMeta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.infoMeta div{padding:10px;border-radius:14px;background:#081521;border:1px solid #20364a}
+.infoMeta span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase}
+.infoMeta b{display:block;margin-top:3px;font-size:13px}
+.closeInfo{width:100%;margin-top:12px}
+
 @media(max-width:920px){
   .heroGrid{grid-template-columns:1fr}
   .brandBlock{gap:12px}
@@ -217,10 +245,10 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
     <div class="heroGrid">
       <div class="brandBlock">
         <div class="brand">
-          <div class="version">BUILD V7 UI EDITION</div>
+          <div class="version">BUILD V9 BLUE EDITION</div>
           <h1>VäNä AutoDyno</h1>
-          <p>Road dyno • sensor fusion • RPM-prioriteetit • AutoTune-pohja • näyttävä käyttöliittymä</p>
-          <div class="build"><span class="glowDot"></span> UI rakennettu uudelleen mallikuvan hengessä</div>
+          <p>Road dyno • sensor fusion • RPM-prioriteetit • AutoTune • BLUE RACING UI</p>
+          <div class="build"><span class="glowDot"></span> Sininen racing-versio • mallikuvan tyyli</div>
         </div>
 
         <div class="gaugeShell">
@@ -273,14 +301,14 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
         </div>
 
         <div class="quickSetup" style="margin-top:12px">
-          <button id="sensorBtn" class="btn blue off">ANTURIT</button>
-          <button id="micBtn" class="btn violet off">MIKROFONI</button>
-          <button id="camBtn" class="btn yellow off">KAMERA</button>
+          <div class="btnWrap"><button id="sensorBtn" class="btn blue off">ANTURIT</button><button class="infoBtn" data-info="sensors">i</button></div>
+          <div class="btnWrap"><button id="micBtn" class="btn violet off">MIKROFONI</button><button class="infoBtn" data-info="mic">i</button></div>
+          <div class="btnWrap"><button id="camBtn" class="btn yellow off">KAMERA</button><button class="infoBtn" data-info="camera">i</button></div>
           <button id="zeroMount" class="btn yellow off">NOLLAA ASENTO</button>
-          <button id="armBtn" class="btn red off">ARM AUTO</button>
-          <button id="manualBtn" class="btn green off">MANUAALI</button>
-          <button id="stopBtn" class="btn red">STOP</button>
-          <button id="calBtn" class="btn blue off">RPM KALIBROI</button>
+          <div class="btnWrap"><button id="armBtn" class="btn red off">ARM AUTO</button><button class="infoBtn" data-info="arm">i</button></div>
+          <div class="btnWrap"><button id="manualBtn" class="btn green off">MANUAALI</button><button class="infoBtn" data-info="manual">i</button></div>
+          <div class="btnWrap"><button id="stopBtn" class="btn red">STOP</button><button class="infoBtn" data-info="stop">i</button></div>
+          <div class="btnWrap"><button id="calBtn" class="btn blue off">RPM KALIBROI</button><button class="infoBtn" data-info="cal">i</button></div>
         </div>
 
         <div class="sensorRow">
@@ -392,7 +420,7 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
           <div><label>Suurin muutos / veto (°)</label><input id="maxStep" type="number" value=".5" step=".1"></div>
           <div><label>RPM-askel</label><input id="rpmStep" type="number" value="500" step="100"></div>
         </div>
-        <div class="quickSetup"><button id="tuneBtn" class="btn violet off">LUO EHDOTUS</button></div>
+        <div class="quickSetup"><div class="btnWrap"><button id="tuneBtn" class="btn violet off">LUO EHDOTUS</button><button class="infoBtn" data-info="tune">i</button></div></div>
         <div id="tuneText" class="status">AutoTune ei muuta karttaa kesken vedon. Se tekee vain seuraavan testivedon ehdotuksen.</div>
       </section>
 
@@ -415,6 +443,19 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
         </div>
       </section>
     </div>
+  </div>
+</div>
+
+
+<div id="infoModal" class="infoModal">
+  <div class="infoSheet">
+    <h3 id="infoTitle">Info</h3>
+    <p id="infoBody"></p>
+    <div class="infoMeta">
+      <div><span>Tila</span><b id="infoState">–</b></div>
+      <div><span>Arvo / huomio</span><b id="infoValue">–</b></div>
+    </div>
+    <button id="closeInfo" class="btn blue on closeInfo">SULJE</button>
   </div>
 </div>
 
@@ -441,7 +482,7 @@ function setPill(id,on){ $(id).classList.toggle("on",!!on) }
 function setSensorBox(id,on){ $(id).classList.toggle("on",!!on) }
 function updateGauge(rpm,source){
   const maxR=12000, deg=Math.max(0,Math.min(240,(rpm/maxR)*240));
-  $("gaugeArc").style.background=`conic-gradient(from 210deg, var(--cyan) 0deg, var(--blue) ${Math.max(20,deg*0.45)}deg, var(--vio) ${Math.max(20,deg*0.75)}deg, var(--red) ${deg}deg, rgba(255,255,255,.08) ${deg}deg 240deg, transparent 240deg 360deg)`;
+  $("gaugeArc").style.background=`conic-gradient(from 210deg, #2de9ff 0deg, #2388ff ${Math.max(20,deg*0.45)}deg, #6e7cff ${Math.max(20,deg*0.75)}deg, #143c9e ${deg}deg, rgba(255,255,255,.08) ${deg}deg 240deg, transparent 240deg 360deg)`;
   $("gaugeRpm").textContent=Math.round(rpm||0);
   $("gaugeSource").textContent=source||"SPEED";
 }
@@ -657,7 +698,7 @@ function drawRun(data, canvas){
   x.clearRect(0,0,w,h); drawGrid(x,w,h);
   if(data.length<2) return;
   let minR=Math.min(...data.map(d=>d.rpm)), maxR=Math.max(...data.map(d=>d.rpm)), maxH=Math.max(1,...data.map(d=>d.hp));
-  x.strokeStyle="#00e7ff"; x.shadowColor="#00e7ff"; x.shadowBlur=10; x.lineWidth=3; x.beginPath();
+  x.strokeStyle="#2de9ff"; x.shadowColor="#2de9ff"; x.shadowBlur=10; x.lineWidth=3; x.beginPath();
   data.forEach((d,i)=>{ let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w, py=h-d.hp/maxH*(h-18); i?x.lineTo(px,py):x.moveTo(px,py); });
   x.stroke(); x.shadowBlur=0;
 }
@@ -675,7 +716,7 @@ $("compareBtn").onclick=()=>{
   x.clearRect(0,0,w,h); drawGrid(x,w,h);
   if(!rs.length) return;
   let all=rs.flatMap(r=>r.data.filter(d=>d.rpm>0)), minR=Math.min(...all.map(d=>d.rpm)), maxR=Math.max(...all.map(d=>d.rpm)), maxH=Math.max(1,...all.map(d=>d.hp));
-  let cols=["#00e7ff","#3cf88f","#ffd44f","#ae6eff","#ff476f"];
+  let cols=["#2de9ff","#2388ff","#6e7cff","#43f58f","#ffd44f"];
   rs.forEach((r,j)=>{ x.strokeStyle=cols[j]; x.lineWidth=2.5; x.beginPath(); let first=true;
     r.data.forEach(d=>{ if(d.rpm<=0) return; let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w, py=h-d.hp/maxH*(h-18); first?(x.moveTo(px,py),first=false):x.lineTo(px,py); });
     x.stroke();
@@ -700,6 +741,27 @@ $("tuneBtn").onclick=()=>{
   $("tuneText").textContent=out.length?"Seuraavan testikartan ehdotus: "+out.join(" • "):"Riittävää vertailudataa ei löytynyt.";
   setBtn($("tuneBtn"),true,"violet");
 };
+
+
+const infoDefs={
+  sensors:{title:"Anturit",body:"Käynnistää puhelimen GPS-, kiihtyvyys-, gyro- ja orientaatioanturit. Näitä käytetään vedon nopeuden, kiihtyvyyden, kaltevuuden ja laadun arviointiin.",state:()=>$("sensorBtn").classList.contains("on")?"Päällä":"Pois",value:()=>isFinite(gpsMeta.accuracy)?`GPS ${gpsMeta.accuracy.toFixed(0)} m`:"GPS ei vielä lukittu"},
+  mic:{title:"Mikrofoni RPM",body:"Arvioi moottorin kierroslukua äänen jaksollisuudesta. Nopeus/välitys pysyy oletuksena tärkeimpänä RPM-lähteenä ja mikrofoni toimii toisena vertailuna.",state:()=>$("micBtn").classList.contains("on")?"Päällä":"Pois",value:()=>isFinite(micRpmValue)?`${Math.round(micRpmValue)} rpm • ${Math.round(micConfidence*100)}%`:"Ei luotettavaa RPM-arvoa"},
+  camera:{title:"Kamera RPM",body:"Kamera on varalähde RPM:lle. Tarkoitus on lukea mittariston viisaria tai digitaalista kierroslukua. Ilman mittarikohtaista kalibrointia kamera ei ohita muita RPM-lähteitä.",state:()=>$("camBtn").classList.contains("on")?"Päällä":"Pois",value:()=>isFinite(cameraRpmValue)?`${Math.round(cameraRpmValue)} rpm`:"Kalibrointi puuttuu"},
+  arm:{title:"ARM AUTO",body:"Valmistelee automaattisen vedon. Sovellus odottaa Record from RPM -rajaa ja selkeää kiihtyvyyttä, ottaa mukaan esipuskurin ja lopettaa Stop RPM:ään tai kiihtyvyyden päättymiseen.",state:()=>armed?"Armed":recording?"Veto käynnissä":"Pois",value:()=>`${$("recordFrom").value} → ${$("stopRpm").value} rpm`},
+  manual:{title:"Manuaalinen veto",body:"Aloittaa vedon heti ilman automaattista käynnistysehtoa. Käytä tätä testauksessa tai tilanteessa, jossa haluat hallita tallennuksen itse.",state:()=>recording&&!armed?"Käynnissä":"Pois",value:()=>run.length?`${run.length} näytettä`:"Ei aktiivista vetoa"},
+  stop:{title:"STOP",body:"Lopettaa käynnissä olevan vedon ja tallentaa sen. Tämä on manuaalinen varmistus automaattisen lopetuksen rinnalla.",state:()=>recording?"Veto käynnissä":"Valmis",value:()=>recording?"Painamalla lopetat vedon":"Ei aktiivista vetoa"},
+  cal:{title:"RPM-kalibrointi",body:"Laskee valitulle vaihteelle RPM/nopeus-suhteen yhdestä tai kahdesta tunnetusta nopeus + kierrosluku -pisteestä. Tätä suhdetta käytetään tärkeimpänä RPM-signaalina.",state:()=>rpmPerKmh>0?"Kalibroitu":"Ei kalibroitu",value:()=>rpmPerKmh>0?`${rpmPerKmh.toFixed(2)} rpm / km/h`:"Syötä nopeus ja RPM"},
+  tune:{title:"AutoTune-ehdotus",body:"Vertaa kahta viimeistä vetoa RPM-alueittain ja tekee pienen seuraavan testikartan sytytysennakkoehdotuksen. Karttaa ei muuteta kesken vedon.",state:()=>"Ehdotustila",value:()=>`Max ${$("maxStep").value}° / veto`}
+};
+document.querySelectorAll(".infoBtn").forEach(b=>b.addEventListener("click",e=>{
+  e.preventDefault();e.stopPropagation();
+  const d=infoDefs[b.dataset.info]; if(!d)return;
+  $("infoTitle").textContent=d.title;$("infoBody").textContent=d.body;
+  $("infoState").textContent=d.state();$("infoValue").textContent=d.value();
+  $("infoModal").classList.add("show");
+}));
+$("closeInfo").onclick=()=>$("infoModal").classList.remove("show");
+$("infoModal").addEventListener("click",e=>{if(e.target===$("infoModal"))$("infoModal").classList.remove("show")});
 
 loadCfg();
 renderRuns();
