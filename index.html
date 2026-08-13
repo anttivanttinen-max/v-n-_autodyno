@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d12"><title>VäNä AutoDyno v1</title>
+<style>
+:root{--bg:#070b10;--p:#101821;--p2:#0b1219;--line:#243341;--t:#f4f7fa;--m:#91a2b3;--a:#69e6ff;--g:#76efa8;--w:#ffd36b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#10202a 0,transparent 28%),var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:14px}.hero{padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#111c26,#0b1118);margin-bottom:12px}
+h1{margin:0;font-size:30px;letter-spacing:-1px}.sub,.note{color:var(--m);font-size:12px}.badge{display:inline-block;margin-top:8px;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:var(--a);font-size:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:rgba(16,24,33,.95);border:1px solid var(--line);border-radius:17px;padding:13px}.full{grid-column:1/-1}
+h2{font-size:15px;margin:0 0 10px}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{font-size:11px;color:var(--m);display:block;margin-bottom:4px}
+input,select{width:100%;background:var(--p2);color:var(--t);border:1px solid var(--line);border-radius:10px;padding:9px;font-size:15px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.metric{background:var(--p2);border:1px solid var(--line);border-radius:12px;padding:9px}.metric span{font-size:10px;color:var(--m);display:block}.metric b{font-size:19px}
+button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:linear-gradient(135deg,var(--a),#bdf7ff);color:#061016}.alt{background:#15212c;color:var(--t);border:1px solid var(--line)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.status{font-size:12px;margin-top:8px;color:var(--m)}canvas{width:100%;height:260px;background:#091018;border:1px solid var(--line);border-radius:12px}
+.run{border:1px solid var(--line);border-radius:11px;padding:8px;margin-top:6px;font-size:12px;display:flex;justify-content:space-between;gap:8px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.metrics{grid-template-columns:1fr 1fr}.inputs{grid-template-columns:1fr}}
+</style></head>
+<body><div class="wrap">
+<div class="hero"><h1>VäNä AutoDyno <span style="font-size:13px;color:var(--a)">v1</span></h1><div class="sub">Road dyno • GPS + puhelimen liikeanturit • RPM/nopeus-kalibrointi • Arduino / Zeeltronic</div><span class="badge">Mittaus tapahtuu puhelimessa</span></div>
+<div class="grid">
+<section class="card"><h2>Pyörä & veto</h2><div class="inputs">
+<div><label>Kokonaismassa pyörä + kuljettaja (kg)</label><input id="mass" type="number" value="190" step="1"></div>
+<div><label>Vaihteisto / ohjain</label><select id="ecu"><option>Arduino</option><option>Zeeltronic</option></select></div>
+<div><label>Vetovaihde</label><select id="gear"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div>
+<div><label>Kalibrointinopeus (km/h)</label><input id="calSpeed" type="number" value="60" step=".1"></div>
+<div><label>Kierrokset mittarista (rpm)</label><input id="calRpm" type="number" value="6000" step="50"></div>
+<div><label>Toinen nopeus (km/h, vapaaehtoinen)</label><input id="calSpeed2" type="number" placeholder="esim. 80"></div>
+<div><label>Toiset kierrokset (rpm)</label><input id="calRpm2" type="number" placeholder="esim. 8000"></div>
+</div><div class="actions"><button id="cal">Kalibroi RPM</button></div><div id="calStatus" class="status">Ei kalibroitu.</div></section>
+
+<section class="card"><h2>Mittaus</h2><div class="metrics">
+<div class="metric"><span>GPS</span><b id="spd">0.0</b><small> km/h</small></div>
+<div class="metric"><span>RPM</span><b id="rpm">0</b></div>
+<div class="metric"><span>G</span><b id="g">0.00</b></div>
+<div class="metric"><span>Teho*</span><b id="hp">0.0</b><small> hv</small></div>
+</div><div class="actions"><button id="permit">Salli anturit</button><button id="start" class="alt">Aloita veto</button><button id="stop" class="alt">Lopeta</button></div>
+<div id="status" class="status">Valmis. Kiinnitä puhelin tukevasti ennen mittausta.</div><p class="note">* v1:n teho on alustava inertiaalinen arvio massasta ja pitkittäiskiihtyvyydestä. Ilmanvastus, vierintävastus, mäki ja GPS/IMU-suodatus tarkennetaan seuraavissa versioissa.</p></section>
+
+<section class="card full"><h2>Veto</h2><canvas id="chart" width="900" height="300"></canvas><div class="note">Käyrä: arvioitu teho (hv) suhteessa RPM:ään. Auto Tune ei muuta karttaa kesken vedon.</div></section>
+<section class="card"><h2>Tallennetut vedot</h2><div id="runs"></div><div class="actions"><button id="clear" class="alt">Tyhjennä vedot</button></div></section>
+<section class="card"><h2>Auto Tune — pohja</h2><div class="inputs"><div><label>Suurin muutos / veto (°)</label><input id="maxStep" type="number" value=".5" step=".1"></div><div><label>RPM-askel</label><input id="rpmStep" type="number" value="500" step="100"></div></div>
+<p class="note">v1 tallentaa mittausdatan ja ohjainvalinnan. Varsinainen Arduino/Zeeltronic-kartan kirjoitus lisätään myöhemmin erillisenä Apply Map -kerroksena.</p></section>
+</div></div>
+<script>
+const $=x=>document.getElementById(x); let rpmPerKmh=0,recording=false,run=[],lastV=0,lastT=0,imuA=0;
+function saveSettings(){localStorage.setItem("vanaCfg",JSON.stringify({mass:$("mass").value,ecu:$("ecu").value,gear:$("gear").value,calSpeed:$("calSpeed").value,calRpm:$("calRpm").value,rpmPerKmh}))}
+function loadSettings(){try{let c=JSON.parse(localStorage.getItem("vanaCfg"));if(!c)return;Object.keys(c).forEach(k=>{if($(k))$(k).value=c[k]});rpmPerKmh=c.rpmPerKmh||0;if(rpmPerKmh)$("calStatus").textContent="Kalibrointi "+rpmPerKmh.toFixed(2)+" rpm / km/h"}catch{}}
+$("cal").onclick=()=>{let s=+$("calSpeed").value,r=+$("calRpm").value,s2=+$("calSpeed2").value,r2=+$("calRpm2").value;if(s<=0||r<=0)return;$("calStatus").textContent="Tarkista arvot.";let a=r/s;if(s2>0&&r2>0){let b=r2/s2;rpmPerKmh=(a+b)/2;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h • pisteiden ero ${Math.abs(a-b).toFixed(2)}`}else{rpmPerKmh=a;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h`}saveSettings()};
+$("permit").onclick=async()=>{try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){let p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw 0}window.addEventListener("devicemotion",e=>{let a=e.accelerationIncludingGravity||e.acceleration;if(a){let vals=[a.x||0,a.y||0,a.z||0];imuA=Math.max(...vals.map(Math.abs));$("g").textContent=(imuA/9.80665).toFixed(2)}});$("status").textContent="Liikeanturit sallittu."}catch{$("status").textContent="Liikeanturilupaa ei saatu."}
+if(navigator.geolocation)navigator.geolocation.watchPosition(pos=>{let kmh=Math.max(0,(pos.coords.speed||0)*3.6);update(kmh)},err=>$("status").textContent="GPS: "+err.message,{enableHighAccuracy:true,maximumAge:0,timeout:10000})};
+function update(kmh){let now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0;let gpsA=dt>.15?(v-lastV)/dt:0;lastV=v;lastT=now;let rpm=kmh*rpmPerKmh;let a=isFinite(gpsA)?gpsA:0;let watts=(+$("mass").value||0)*a*v;let hp=Math.max(0,watts/735.49875);$("spd").textContent=kmh.toFixed(1);$("rpm").textContent=Math.round(rpm);$("hp").textContent=hp.toFixed(1);if(recording&&rpm>0)run.push({t:Date.now(),kmh,rpm,hp,a,imuA});draw(run)}
+$("start").onclick=()=>{run=[];recording=true;$("status").textContent="VETO KÄYNNISSÄ";draw(run)};
+$("stop").onclick=()=>{if(!recording)return;recording=false;let runs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");runs.unshift({date:new Date().toISOString(),ecu:$("ecu").value,gear:$("gear").value,ratio:rpmPerKmh,data:run});runs=runs.slice(0,10);localStorage.setItem("vanaRuns",JSON.stringify(runs));$("status").textContent=`Veto tallennettu • ${run.length} näytettä`;renderRuns()};
+function draw(data){let c=$("chart"),x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.strokeStyle="#243341";x.lineWidth=1;for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}if(data.length<2)return;let minR=Math.min(...data.map(d=>d.rpm)),maxR=Math.max(...data.map(d=>d.rpm)),maxH=Math.max(1,...data.map(d=>d.hp));x.strokeStyle="#69e6ff";x.lineWidth=3;x.beginPath();data.forEach((d,i)=>{let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-15);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
+function renderRuns(){let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");$("runs").innerHTML=rs.length?rs.map((r,i)=>`<div class="run"><span>${new Date(r.date).toLocaleString("fi-FI")} • ${r.ecu} • ${r.gear}. vaihde</span><b>${r.data.length} näytettä</b></div>`).join(""):'<div class="note">Ei tallennettuja vetoja.</div>'}
+$("clear").onclick=()=>{localStorage.removeItem("vanaRuns");renderRuns()};loadSettings();renderRuns();draw([]);
+</script></body></html>
