@@ -1,21 +1,21 @@
-# VäNä AutoDyno v7 UI Edition
+# VäNä AutoDyno v13 Red Functional
 
-Tässä versiossa käyttöliittymä rakennettiin uudelleen hyväksytyn mallikuvan hengessä.
+Korjaus v12:een: v12 oli ulkoasu-demo eikä oikeasti käyttänyt antureita. v13 palauttaa toiminnallisuuden punaisen UI:n alle.
 
-Mukana:
-- selkeämpi, huolitellumpi racing-UI
-- pehmeät pyöristetyt napit
-- aktiivinen/päällä näkyy värillä
-- uusi hero + iso RPM-gauge
-- live-stat-kortit
-- mittaus / vedot / analyysi / autotune / asetukset -näkymät
-- automaattinen veto
-- RPM-prioriteetit
-- mikrofoni, kamera, GPS, IMU
-- vertailu ja AutoTune-ehdotuspohja
+Toimii nyt:
+- GPS
+- DeviceMotion / IMU
+- mikrofonin RPM-arvio
+- kamera live-kuva
+- RPM kalibrointi nopeudesta
+- ARM AUTO
+- manuaalinen veto
+- STOP
+- vetojen tallennus localStorageen
+- live RPM / nopeus / hv / Nm / G
+- info-painikkeet
 
-GitHub Pages:
-1. Pura ZIP.
-2. Lataa `index.html` ja `bike.png` repositorion juureen.
-3. Commit / push.
-4. Avaa sivu. V7 näyttää ylhäällä tekstin `BUILD V7 UI EDITION`.
+GitHub:
+1. korvaa index.html
+2. pidä bike.png samassa kansiossa
+3. avaa ?v=13
