@@ -1,21 +1,18 @@
-# VäNä AutoDyno v12 Red Master
+# VäNä AutoDyno v10 Blue Mobile
 
-Punainen versio rakennettu suoraan hyväksytyn punaisen mockupin rakenteen mukaan.
+Tämä versio on tehty nimenomaan iPhone/mobiilin etunäkymää varten lähemmäs hyväksyttyä sinistä mallikuvaa.
 
-Mukana:
-- VäNä AutoDyno -hero
-- pyörä oikealla
-- suuri RPM-mittari
-- nopeus / teho / vääntö / G -kortit
-- anturit / mikrofoni / kamera / ARM / manuaali / STOP
-- RPM-prioriteetti
-- dynokäyrä
-- alavalikko
-- info-napit
-- aktiiviset tilat väreillä
-- tumma/racing-kokonaisuus
+Muutokset:
+- pyörä nostettu yläosaan näkyväksi
+- logo + pyörä + RPM-mittari samaan hero-kokonaisuuteen
+- isompi, näyttävämpi RPM-mittari
+- live-nopeus / teho / vääntö / G heti hero-osiossa
+- sensorit näkyvät ylhäällä kompakteina tiloina
+- alavalikko korostuu enemmän
+- sininen neon/racing-kontrasti vahvempi
+- info-napit säilyvät
+- kaikki v9:n mittaus- ja AutoTune-toiminnot säilyvät
 
 GitHub:
-- korvaa `index.html`
-- lisää `bike.png` samaan kansioon
-- avaa `?v=12`
+Korvaa `index.html` ja pidä `bike.png` samassa juurikansiossa.
+Oikea versio näyttää tekstin `BUILD V10 BLUE MOBILE`.
