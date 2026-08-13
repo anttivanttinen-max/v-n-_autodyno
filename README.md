@@ -1,20 +1,21 @@
-# VäNä AutoDyno v14 Red Reliable
+# VäNä AutoDyno v16 Red Clean
 
-v14 on tehty nimenomaan toimivuuden diagnosointiin ja iPhone-selainta varten.
+Muutokset:
+- Kamera poistettu kokonaan käyttöliittymästä ja koodista.
+- RPM-lähteet ovat nyt nopeus/välitys ja mikrofoni.
+- Asetuksiin lisätty ⓘ Info-napit PÄÄLLÄ/POIS.
+- Info-asetus tallentuu localStorageen ja palautuu seuraavalla avauksella.
+- Alavalikko, vedot, analyysi, AutoTune, asetukset, ARM, manuaali, STOP ja RPM-kalibrointi säilyvät.
 
-Korjattu:
-- poistettu kaikki feikki/live-demoarvot
-- napit ovat oikeita toimintoja, info-nappi ei enää avaa infoa koko painikkeesta
-- GPS, DeviceMotion, mikrofoni ja kamera käynnistyvät erikseen
-- iOS permission -pyynnöt tehdään suoraan käyttäjän napinpainalluksesta
-- näkyvä Järjestelmätesti kertoo HTTPS/secure-contextin sekä API-tuen
-- näkyvä diagnostiikkaloki näyttää GPS/media/JS-virheet
-- RPM-kalibrointi ja localStorage
-- ARM AUTO / manuaali / STOP
-- vetojen tallennus
+Testaus:
+- JavaScript-syntaksi tarkistettu.
+- Selain avattu headless Chromiumilla.
+- Alavalikon kaikki 5 näkymää testattu.
+- Info-nappien PÄÄLLÄ/POIS testattu ja pysyvyys tarkistettu sivun uudelleenlatauksen jälkeen.
+- Kameraan viittaavat UI-elementit ja JS-funktiot poistettu.
+- Console/page-errorit tarkistettu.
 
 GitHub:
-1. korvaa index.html
-2. pidä bike.png samassa kansiossa
-3. avaa ?v=14
-4. paina AJA JÄRJESTELMÄTESTI
+1. korvaa `index.html`
+2. pidä `bike.png` samassa juuressa
+3. avaa `?v=16`
