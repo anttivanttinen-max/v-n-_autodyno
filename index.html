@@ -3,694 +3,332 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#030814">
+<meta name="theme-color" content="#090507">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VäNä AutoDyno v11 Blue Reference</title>
+<title>VäNä AutoDyno v12 Red Master</title>
 <style>
 :root{
-  --bg:#020813;
-  --bg2:#071327;
-  --panel:#071423;
-  --panel2:#09182a;
-  --line:#0f65bc;
-  --cyan:#19c9ff;
-  --cyan2:#42f4ff;
-  --blue:#2386ff;
-  --blue2:#6bc7ff;
-  --green:#37ec68;
-  --green2:#a7ff54;
-  --yellow:#ffc72d;
-  --orange:#ff8a1a;
-  --red:#ff2448;
-  --red2:#ff5672;
-  --white:#eff7ff;
-  --muted:#90a8c6;
-  --shadow:0 18px 40px rgba(0,0,0,.45);
+  --bg:#050304;--panel:#0b0c10;--panel2:#121216;--line:#4a2027;
+  --white:#f7f7f8;--muted:#9ba0a8;--red:#ff233f;--red2:#ff4b5f;
+  --green:#39f061;--yellow:#ffb71b;--blue:#3aa7ff;--gray:#707780;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#000;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-body{
-  background:
-    radial-gradient(circle at 50% 10%, rgba(31,118,255,.18), transparent 24%),
-    radial-gradient(circle at 20% 80%, rgba(255,40,80,.12), transparent 20%),
-    linear-gradient(180deg, #01040a, #030b16 28%, #040912 100%);
-}
+html,body{margin:0;background:#000;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:linear-gradient(180deg,#030202,#090507 40%,#020202)}
 .app{
-  width:min(100vw, 430px);
-  min-height:100vh;
-  margin:auto;
+  width:min(100vw,430px);min-height:100vh;margin:auto;position:relative;overflow:hidden;
   padding:14px 10px calc(18px + env(safe-area-inset-bottom));
-  position:relative;
-  overflow:hidden;
   background:
-    radial-gradient(circle at 75% 20%, rgba(36,134,255,.14), transparent 25%),
-    linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.18)),
-    linear-gradient(180deg, #020712, #020915 65%, #020712);
+    radial-gradient(circle at 74% 14%,rgba(255,28,59,.16),transparent 22%),
+    radial-gradient(circle at 18% 80%,rgba(255,25,55,.10),transparent 24%),
+    linear-gradient(180deg,#050203,#090406 58%,#030202);
 }
 .app:before{
-  content:"";
-  position:absolute;inset:0;
+  content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(145deg, transparent 0 58%, rgba(33,136,255,.18) 58.3%, transparent 58.9%),
-    linear-gradient(40deg, transparent 0 68%, rgba(255,26,71,.22) 68.5%, transparent 69%);
-  pointer-events:none;
-  opacity:.7;
+    linear-gradient(130deg,transparent 0 60%,rgba(255,25,55,.16) 60.5%,transparent 61%),
+    linear-gradient(40deg,transparent 0 71%,rgba(255,25,55,.11) 71.4%,transparent 72%),
+    radial-gradient(circle at 55% 23%,rgba(255,37,70,.08),transparent 20%);
 }
 .app:after{
-  content:"";
-  position:absolute;inset:0;
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
   background:
-    repeating-linear-gradient(115deg, transparent 0 44px, rgba(30,141,255,.09) 44px 47px, transparent 47px 96px),
-    repeating-linear-gradient(62deg, transparent 0 72px, rgba(255,34,86,.08) 72px 76px, transparent 76px 130px);
-  mix-blend-mode:screen;opacity:.36;pointer-events:none;
+    repeating-linear-gradient(112deg,transparent 0 44px,rgba(255,38,68,.10) 44px 47px,transparent 47px 96px),
+    repeating-linear-gradient(61deg,transparent 0 72px,rgba(255,255,255,.025) 72px 75px,transparent 75px 128px);
 }
-.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:3}
-.menuBtn,.miniCard,.battery{
-  border:1.6px solid rgba(40,160,255,.8);
-  box-shadow:0 0 18px rgba(31,145,255,.15), inset 0 0 18px rgba(0,0,0,.28);
-  background:linear-gradient(180deg, rgba(8,20,36,.93), rgba(4,10,20,.95));
+.topbar{position:relative;z-index:4;display:flex;justify-content:space-between;align-items:flex-start}
+.menu{
+  width:54px;height:54px;border-radius:15px;border:1.5px solid rgba(255,36,62,.72);
+  background:linear-gradient(180deg,#101115,#09090d);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 18px rgba(255,25,55,.12), inset 0 0 14px rgba(0,0,0,.5)
 }
-.menuBtn{
-  width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+.menu i,.menu i:before,.menu i:after{content:"";display:block;width:24px;height:3px;background:#fff;border-radius:99px;position:relative}
+.menu i:before{position:absolute;top:-7px}.menu i:after{position:absolute;top:7px}
+.topSensors{display:flex;gap:7px;align-items:center}
+.sensorBar,.battery{
+  border:1.4px solid rgba(150,160,174,.4);border-radius:14px;background:linear-gradient(180deg,#101216,#08090c);
+  box-shadow:inset 0 0 14px rgba(0,0,0,.35),0 0 14px rgba(255,255,255,.02)
 }
-.menuBtn span,.menuBtn span:before,.menuBtn span:after{
-  content:"";display:block;width:22px;height:3px;background:#fff;border-radius:999px;position:relative;
-}
-.menuBtn span:before{position:absolute;top:-7px;left:0}
-.menuBtn span:after{position:absolute;top:7px;left:0}
-.topRight{display:flex;gap:8px;align-items:flex-start}
-.miniCard{border-radius:15px;padding:8px 11px 8px 12px;min-width:126px}
-.miniCard .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.miniCard b{font-size:11px;letter-spacing:.04em}
-.miniCard .big{font-size:17px;font-weight:900}
-.gpsDot{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #71ff7f, #15d430); box-shadow:0 0 16px rgba(70,255,90,.45)}
-.signal{display:flex;align-items:flex-end;gap:3px}
-.signal i{display:block;width:5px;background:linear-gradient(180deg,#6cff7a,#35df51);border-radius:3px}
-.signal i:nth-child(1){height:8px}.signal i:nth-child(2){height:12px}.signal i:nth-child(3){height:17px}.signal i:nth-child(4){height:22px}
-.battery{border-radius:15px;padding:8px 11px;width:72px;text-align:center}
-.batteryIcon{height:18px;border:2px solid #fff;border-radius:4px;position:relative;overflow:hidden;margin-bottom:4px}
-.batteryIcon:after{content:"";position:absolute;right:-5px;top:4px;width:4px;height:8px;border-radius:2px;background:#fff}
-.batteryFill{height:100%;width:92%;background:linear-gradient(90deg,#7afc5b,#2cd34c)}
-.sideWeather{
-  position:absolute;right:0;top:72px;z-index:3;
-  width:86px;padding:10px 8px;border-radius:18px;border:1.6px solid rgba(40,160,255,.75);
-  background:linear-gradient(180deg, rgba(8,20,36,.94), rgba(4,10,20,.96));
-  box-shadow:0 0 18px rgba(31,145,255,.14), inset 0 0 18px rgba(0,0,0,.28);
-}
-.sideWeather .item{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#fff;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.sideWeather .item:last-child{border-bottom:0}
-.sideWeather .ico{font-size:16px}
+.sensorBar{display:flex;gap:10px;padding:8px 10px}
+.sdot{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:#d8dde3}
+.sdot i{width:10px;height:10px;border-radius:50%;background:#555d67}
+.sdot.on i{background:var(--green);box-shadow:0 0 10px rgba(57,240,97,.5)}
+.battery{padding:8px 9px;width:64px;text-align:center;font-size:11px;font-weight:900}
+.batteryIcon{height:14px;border:1.5px solid #dfe4e8;border-radius:3px;position:relative;overflow:hidden;margin-bottom:3px}
+.batteryIcon:after{content:"";position:absolute;right:-4px;top:3px;width:3px;height:6px;border-radius:2px;background:#ddd}
+.batteryFill{height:100%;width:92%;background:linear-gradient(90deg,#5cff64,#2ac941)}
 
-.hero{
-  position:relative;z-index:2;margin-top:6px;min-height:330px;
+.hero{position:relative;z-index:2;min-height:510px;margin-top:0}
+.vbadge{
+  position:absolute;left:176px;top:4px;z-index:5;color:var(--red);font-weight:1000;font-size:22px;font-style:italic;
+  border:1.5px solid rgba(255,36,62,.55);border-radius:8px;padding:1px 8px;transform:rotate(-6deg);
+  box-shadow:0 0 16px rgba(255,36,62,.12)
 }
-.version{
-  position:absolute;left:172px;top:-2px;color:#49d8ff;font-weight:900;font-style:italic;font-size:18px;letter-spacing:.06em;text-shadow:0 0 16px rgba(34,180,255,.45)
+.logo{position:absolute;left:0;top:22px;z-index:4;width:220px}
+.logo .v1{font-size:74px;line-height:.83;font-weight:1000;font-style:italic;letter-spacing:-4px;transform:skewX(-10deg) rotate(-5deg);color:#fff}
+.logo .v2{font-size:52px;line-height:.88;font-weight:1000;font-style:italic;letter-spacing:-3px;transform:skewX(-12deg) rotate(-6deg);color:var(--red);text-shadow:0 0 18px rgba(255,36,62,.25)}
+.logo .tag{margin-top:9px;font-size:12px;letter-spacing:.18em;font-weight:800;color:#d7d7db;font-style:italic}
+.bike{position:absolute;right:-17px;top:30px;width:286px;max-width:69%;filter:drop-shadow(0 18px 22px rgba(0,0,0,.6))}
+.gauge{
+  position:absolute;left:0;bottom:8px;width:100%;height:280px;
 }
-.logoWrap{position:absolute;left:4px;top:8px;width:220px}
-.logo1{
-  font-weight:1000;font-size:76px;line-height:.86;letter-spacing:-4px;font-style:italic;
-  color:#f8fbff;text-transform:uppercase;transform:skewX(-10deg) rotate(-4deg);
-  text-shadow:0 0 1px rgba(255,255,255,.9), 0 0 18px rgba(255,255,255,.12);
+.arc{
+  position:absolute;left:-26px;right:-26px;top:-80px;height:360px;border-radius:50%;
+  border:19px solid rgba(255,255,255,.10);border-bottom-color:transparent;
+  box-shadow:inset 0 0 25px rgba(255,255,255,.02)
 }
-.logo2{
-  margin-top:-6px;font-weight:1000;font-size:52px;line-height:.9;letter-spacing:-2px;font-style:italic;
-  color:#ff2248;text-transform:uppercase;transform:skewX(-12deg) rotate(-6deg);
-  text-shadow:0 0 20px rgba(255,45,86,.35);
+.arcRed{
+  position:absolute;left:-26px;right:-26px;top:-80px;height:360px;border-radius:50%;
+  border:19px solid transparent;border-top-color:var(--red);border-right-color:var(--red);border-bottom-color:transparent;
+  transform:rotate(5deg);filter:drop-shadow(0 0 15px rgba(255,35,63,.45))
 }
-.tagline{
-  margin-top:8px;color:#f7fbff;font-size:13px;font-weight:700;letter-spacing:.12em;font-style:italic;
-  text-shadow:0 0 10px rgba(36,144,255,.25)
+.gcenter{
+  position:absolute;left:50%;top:84px;transform:translateX(-50%);width:194px;height:194px;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,#16181d,#06070a 72%);border:1px solid rgba(150,160,174,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 28px rgba(0,0,0,.5),inset 0 0 26px rgba(255,255,255,.015)
 }
-.tagline .dot{color:#fff;margin:0 4px}
-.bike{
-  position:absolute;right:-10px;top:0;width:280px;max-width:67%;filter:drop-shadow(0 16px 22px rgba(0,0,0,.48)) drop-shadow(0 0 14px rgba(45,190,255,.12));
-}
-.shield{
-  position:absolute;right:12px;bottom:36px;width:64px;height:72px;transform:skewX(-8deg);
-  background:linear-gradient(135deg,#fff 0 40%,#111 40% 60%,#f01734 60% 100%);
-  clip-path:polygon(12% 0, 100% 12%, 88% 100%, 0 88%);
-  border:2px solid rgba(255,255,255,.7);
-  box-shadow:0 0 18px rgba(255,32,71,.28);
-}
-.shield:before{
-  content:"V";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-weight:1000;font-size:54px;font-style:italic;color:#09111f;text-shadow:0 0 8px rgba(255,255,255,.15)
-}
-
-.gaugeArea{position:relative;z-index:2;margin-top:176px}
-.bigGauge{
-  position:relative;
-  width:100%;height:240px;overflow:hidden;
-}
-.bigGauge .arcBg{
-  position:absolute;left:-34px;right:-34px;top:-112px;height:390px;border-radius:50%;
-  border:18px solid rgba(255,255,255,.12);
-  border-bottom-color:transparent;
-  box-shadow:inset 0 0 26px rgba(255,255,255,.04);
-}
-.bigGauge .arcBlue, .bigGauge .arcRed{
-  position:absolute;left:-34px;right:-34px;top:-112px;height:390px;border-radius:50%;
-  border:18px solid transparent;border-bottom-color:transparent;
-}
-.bigGauge .arcBlue{
-  border-top-color:#14cfff;border-left-color:#14cfff;transform:rotate(-25deg);
-  filter:drop-shadow(0 0 16px rgba(20,207,255,.5));
-}
-.bigGauge .arcRed{
-  border-top-color:#ff2048;border-right-color:#ff2048;transform:rotate(24deg);
-  filter:drop-shadow(0 0 16px rgba(255,32,72,.45));
-}
-.tickLabels{
-  position:absolute;left:18px;right:18px;top:22px;height:170px;pointer-events:none;
-}
-.tickLabels span{
-  position:absolute;color:#fff;font-weight:900;font-size:20px;text-shadow:0 0 12px rgba(255,255,255,.12)
-}
-.t0{left:10px;bottom:24px}.t2{left:46px;top:76px}.t4{left:96px;top:34px}.t6{left:164px;top:18px}
-.t8{right:105px;top:34px}.t10{right:30px;top:80px}
-.gaugeCenter{
-  position:absolute;left:50%;transform:translateX(-50%);
-  top:92px;width:184px;height:184px;border-radius:50%;
-  background:radial-gradient(circle at 50% 35%, #15202d, #050b14 70%);
-  box-shadow:0 0 28px rgba(10,80,170,.2), inset 0 0 30px rgba(0,0,0,.5);
-  border:1.5px solid rgba(96,140,195,.35);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-}
-.gaugeCenter .lab{font-size:18px;font-weight:900;letter-spacing:.04em}
-.gaugeCenter .rpm{font-size:72px;line-height:.95;font-weight:1000}
-.gaugeCenter .small{font-size:17px;color:#eef5ff}
-.gaugeCenter .tiny{font-size:13px;color:#b9d7ff;margin-top:4px}
+.gcenter .lab{font-size:16px;font-weight:900}.gcenter .rpm{font-size:74px;line-height:.94;font-weight:1000}.gcenter .tiny{font-size:14px;color:#dfe1e4}
+.gcenter .source{margin-top:10px;padding:5px 10px;border-radius:10px;background:#15171b;border:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:800}
+.gcenter .source b{color:var(--red)}
+.ticks span{position:absolute;font-size:20px;font-weight:900;color:#f7f7f8}
+.t0{left:33px;bottom:46px}.t2{left:62px;top:118px}.t4{left:112px;top:66px}.t6{left:192px;top:49px}.t8{right:120px;top:69px}.t10{right:40px;top:125px}.t12{right:25px;bottom:48px}
 .needle{
-  position:absolute;left:50%;bottom:73px;width:120px;height:4px;background:linear-gradient(90deg,#fff,#ff3356);
-  transform-origin:0 50%;transform:rotate(-14deg);border-radius:999px;box-shadow:0 0 12px rgba(255,50,90,.55)
+  position:absolute;left:50%;top:167px;width:118px;height:4px;background:linear-gradient(90deg,#f7f7f8,#ff2845);
+  transform-origin:0 50%;transform:rotate(-14deg);border-radius:999px;box-shadow:0 0 10px rgba(255,36,62,.55)
 }
-.needle:after{
-  content:"";position:absolute;right:-4px;top:-4px;width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 0 12px rgba(255,255,255,.65)
-}
-.needle:before{
-  content:"";position:absolute;left:-8px;top:-6px;width:14px;height:14px;border-radius:50%;background:#ddd;border:2px solid #fff
-}
+.needle:before{content:"";position:absolute;left:-8px;top:-6px;width:14px;height:14px;border-radius:50%;background:#ddd;border:2px solid #fff}
 
-.smallGauges{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:-6px}
-.miniGauge{
-  position:relative;height:110px;border-radius:24px;padding:12px 12px 10px;
-  background:linear-gradient(180deg, rgba(8,19,32,.96), rgba(6,14,23,.96));
-  border:1.5px solid rgba(33,120,210,.65);box-shadow:var(--shadow), inset 0 0 18px rgba(0,0,0,.3)
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:relative;z-index:3;margin-top:-4px}
+.stat{
+  min-height:112px;border-radius:18px;padding:12px 10px;background:linear-gradient(180deg,#111216,#090a0d);
+  border:1.4px solid rgba(145,150,160,.32);box-shadow:0 10px 24px rgba(0,0,0,.32),inset 0 0 16px rgba(0,0,0,.28)
 }
-.miniGauge .cap{position:absolute;left:0;right:0;top:18px;text-align:center;font-size:16px;font-weight:900;letter-spacing:.03em}
-.miniGauge .num{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:32px;font-weight:1000}
-.miniGauge .unit{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:14px;color:#dfefff}
-.miniGauge .semi{
-  position:absolute;left:12px;right:12px;top:8px;height:86px;border-radius:999px 999px 0 0;
-  border:7px solid rgba(255,255,255,.11);border-bottom:0;
-}
-.miniGauge.speed .semi{border-top-color:#12c9ff;border-left-color:#12c9ff;border-right-color:#0c2e58;filter:drop-shadow(0 0 10px rgba(20,205,255,.28))}
-.miniGauge.accel .semi{border-top-color:#ffb11f;border-left-color:#ffb11f;border-right-color:#ff2048;filter:drop-shadow(0 0 10px rgba(255,168,18,.26))}
+.stat.red{border-color:rgba(255,36,62,.65)}
+.stat .title{font-size:11px;font-weight:1000;color:var(--red);text-transform:uppercase}
+.stat .title.white{color:#f5f5f6}
+.stat .val{font-size:35px;font-weight:1000;margin-top:8px}.stat .unit{font-size:13px;color:#d0d2d6}
 
-.cards3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
-.statCard{
-  position:relative;border-radius:18px;padding:12px 12px 10px;border:1.6px solid rgba(40,160,255,.62);
-  background:linear-gradient(180deg, rgba(8,20,34,.98), rgba(5,12,20,.98));
-  box-shadow:var(--shadow), inset 0 0 18px rgba(0,0,0,.26);
-  min-height:92px;
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1.25fr 1fr 1fr;gap:7px;margin-top:10px;position:relative;z-index:3}
+.ctrl{
+  min-height:96px;border-radius:17px;padding:10px 7px;text-align:center;position:relative;
+  background:linear-gradient(180deg,#111318,#090a0d);border:1.4px solid rgba(145,150,160,.35);
+  box-shadow:0 10px 22px rgba(0,0,0,.28),inset 0 0 16px rgba(0,0,0,.3)
 }
-.statCard.red{border-color:rgba(255,44,76,.85);box-shadow:0 0 18px rgba(255,32,72,.12), var(--shadow), inset 0 0 18px rgba(0,0,0,.26)}
-.statCard .title{font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
-.statCard .title.redText{color:#ff3558}.statCard .title.blueText{color:#39b6ff}
-.statCard .value{margin-top:2px;font-size:28px;font-weight:1000}
-.statCard .value .unit{font-size:18px}
-.statCard .sub{margin-top:2px;font-size:12px;color:#e8f1ff}
-.iconBox{
-  position:absolute;left:11px;top:14px;width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:20px
+.ctrl .ico{font-size:27px}.ctrl .main{margin-top:8px;font-size:12px;font-weight:1000}.ctrl .sub{margin-top:3px;font-size:9px;color:#9ba0a8}
+.ctrl.green{background:linear-gradient(180deg,#173a16,#0d240c);border-color:#3c8c35}
+.ctrl.green .sub{color:#55ec57}
+.ctrl.arm{background:linear-gradient(180deg,#68121f,#33080f);border-color:var(--red);box-shadow:0 0 20px rgba(255,36,62,.18),0 10px 22px rgba(0,0,0,.28)}
+.ctrl.arm .sub{color:#ff3c55}
+.info{
+  position:absolute;right:6px;top:6px;width:20px;height:20px;border-radius:50%;background:#14161a;border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:1000;color:#dfe2e5
 }
-.statCard.hasIcon{padding-left:56px}
-.statCard.run .title{color:#fff}
-.statCard.run .value{font-size:26px}
-.liveDot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#ff1e42;box-shadow:0 0 14px rgba(255,30,66,.55);margin-right:7px}
 
 .panel{
-  margin-top:12px;position:relative;z-index:2;
-  border-radius:18px;
-  border:1.6px solid rgba(33,136,255,.7);
-  background:linear-gradient(180deg, rgba(5,14,26,.96), rgba(3,9,18,.98));
-  box-shadow:0 0 20px rgba(30,120,255,.1), inset 0 0 24px rgba(0,0,0,.36);
-  overflow:hidden;
+  margin-top:10px;position:relative;z-index:3;border-radius:17px;background:linear-gradient(180deg,#0d0f13,#08090c);
+  border:1.4px solid rgba(130,140,150,.32);box-shadow:0 12px 28px rgba(0,0,0,.32),inset 0 0 20px rgba(0,0,0,.28);overflow:hidden
 }
-.panelHeader{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 12px;border-bottom:1px solid rgba(90,160,255,.18);
+.phead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ptitle{font-size:14px;font-weight:1000;font-style:italic;text-transform:uppercase}
+.ptitle .r{color:var(--red)}
+.priority{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px}
+.prio{
+  min-height:74px;border-radius:14px;padding:9px 10px;background:linear-gradient(180deg,#14161a,#0b0c0f);
+  border:1.3px solid rgba(150,155,164,.25);position:relative
 }
-.panelTitle{font-size:16px;font-weight:1000;font-style:italic;text-transform:uppercase;letter-spacing:.02em}
-.panelTitle .blue{color:#38b7ff}
-.switches{display:flex;gap:8px}
-.toggle{
-  border:1.4px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:12px;background:#1a2433;color:#bfcde0;font-weight:900;font-size:12px
+.prio.active{background:linear-gradient(180deg,#5d0d18,#28060b);border-color:var(--red);box-shadow:0 0 18px rgba(255,36,62,.14)}
+.prio .rank{
+  width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#292c31;font-size:18px;font-weight:1000;position:absolute;left:8px;top:9px
 }
-.toggle.active.red{background:linear-gradient(180deg,#ff2b49,#cc1734);color:#fff;box-shadow:0 0 12px rgba(255,40,72,.32)}
-.chartWrap{padding:10px 10px 12px}
-#curveChart{width:100%;height:210px;border-radius:10px;background:
- linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)),
- linear-gradient(180deg,#07101c,#050c16);
- border:1px solid rgba(255,255,255,.05)}
+.prio.active .rank{background:linear-gradient(180deg,#ff2b46,#bb1228)}
+.prio .label{margin-left:39px;font-size:13px;font-weight:1000}.prio .state{margin-left:39px;margin-top:5px;font-size:10px;color:#8f949c}.prio.active .state{color:#ff5267}
 
-.priorityWrap{display:grid;grid-template-columns:1fr 1fr 1fr 132px;gap:8px;padding:10px}
-.priorityCard{
-  border-radius:14px;padding:8px 8px 10px;position:relative;overflow:hidden;border:1.4px solid rgba(255,255,255,.12);
-  min-height:76px;box-shadow:inset 0 0 18px rgba(0,0,0,.24)
-}
-.priorityCard.green{background:linear-gradient(180deg,#1f8d14,#116b10)}
-.priorityCard.green2{background:linear-gradient(180deg,#22a62e,#147020)}
-.priorityCard.yellow{background:linear-gradient(180deg,#d39d19,#8c6709)}
-.priorityCard .rank{
-  position:absolute;left:0;top:0;width:28px;height:28px;background:rgba(255,255,255,.16);clip-path:polygon(0 0,100% 0,0 100%);
-  display:flex;align-items:flex-start;justify-content:flex-start;padding:4px 5px;font-weight:1000;font-size:16px
-}
-.priorityCard .label{font-size:12px;font-weight:1000;margin-top:10px}
-.priorityCard .state{margin-top:6px;font-size:12px;font-weight:900;color:#f7ffe8}
-.confBox{
-  border-radius:14px;padding:8px 10px;background:linear-gradient(180deg,#0b1726,#07111d);border:1.4px solid rgba(255,255,255,.08)
-}
-.confBox .heading{font-size:12px;font-weight:1000;margin-bottom:8px}
-.confRow{display:grid;grid-template-columns:1fr 56px;gap:8px;align-items:center;font-size:11px;margin:5px 0}
-.bar{height:7px;border-radius:999px;background:#132033;overflow:hidden}
-.fill{height:100%}
-.fill.g{background:linear-gradient(90deg,#66ff65,#20c54a)}
-.fill.y{background:linear-gradient(90deg,#ffe73a,#d7ae0c)}
+.chartWrap{padding:10px}
+#dyno{width:100%;height:230px;background:#07080a;border-radius:10px;border:1px solid rgba(255,255,255,.05)}
 
-.sensorGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:10px}
-.sensorTile{
-  min-height:92px;border-radius:14px;padding:10px 6px 8px;text-align:center;
-  background:linear-gradient(180deg, rgba(11,20,32,.98), rgba(7,12,21,.98));
-  border:1.4px solid rgba(60,130,210,.58);box-shadow:inset 0 0 16px rgba(0,0,0,.25)
+.bottom{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;position:relative;z-index:3
 }
-.sensorTile .ico{font-size:28px;line-height:1.1}
-.sensorTile .txt{margin-top:6px;font-size:12px;font-weight:900}
-.sensorTile .state{margin-top:6px;color:#45f25e;font-size:12px;font-weight:1000}
-.sensorTile.yellow .state{color:#ffd038}
+.nav{
+  min-height:90px;border-radius:15px;background:linear-gradient(180deg,#0e1014,#08090c);border:1.3px solid rgba(135,145,155,.3);
+  text-align:center;padding:12px 5px;box-shadow:0 10px 22px rgba(0,0,0,.25),inset 0 0 15px rgba(0,0,0,.25)
+}
+.nav.active{background:linear-gradient(180deg,#4c0b15,#25050a);border-color:var(--red);box-shadow:0 0 18px rgba(255,36,62,.16),0 10px 22px rgba(0,0,0,.25)}
+.nav .ico{font-size:30px}.nav .txt{font-size:11px;font-weight:1000;margin-top:7px;font-style:italic}
+.nav.active .txt{color:var(--red)}
 
-.controlGrid{display:grid;grid-template-columns:1fr 1.5fr 1.5fr 1fr;gap:10px;padding:10px}
-.ctrl{
-  min-height:84px;border-radius:16px;padding:10px 8px;text-align:center;border:1.4px solid rgba(255,255,255,.1);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-weight:1000;box-shadow:var(--shadow), inset 0 0 18px rgba(0,0,0,.25)
-}
-.ctrl .ico{font-size:28px;line-height:1}
-.ctrl .main{margin-top:8px;font-size:14px}
-.ctrl .sub{font-size:11px;margin-top:4px}
-.ctrl.wait{background:linear-gradient(180deg,#252c38,#151b24)}
-.ctrl.arm{background:linear-gradient(180deg,#ff2d48,#c9132e)}
-.ctrl.measure{background:linear-gradient(180deg,#4ee02d,#219e10)}
-.ctrl.stop{background:linear-gradient(180deg,#293341,#161f2b)}
-
-.bottomNav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;padding-bottom:6px}
-.navBtn{
-  min-height:88px;border-radius:14px;padding:10px 6px 9px;
-  background:linear-gradient(180deg, rgba(7,16,28,.98), rgba(4,10,18,.98));
-  border:1.4px solid rgba(48,112,180,.62);text-align:center;box-shadow:var(--shadow), inset 0 0 14px rgba(0,0,0,.24)
-}
-.navBtn .ico{font-size:34px;line-height:1}
-.navBtn .txt{margin-top:6px;font-size:12px;font-weight:1000;font-style:italic;text-transform:uppercase}
-.navBtn.active{
-  background:linear-gradient(180deg,#6a0e1d,#3d0b14);
-  border-color:#ff3759;
-  box-shadow:0 0 18px rgba(255,40,72,.18), var(--shadow), inset 0 0 14px rgba(0,0,0,.24)
-}
-.infoBadge{
-  position:absolute;right:8px;top:8px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(180deg,#0d223a,#081524);border:1px solid rgba(60,160,255,.65);color:#8fefff;font-weight:1000;font-size:12px
-}
-.infoModal{
-  position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:flex-end;justify-content:center;padding:10px;z-index:50
-}
-.infoModal.show{display:flex}
-.infoSheet{
-  width:min(100%,430px);border-radius:24px 24px 18px 18px;padding:16px 16px 18px;background:linear-gradient(180deg,#0a192c,#050d18);
-  border:1.5px solid rgba(46,151,255,.72);box-shadow:0 -12px 40px rgba(0,0,0,.42), 0 0 20px rgba(35,136,255,.12)
-}
-.infoSheet h3{margin:0 0 8px;font-size:20px}
-.infoSheet p{margin:0;color:#cfe3ff;line-height:1.5;font-size:13px}
-.infoMeta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.infoMeta div{background:#071322;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:10px}
-.infoMeta span{display:block;color:#90aac6;font-size:10px;text-transform:uppercase}
-.infoMeta b{display:block;margin-top:4px;font-size:14px}
-.closeInfo{
-  width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px 10px;background:linear-gradient(180deg,#228cff,#1261c4);color:#fff;font-weight:1000
-}
-@media (max-width:390px){
-  .app{padding-left:8px;padding-right:8px}
-  .logo1{font-size:68px}
-  .logo2{font-size:47px}
-  .version{left:155px}
-  .bike{width:255px}
-  .gaugeCenter{width:172px;height:172px}
-  .gaugeCenter .rpm{font-size:64px}
-  .cards3{grid-template-columns:1fr}
-  .priorityWrap{grid-template-columns:1fr 1fr}
-  .priorityWrap .confBox{grid-column:1/-1}
-  .sensorGrid{grid-template-columns:repeat(4,1fr)}
-  .controlGrid{grid-template-columns:1fr 1fr}
-  .bottomNav{grid-template-columns:repeat(5,1fr)}
-  .navBtn{min-height:80px}
+.modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.68);z-index:50;padding:10px}
+.modal.show{display:flex}
+.sheet{width:min(100%,430px);background:linear-gradient(180deg,#121318,#090a0d);border:1.4px solid rgba(255,36,62,.55);border-radius:24px 24px 18px 18px;padding:16px;box-shadow:0 -10px 30px rgba(0,0,0,.45),0 0 20px rgba(255,36,62,.08)}
+.sheet h3{margin:0 0 8px;font-size:20px}.sheet p{margin:0;color:#c9ccd1;line-height:1.5;font-size:13px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.meta div{padding:10px;border-radius:13px;background:#0d0f13;border:1px solid rgba(255,255,255,.05)}.meta span{display:block;font-size:9px;color:#8d9299;text-transform:uppercase}.meta b{display:block;margin-top:4px;font-size:13px}
+.close{width:100%;margin-top:12px;border:0;border-radius:13px;padding:12px;background:linear-gradient(180deg,#ff2a46,#b91028);color:#fff;font-weight:1000}
+@media(max-width:390px){
+  .logo .v1{font-size:66px}.logo .v2{font-size:47px}.vbade{left:160px}
+  .bike{width:260px}.gcenter{width:180px;height:180px}.gcenter .rpm{font-size:66px}
+  .stats{grid-template-columns:1fr 1fr}.controls{grid-template-columns:1fr 1fr}.priority{grid-template-columns:1fr}.bottom{grid-template-columns:repeat(5,1fr)}
 }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="menuBtn"><span></span></div>
-    <div class="topRight">
-      <div class="miniCard">
-        <div class="row">
-          <div class="gpsDot"></div>
-          <div>
-            <b>GPS</b>
-            <div class="big">3D</div>
-          </div>
-          <div class="signal"><i></i><i></i><i></i><i></i></div>
-          <div style="font-size:14px;font-weight:1000">12</div>
-        </div>
+    <div class="menu"><i></i></div>
+    <div class="topSensors">
+      <div class="sensorBar">
+        <div class="sdot on"><i></i>GPS</div>
+        <div class="sdot on"><i></i>IMU</div>
+        <div class="sdot on"><i></i>MIC</div>
+        <div class="sdot"><i></i>CAM</div>
       </div>
       <div class="battery">
         <div class="batteryIcon"><div class="batteryFill"></div></div>
-        <div style="font-size:15px;font-weight:1000">92%</div>
+        92%
       </div>
     </div>
-  </div>
-
-  <div class="sideWeather">
-    <div class="item"><span class="ico">☀️</span><b>18°C</b></div>
-    <div class="item"><span class="ico">△</span><b>18°C</b></div>
-    <div class="item"><span class="ico">△</span><b>12.4 m</b></div>
-    <div class="item"><span class="ico">⇆</span><b>2.4 m/s</b></div>
   </div>
 
   <section class="hero">
-    <div class="version">v11</div>
-    <div class="logoWrap">
-      <div class="logo1">VäNä</div>
-      <div class="logo2">AutoDyno</div>
-      <div class="tagline">MEASURE <span class="dot">•</span> TUNE <span class="dot">•</span> RIDE</div>
+    <div class="vbade" style="position:absolute;left:174px;top:4px;color:#ff233f;font-weight:1000;font-size:22px;font-style:italic;border:1.5px solid rgba(255,36,62,.55);border-radius:8px;padding:1px 8px;transform:rotate(-6deg)">v12</div>
+    <div class="logo">
+      <div class="v1">VäNä</div>
+      <div class="v2">AutoDyno</div>
+      <div class="tag">MITTAA • OPTIMOI • DOMINOI</div>
     </div>
-    <img class="bike" src="bike.png?v=11" alt="">
-    <div class="shield"></div>
-
-    <div class="gaugeArea">
-      <div class="bigGauge">
-        <div class="arcBg"></div>
-        <div class="arcBlue"></div>
-        <div class="arcRed"></div>
-        <div class="tickLabels">
-          <span class="t0">0</span><span class="t2">2</span><span class="t4">4</span><span class="t6">6</span><span class="t8">8</span><span class="t10">10</span>
-        </div>
-        <div class="needle" id="needle"></div>
-        <div class="gaugeCenter">
-          <div class="lab">RPM</div>
-          <div class="rpm" id="rpmMain">8460</div>
-          <div class="small">x1000</div>
-        </div>
+    <img src="bike.png?v=12" class="bike" alt="">
+    <div class="gauge">
+      <div class="arc"></div><div class="arcRed"></div>
+      <div class="ticks">
+        <span class="t0">0</span><span class="t2">2</span><span class="t4">4</span><span class="t6">6</span><span class="t8">8</span><span class="t10">10</span><span class="t12">12</span>
       </div>
-
-      <div class="smallGauges">
-        <div class="miniGauge speed">
-          <div class="semi"></div>
-          <div class="cap">NOPEUS</div>
-          <div class="num" id="speedMain">138</div>
-          <div class="unit">km/h</div>
-        </div>
-        <div class="miniGauge accel">
-          <div class="semi"></div>
-          <div class="cap">KIIHTYVYYS</div>
-          <div class="num" id="gMain">0.72</div>
-          <div class="unit">G</div>
-        </div>
+      <div class="needle" id="needle"></div>
+      <div class="gcenter">
+        <div class="lab">RPM</div>
+        <div class="rpm" id="rpmMain">8450</div>
+        <div class="tiny">x1000</div>
+        <div class="source">RPM lähde: <b>NOPEUS</b></div>
       </div>
     </div>
   </section>
 
-  <div class="cards3">
-    <div class="statCard red hasIcon">
-      <div class="iconBox">⚡</div>
-      <div class="title redText">TEHO</div>
-      <div class="value"><span id="hpMain">28.7</span> <span class="unit">hv</span></div>
-      <div class="sub">@ <span id="hpRpm">8420</span> rpm</div>
-    </div>
-    <div class="statCard hasIcon">
-      <div class="iconBox">🔗</div>
-      <div class="title blueText">VÄÄNTÖ</div>
-      <div class="value"><span id="nmMain">26.1</span> <span class="unit">Nm</span></div>
-      <div class="sub">@ <span id="nmRpm">7120</span> rpm</div>
-    </div>
-    <div class="statCard run">
-      <div class="title">🏁 VETO 3</div>
-      <div class="value" id="runTime">00:08.42</div>
-      <div class="sub"><span class="liveDot"></span>Tallentaa...</div>
-    </div>
+  <div class="stats">
+    <div class="stat red"><div class="title">NOPEUS</div><div class="val" id="speedMain">86</div><div class="unit">km/h</div></div>
+    <div class="stat red"><div class="title">TEHO</div><div class="val"><span id="hpMain">27.4</span></div><div class="unit">hv</div></div>
+    <div class="stat red"><div class="title">VÄÄNTÖ</div><div class="val"><span id="nmMain">22.8</span></div><div class="unit">Nm</div></div>
+    <div class="stat"><div class="title white">G</div><div class="val" id="gMain">0.42</div><div class="unit">G</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl green" data-info="sensors"><div class="info">i</div><div class="ico">〰️</div><div class="main">ANTURIT</div><div class="sub">AKTIIVINEN</div></div>
+    <div class="ctrl green" data-info="mic"><div class="info">i</div><div class="ico">🎤</div><div class="main">MIKROFONI</div><div class="sub">AKTIIVINEN</div></div>
+    <div class="ctrl" data-info="camera"><div class="info">i</div><div class="ico">📷</div><div class="main">KAMERA</div><div class="sub">EI AKTIIVINEN</div></div>
+    <div class="ctrl arm" data-info="arm"><div class="info">i</div><div class="ico">🎯</div><div class="main">ARM AUTO</div><div class="sub">AKTIIVINEN</div></div>
+    <div class="ctrl" data-info="manual"><div class="info">i</div><div class="ico">📖</div><div class="main">MANUAALI</div><div class="sub">VALMIS</div></div>
+    <div class="ctrl" data-info="stop"><div class="info">i</div><div class="ico">◼️</div><div class="main">STOP</div><div class="sub">VALMIS</div></div>
   </div>
 
   <section class="panel">
-    <div class="panelHeader">
-      <div class="panelTitle">📈 TEHO & <span class="blue">VÄÄNTÖ KÄYRÄ</span></div>
-      <div class="switches">
-        <div class="toggle active red">HV / NM</div>
-        <div class="toggle">KW / NM</div>
-      </div>
-    </div>
-    <div class="chartWrap">
-      <canvas id="curveChart" width="390" height="210"></canvas>
+    <div class="phead"><div class="ptitle"><span class="r">🎯</span> RPM LÄHDE & PRIORITEETTI</div><div class="info" data-info="rpmprio">i</div></div>
+    <div class="priority">
+      <div class="prio active"><div class="rank">1</div><div class="label">NOPEUS</div><div class="state">AKTIIVINEN</div></div>
+      <div class="prio"><div class="rank">2</div><div class="label">MIKROFONI</div><div class="state">VARA</div></div>
+      <div class="prio"><div class="rank">3</div><div class="label">KAMERA</div><div class="state">VARA</div></div>
     </div>
   </section>
 
-  <section class="panel" style="position:relative">
-    <div class="panelHeader">
-      <div class="panelTitle">🎯 RPM LÄHDE & PRIORITEETTI</div>
-      <div class="infoBadge" data-info="rpmprio">i</div>
-    </div>
-    <div class="priorityWrap">
-      <div class="priorityCard green">
-        <div class="rank">1</div>
-        <div class="label">🏎️ NOPEUS</div>
-        <div class="state">PÄÄLLÄ</div>
-      </div>
-      <div class="priorityCard green2">
-        <div class="rank">2</div>
-        <div class="label">🎤 MIKROFONI</div>
-        <div class="state">PÄÄLLÄ</div>
-      </div>
-      <div class="priorityCard yellow">
-        <div class="rank">3</div>
-        <div class="label">📷 KAMERA</div>
-        <div class="state">VALMIUS</div>
-      </div>
-      <div class="confBox">
-        <div class="heading">LUOTTAMUS</div>
-        <div class="confRow"><span>Nopeus</span><span>92%</span><div class="bar"><div class="fill g" style="width:92%"></div></div><div></div></div>
-        <div class="confRow"><span>Mikrofoni</span><span>78%</span><div class="bar"><div class="fill g" style="width:78%"></div></div><div></div></div>
-        <div class="confRow"><span>Kamera</span><span>45%</span><div class="bar"><div class="fill y" style="width:45%"></div></div><div></div></div>
-      </div>
-    </div>
+  <section class="panel">
+    <div class="phead"><div class="ptitle"><span class="r">📈</span> DYNO KÄYRÄ – TEHO (HV) & VÄÄNTÖ (NM)</div></div>
+    <div class="chartWrap"><canvas id="dyno" width="390" height="230"></canvas></div>
   </section>
 
-  <section class="panel" style="position:relative">
-    <div class="panelHeader">
-      <div class="panelTitle">📡 ANTURIT</div>
-      <div class="infoBadge" data-info="sensors">i</div>
-    </div>
-    <div class="sensorGrid">
-      <div class="sensorTile"><div class="ico">🛰️</div><div class="txt">GPS</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile"><div class="ico">↔️</div><div class="txt">KIIHTYVYYS</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile"><div class="ico">⭕</div><div class="txt">GYRO</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile"><div class="ico">📐</div><div class="txt">KALTEVUUS</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile"><div class="ico">⛰️</div><div class="txt">KORKEUS</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile"><div class="ico">🎙️</div><div class="txt">MIKROFONI</div><div class="state">PÄÄLLÄ</div></div>
-      <div class="sensorTile yellow"><div class="ico">📷</div><div class="txt">KAMERA</div><div class="state">VALMIUS</div></div>
-    </div>
-  </section>
-
-  <section class="panel" style="position:relative">
-    <div class="panelHeader">
-      <div class="panelTitle">🚩 VEDON OHJAUS</div>
-      <div class="infoBadge" data-info="controls">i</div>
-    </div>
-    <div class="controlGrid">
-      <div class="ctrl wait"><div class="ico">⏳</div><div class="main">ODOTA</div></div>
-      <div class="ctrl arm"><div class="ico">🎯</div><div class="main">ARM</div><div class="sub">ARM (VALMIS)</div></div>
-      <div class="ctrl measure"><div class="ico">▶</div><div class="main">MITTAUS</div></div>
-      <div class="ctrl stop"><div class="ico">◼</div><div class="main">PYSÄYTÄ</div></div>
-    </div>
-  </section>
-
-  <div class="bottomNav">
-    <div class="navBtn active"><div class="ico">⏱️</div><div class="txt">MITTAUS</div></div>
-    <div class="navBtn"><div class="ico">📈</div><div class="txt">VEDOT</div></div>
-    <div class="navBtn"><div class="ico">📉</div><div class="txt">ANALYYSI</div></div>
-    <div class="navBtn"><div class="ico">💾</div><div class="txt">AUTOTUNE</div></div>
-    <div class="navBtn"><div class="ico">⚙️</div><div class="txt">ASETUKSET</div></div>
+  <div class="bottom">
+    <div class="nav active"><div class="ico">⏱️</div><div class="txt">MITTAUS</div></div>
+    <div class="nav"><div class="ico">🏁</div><div class="txt">VEDOT</div></div>
+    <div class="nav"><div class="ico">📉</div><div class="txt">ANALYYSI</div></div>
+    <div class="nav"><div class="ico">💾</div><div class="txt">AUTOTUNE</div></div>
+    <div class="nav"><div class="ico">⚙️</div><div class="txt">ASETUKSET</div></div>
   </div>
 </div>
 
-<div class="infoModal" id="infoModal">
-  <div class="infoSheet">
-    <h3 id="infoTitle">Info</h3>
-    <p id="infoText"></p>
-    <div class="infoMeta">
-      <div><span>Tila</span><b id="infoState">–</b></div>
-      <div><span>Huomio</span><b id="infoValue">–</b></div>
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h3 id="mtitle">Info</h3>
+    <p id="mtext"></p>
+    <div class="meta">
+      <div><span>Tila</span><b id="mstate">–</b></div>
+      <div><span>Huomio</span><b id="mvalue">–</b></div>
     </div>
-    <button class="closeInfo" id="closeInfo">SULJE</button>
+    <button class="close" id="close">SULJE</button>
   </div>
 </div>
 
 <script>
-const infoDefs={
-  rpmprio:{
-    title:"RPM lähde & prioriteetti",
-    text:"Kierrosluvun oletusjärjestys on nopeus → mikrofoni → kamera. Nopeus on ensisijainen, koska se on yleensä vakain tietyllä vaihteella kalibroinnin jälkeen. Mikrofoni toimii vertailuna ja kamera varalähteenä.",
-    state:"Nopeus prioriteetti 1",
-    value:"Nopeus 92% • Mikrofoni 78% • Kamera 45%"
-  },
-  sensors:{
-    title:"Anturit",
-    text:"AutoDyno hyödyntää hyödyllisiä puhelimen antureita: GPS-nopeutta, kiihtyvyyttä, gyroa, kaltevuutta, korkeutta, mikrofonia ja tarvittaessa kameraa. Näitä yhdistetään dynolaskentaan ja vedon laadun arviointiin.",
-    state:"6 aktiivista + kamera valmius",
-    value:"Sensor fusion käytössä"
-  },
-  controls:{
-    title:"Vedon ohjaus",
-    text:"ODOTA pitää sovelluksen valmiina. ARM virittää automaattisen vedon lähtemään oikealla hetkellä. MITTAUS käynnistää vedon. PYSÄYTÄ lopettaa vedon ja tallentaa datan vertailuun.",
-    state:"ARM valmis",
-    value:"Veto 3 • 00:08.42"
-  }
+const infos={
+  sensors:{title:"Anturit",text:"GPS, kiihtyvyys, gyro ja orientaatio muodostavat mittauksen sensorifuusion. Niitä käytetään vedon nopeuden, kiihtyvyyden ja laadun arviointiin.",state:"Aktiivinen",value:"GPS + IMU käytössä"},
+  mic:{title:"Mikrofoni RPM",text:"Mikrofoni arvioi moottorin kierroslukua äänen jaksollisuudesta. Nopeus/välitys pysyy oletuksena tärkeimpänä RPM-lähteenä.",state:"Aktiivinen",value:"Toissijainen RPM-lähde"},
+  camera:{title:"Kamera RPM",text:"Kamera on varalähde RPM:lle ja tarkoitettu mittariston viisarin tai digitaalisen RPM:n lukemiseen kalibroinnin jälkeen.",state:"Ei aktiivinen",value:"Kalibrointi puuttuu"},
+  arm:{title:"ARM AUTO",text:"Valmistelee automaattisen vedon. Sovellus odottaa valittua aloitus-RPM:ää ja kiihtyvyyttä ja tallentaa esipuskurin mukaan.",state:"Aktiivinen",value:"Auto-start valmiina"},
+  manual:{title:"Manuaali",text:"Aloittaa vedon heti ilman automaattisia starttiehtoja.",state:"Valmis",value:"Käyttäjän käynnistys"},
+  stop:{title:"STOP",text:"Lopettaa käynnissä olevan vedon ja tallentaa datan.",state:"Valmis",value:"Manuaalinen varmistus"},
+  rpmprio:{title:"RPM lähde & prioriteetti",text:"Oletusjärjestys on nopeus → mikrofoni → kamera. Käyttäjä voi myöhemmin vaihtaa järjestystä asetuksista.",state:"Nopeus prioriteetti 1",value:"Mikrofoni 2 • Kamera 3"}
 };
-document.querySelectorAll("[data-info]").forEach(el=>{
-  el.addEventListener("click", ()=>{
-    const d=infoDefs[el.dataset.info];
-    document.getElementById("infoTitle").textContent=d.title;
-    document.getElementById("infoText").textContent=d.text;
-    document.getElementById("infoState").textContent=d.state;
-    document.getElementById("infoValue").textContent=d.value;
-    document.getElementById("infoModal").classList.add("show");
-  });
-});
-document.getElementById("closeInfo").onclick=()=>document.getElementById("infoModal").classList.remove("show");
-document.getElementById("infoModal").addEventListener("click",e=>{ if(e.target.id==="infoModal") e.currentTarget.classList.remove("show"); });
+document.querySelectorAll("[data-info]").forEach(el=>el.addEventListener("click",e=>{
+  e.stopPropagation();
+  const d=infos[el.dataset.info];
+  document.getElementById("mtitle").textContent=d.title;
+  document.getElementById("mtext").textContent=d.text;
+  document.getElementById("mstate").textContent=d.state;
+  document.getElementById("mvalue").textContent=d.value;
+  document.getElementById("modal").classList.add("show");
+}));
+document.getElementById("close").onclick=()=>document.getElementById("modal").classList.remove("show");
+document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")e.currentTarget.classList.remove("show")};
 
-function drawChart(){
-  const c=document.getElementById("curveChart");
-  const x=c.getContext("2d");
-  const w=c.width,h=c.height;
+function drawDyno(){
+  const c=document.getElementById("dyno"),x=c.getContext("2d"),w=c.width,h=c.height;
   x.clearRect(0,0,w,h);
+  x.strokeStyle="rgba(255,255,255,.08)";x.lineWidth=1;
+  for(let i=0;i<8;i++){let y=16+i*(h-34)/7;x.beginPath();x.moveTo(30,y);x.lineTo(w-18,y);x.stroke()}
+  for(let i=0;i<10;i++){let px=30+i*(w-48)/9;x.beginPath();x.moveTo(px,14);x.lineTo(px,h-20);x.stroke()}
+  x.fillStyle="#ff2a46";x.font="bold 12px Arial";x.fillText("HV",8,20);
+  x.fillStyle="#aaaeb6";x.fillText("NM",w-26,20);
+  x.fillStyle="#cfd2d7";x.font="bold 9px Arial";
+  [2000,4000,6000,8000,10000,12000].forEach((v,i)=>x.fillText(String(v),42+i*58,h-6));
 
-  // grid
-  x.strokeStyle="rgba(100,170,255,.16)";
-  x.lineWidth=1;
-  for(let i=0;i<11;i++){
-    let py=18+i*(h-36)/10;
-    x.beginPath();x.moveTo(34,py);x.lineTo(w-22,py);x.stroke();
-  }
-  for(let i=0;i<11;i++){
-    let px=34+i*(w-56)/10;
-    x.beginPath();x.moveTo(px,12);x.lineTo(px,h-22);x.stroke();
-  }
+  const hp=[[1200,4],[2500,10],[4200,16],[5800,23],[7000,30],[8200,37],[9300,34],[10600,28],[12000,21]];
+  const nm=[[1200,5],[2500,18],[4200,27],[5600,31],[7000,30],[8200,27],[9300,23],[10600,15],[12000,10]];
+  const X=r=>30+(r-1000)/(12000-1000)*(w-48);
+  const Y=v=>h-20-(v/40)*(h-36);
 
-  // axes labels
-  x.fillStyle="#ff3658";
-  x.font="bold 12px Arial";
-  x.fillText("hv",12,22);
-  [0,10,20,30,40].forEach((v,i)=>x.fillText(String(v),8,h-28 - i*(h-52)/4));
-  x.fillStyle="#35b9ff";
-  x.fillText("Nm",w-26,18);
-  [0,10,20,30,40].forEach((v,i)=>x.fillText(String(v),w-22,h-28 - i*(h-52)/4));
-  x.fillStyle="#d7e6f9";
-  x.font="bold 9px Arial";
-  [2000,4000,6000,8000,10000,12000].forEach((v,i)=>{
-    let px=52+i*(w-90)/5;
-    x.fillText(String(v),px-10,h-8);
-  });
-  x.fillText("rpm",10,h-8);
+  let grad=x.createLinearGradient(0,0,w,0);grad.addColorStop(0,"rgba(255,35,63,.05)");grad.addColorStop(1,"rgba(255,35,63,.30)");
+  x.beginPath();hp.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.lineTo(X(12000),h-20);x.lineTo(X(1200),h-20);x.closePath();x.fillStyle=grad;x.fill();
 
-  // curves
-  const hpPts=[[1200,5],[2400,11],[4200,16],[5600,23],[6800,25],[7800,31],[8400,36],[9200,34],[10800,28],[12000,22]];
-  const nmPts=[[1200,5],[2400,18],[4000,23],[5600,31],[6500,31],[7200,29],[8000,27],[9200,23],[10800,15],[12000,10]];
-  const xMap=r=>34+(r-1000)/(12000-1000)*(w-56);
-  const yMap=v=>h-22-(v/40)*(h-44);
+  x.strokeStyle="#ff233f";x.lineWidth=3;x.beginPath();hp.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();
+  x.strokeStyle="#a5a8ad";x.lineWidth=3;x.beginPath();nm.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();
 
-  // fills
-  let gradR=x.createLinearGradient(0,0,w,0); gradR.addColorStop(0,"rgba(255,40,72,.08)"); gradR.addColorStop(1,"rgba(255,40,72,.35)");
-  x.beginPath();
-  hpPts.forEach((p,i)=>{ const px=xMap(p[0]), py=yMap(p[1]); i?x.lineTo(px,py):x.moveTo(px,py); });
-  x.lineTo(xMap(hpPts.at(-1)[0]),h-22); x.lineTo(xMap(hpPts[0][0]),h-22); x.closePath();
-  x.fillStyle=gradR; x.fill();
-
-  let gradB=x.createLinearGradient(0,0,w,0); gradB.addColorStop(0,"rgba(30,180,255,.08)"); gradB.addColorStop(1,"rgba(30,180,255,.25)");
-  x.beginPath();
-  nmPts.forEach((p,i)=>{ const px=xMap(p[0]), py=yMap(p[1]); i?x.lineTo(px,py):x.moveTo(px,py); });
-  x.lineTo(xMap(nmPts.at(-1)[0]),h-22); x.lineTo(xMap(nmPts[0][0]),h-22); x.closePath();
-  x.fillStyle=gradB; x.fill();
-
-  // red curve
-  x.strokeStyle="#ff1f42"; x.lineWidth=3;
-  x.beginPath();
-  hpPts.forEach((p,i)=>{ const px=xMap(p[0]), py=yMap(p[1]); i?x.lineTo(px,py):x.moveTo(px,py); });
-  x.stroke();
-
-  // blue curve
-  x.strokeStyle="#1fb8ff"; x.lineWidth=3;
-  x.beginPath();
-  nmPts.forEach((p,i)=>{ const px=xMap(p[0]), py=yMap(p[1]); i?x.lineTo(px,py):x.moveTo(px,py); });
-  x.stroke();
-
-  // marker lines
-  const m1=8400, m2=7800;
-  x.strokeStyle="rgba(255,255,255,.45)";
-  x.lineWidth=1.2;
-  x.beginPath();x.moveTo(xMap(m1),12);x.lineTo(xMap(m1),h-22);x.stroke();
-
-  function badge(px,py,text,bg){
-    const padX=10, padY=7;
-    x.font="bold 12px Arial";
-    const tw=x.measureText(text).width;
-    x.fillStyle=bg;
-    const bw=tw+padX*2,bh=26;
-    x.beginPath();x.roundRect(px-bw/2,py-bh/2,bw,bh,8);x.fill();
-    x.fillStyle="#fff";
-    x.fillText(text,px-tw/2,py+4);
-  }
-
-  const hpY=yMap(36), nmY=yMap(27);
-  x.fillStyle="#fff";
-  x.beginPath();x.arc(xMap(8400),hpY,6,0,Math.PI*2);x.fill();
-  x.strokeStyle="#ff1f42";x.lineWidth=4;x.stroke();
-  x.fillStyle="#fff";
-  x.beginPath();x.arc(xMap(7600),nmY,6,0,Math.PI*2);x.fill();
-  x.strokeStyle="#1fb8ff";x.lineWidth=4;x.stroke();
-
-  badge(xMap(9100), hpY-18, "28.7 hv", "#ff2448");
-  badge(xMap(7600), nmY+24, "26.1 Nm", "#2494ff");
+  const mx=X(8200);x.strokeStyle="rgba(255,255,255,.48)";x.lineWidth=1;x.beginPath();x.moveTo(mx,14);x.lineTo(mx,h-20);x.stroke();
+  x.fillStyle="#fff";x.beginPath();x.arc(mx,Y(37),5,0,Math.PI*2);x.fill();x.strokeStyle="#ff233f";x.lineWidth=4;x.stroke();
+  x.fillStyle="#fff";x.beginPath();x.arc(mx,Y(27),5,0,Math.PI*2);x.fill();x.strokeStyle="#a5a8ad";x.lineWidth=4;x.stroke();
 }
-drawChart();
+drawDyno();
 
 let t=0;
 setInterval(()=>{
-  t += 0.04;
-  const rpm=8400 + Math.round(Math.sin(t)*450 + Math.sin(t*0.6)*130);
-  const kmh=(136 + Math.sin(t*0.8)*4).toFixed(0);
-  const g=(0.70 + Math.sin(t*1.2)*0.04).toFixed(2);
-  const hp=(28.4 + Math.sin(t*0.8)*0.8).toFixed(1);
-  const nm=(26.0 + Math.sin(t*0.9)*0.7).toFixed(1);
-
-  document.getElementById("rpmMain").textContent = rpm;
-  document.getElementById("speedMain").textContent = kmh;
-  document.getElementById("gMain").textContent = g;
-  document.getElementById("hpMain").textContent = hp;
-  document.getElementById("nmMain").textContent = nm;
-
-  // approximate needle map from 0..10000
-  const deg = -20 + (rpm/10000)*122;
-  document.getElementById("needle").style.transform = `rotate(${deg}deg)`;
-}, 120);
+  t+=0.045;
+  const rpm=Math.round(8450+Math.sin(t)*420);
+  const spd=Math.round(86+Math.sin(t*.8)*3);
+  const hp=(27.4+Math.sin(t*.9)*.8).toFixed(1);
+  const nm=(22.8+Math.sin(t*.75)*.6).toFixed(1);
+  const g=(0.42+Math.sin(t*1.1)*.03).toFixed(2);
+  document.getElementById("rpmMain").textContent=rpm;
+  document.getElementById("speedMain").textContent=spd;
+  document.getElementById("hpMain").textContent=hp;
+  document.getElementById("nmMain").textContent=nm;
+  document.getElementById("gMain").textContent=g;
+  const deg=-25+(rpm/12000)*125;
+  document.getElementById("needle").style.transform=`rotate(${deg}deg)`;
+},120);
 </script>
 </body>
 </html>

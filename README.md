@@ -1,22 +1,21 @@
-# VäNä AutoDyno v11 Blue Reference
+# VäNä AutoDyno v12 Red Master
 
-Tämä versio on tehty nimenomaan mahdollisimman lähelle hyväksyttyä sinistä referenssikuvaa.
+Punainen versio rakennettu suoraan hyväksytyn punaisen mockupin rakenteen mukaan.
 
-Painotus:
-- sama sininen/neon racing-look
+Mukana:
+- VäNä AutoDyno -hero
+- pyörä oikealla
 - suuri RPM-mittari
-- pyörä yläosassa
-- teho / vääntö / veto -kortit
-- teho & vääntö -käyrä
-- RPM-lähde & prioriteetti
-- anturit
-- vedon ohjaus
+- nopeus / teho / vääntö / G -kortit
+- anturit / mikrofoni / kamera / ARM / manuaali / STOP
+- RPM-prioriteetti
+- dynokäyrä
 - alavalikko
-- pienet info-napit
+- info-napit
+- aktiiviset tilat väreillä
+- tumma/racing-kokonaisuus
 
-GitHub Pages:
-1. pura zip
-2. korvaa repossa `index.html`
-3. pidä `bike.png` samassa juuressa
-4. avaa sivu querylla esim. `?v=11`
-5. oikeassa versiossa näkyy `v11`
+GitHub:
+- korvaa `index.html`
+- lisää `bike.png` samaan kansioon
+- avaa `?v=12`
