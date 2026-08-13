@@ -1,21 +1,20 @@
-# VäNä AutoDyno v13 Red Functional
+# VäNä AutoDyno v14 Red Reliable
 
-Korjaus v12:een: v12 oli ulkoasu-demo eikä oikeasti käyttänyt antureita. v13 palauttaa toiminnallisuuden punaisen UI:n alle.
+v14 on tehty nimenomaan toimivuuden diagnosointiin ja iPhone-selainta varten.
 
-Toimii nyt:
-- GPS
-- DeviceMotion / IMU
-- mikrofonin RPM-arvio
-- kamera live-kuva
-- RPM kalibrointi nopeudesta
-- ARM AUTO
-- manuaalinen veto
-- STOP
-- vetojen tallennus localStorageen
-- live RPM / nopeus / hv / Nm / G
-- info-painikkeet
+Korjattu:
+- poistettu kaikki feikki/live-demoarvot
+- napit ovat oikeita toimintoja, info-nappi ei enää avaa infoa koko painikkeesta
+- GPS, DeviceMotion, mikrofoni ja kamera käynnistyvät erikseen
+- iOS permission -pyynnöt tehdään suoraan käyttäjän napinpainalluksesta
+- näkyvä Järjestelmätesti kertoo HTTPS/secure-contextin sekä API-tuen
+- näkyvä diagnostiikkaloki näyttää GPS/media/JS-virheet
+- RPM-kalibrointi ja localStorage
+- ARM AUTO / manuaali / STOP
+- vetojen tallennus
 
 GitHub:
 1. korvaa index.html
 2. pidä bike.png samassa kansiossa
-3. avaa ?v=13
+3. avaa ?v=14
+4. paina AJA JÄRJESTELMÄTESTI

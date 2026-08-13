@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VäNä AutoDyno v13 Red Functional</title>
+<title>VäNä AutoDyno v14 Red Reliable</title>
 <style>
 :root{
   --bg:#050304;--panel:#0b0c10;--panel2:#121216;--line:#4a2027;
@@ -190,7 +190,7 @@ body{background:linear-gradient(180deg,#030202,#090507 40%,#020202)}
   </div>
 
   <section class="hero">
-    <div class="vbade" style="position:absolute;left:174px;top:4px;color:#ff233f;font-weight:1000;font-size:22px;font-style:italic;border:1.5px solid rgba(255,36,62,.55);border-radius:8px;padding:1px 8px;transform:rotate(-6deg)">v13</div>
+    <div class="vbade" style="position:absolute;left:174px;top:4px;color:#ff233f;font-weight:1000;font-size:22px;font-style:italic;border:1.5px solid rgba(255,36,62,.55);border-radius:8px;padding:1px 8px;transform:rotate(-6deg)">v14</div>
     <div class="logo">
       <div class="v1">VäNä</div>
       <div class="v2">AutoDyno</div>
@@ -205,7 +205,7 @@ body{background:linear-gradient(180deg,#030202,#090507 40%,#020202)}
       <div class="needle" id="needle"></div>
       <div class="gcenter">
         <div class="lab">RPM</div>
-        <div class="rpm" id="rpmMain">8450</div>
+        <div class="rpm" id="rpmMain">0</div>
         <div class="tiny">x1000</div>
         <div class="source">RPM lähde: <b>NOPEUS</b></div>
       </div>
@@ -213,19 +213,19 @@ body{background:linear-gradient(180deg,#030202,#090507 40%,#020202)}
   </section>
 
   <div class="stats">
-    <div class="stat red"><div class="title">NOPEUS</div><div class="val" id="speedMain">86</div><div class="unit">km/h</div></div>
-    <div class="stat red"><div class="title">TEHO</div><div class="val"><span id="hpMain">27.4</span></div><div class="unit">hv</div></div>
-    <div class="stat red"><div class="title">VÄÄNTÖ</div><div class="val"><span id="nmMain">22.8</span></div><div class="unit">Nm</div></div>
-    <div class="stat"><div class="title white">G</div><div class="val" id="gMain">0.42</div><div class="unit">G</div></div>
+    <div class="stat red"><div class="title">NOPEUS</div><div class="val" id="speedMain">0</div><div class="unit">km/h</div></div>
+    <div class="stat red"><div class="title">TEHO</div><div class="val"><span id="hpMain">0.0</span></div><div class="unit">hv</div></div>
+    <div class="stat red"><div class="title">VÄÄNTÖ</div><div class="val"><span id="nmMain">0.0</span></div><div class="unit">Nm</div></div>
+    <div class="stat"><div class="title white">G</div><div class="val" id="gMain">0.00</div><div class="unit">G</div></div>
   </div>
 
   <div class="controls">
-    <div id="sensorBtn" class="ctrl" data-info="sensors"><div class="info">i</div><div class="ico">〰️</div><div class="main">ANTURIT</div><div class="sub" id="sensorState">POIS</div></div>
-    <div id="micBtn" class="ctrl" data-info="mic"><div class="info">i</div><div class="ico">🎤</div><div class="main">MIKROFONI</div><div class="sub" id="micState">POIS</div></div>
-    <div id="camBtn" class="ctrl" data-info="camera"><div class="info">i</div><div class="ico">📷</div><div class="main">KAMERA</div><div class="sub" id="camState">POIS</div></div>
-    <div id="armBtn" class="ctrl arm" data-info="arm"><div class="info">i</div><div class="ico">🎯</div><div class="main">ARM AUTO</div><div class="sub" id="armState">VALMIS</div></div>
-    <div id="manualBtn" class="ctrl" data-info="manual"><div class="info">i</div><div class="ico">📖</div><div class="main">MANUAALI</div><div class="sub" id="manualState">VALMIS</div></div>
-    <div id="stopBtn" class="ctrl" data-info="stop"><div class="info">i</div><div class="ico">◼️</div><div class="main">STOP</div><div class="sub" id="stopState">VALMIS</div></div>
+    <div id="sensorBtn" class="ctrl"><div class="info" data-info="sensors">i</div><div class="ico">〰️</div><div class="main">ANTURIT</div><div class="sub" id="sensorState">POIS</div></div>
+    <div id="micBtn" class="ctrl"><div class="info" data-info="mic">i</div><div class="ico">🎤</div><div class="main">MIKROFONI</div><div class="sub" id="micState">POIS</div></div>
+    <div id="camBtn" class="ctrl"><div class="info" data-info="camera">i</div><div class="ico">📷</div><div class="main">KAMERA</div><div class="sub" id="camState">POIS</div></div>
+    <div id="armBtn" class="ctrl arm"><div class="info" data-info="arm">i</div><div class="ico">🎯</div><div class="main">ARM AUTO</div><div class="sub" id="armState">VALMIS</div></div>
+    <div id="manualBtn" class="ctrl"><div class="info" data-info="manual">i</div><div class="ico">📖</div><div class="main">MANUAALI</div><div class="sub" id="manualState">VALMIS</div></div>
+    <div id="stopBtn" class="ctrl"><div class="info" data-info="stop">i</div><div class="ico">◼️</div><div class="main">STOP</div><div class="sub" id="stopState">VALMIS</div></div>
   </div>
 
   <section class="panel">
@@ -260,6 +260,19 @@ body{background:linear-gradient(180deg,#030202,#090507 40%,#020202)}
     <video id="camVideo" playsinline muted style="display:none;width:calc(100% - 20px);margin:0 10px 10px;border-radius:12px"></video>
   </section>
 
+
+  <section class="panel">
+    <div class="phead"><div class="ptitle"><span class="r">🧪</span> JÄRJESTELMÄTESTI</div></div>
+    <div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+      <div style="padding:9px;border-radius:11px;background:#090a0d;border:1px solid #302128">HTTPS / secure context<br><b id="diagSecure">–</b></div>
+      <div style="padding:9px;border-radius:11px;background:#090a0d;border:1px solid #302128">GPS API<br><b id="diagGps">–</b></div>
+      <div style="padding:9px;border-radius:11px;background:#090a0d;border:1px solid #302128">Motion API<br><b id="diagMotion">–</b></div>
+      <div style="padding:9px;border-radius:11px;background:#090a0d;border:1px solid #302128">Media API<br><b id="diagMedia">–</b></div>
+      <button id="selfTestBtn" style="grid-column:1/-1;padding:12px;border-radius:13px;border:1px solid #ff233f;background:linear-gradient(#5d101b,#2a070c);color:#fff;font-weight:1000">AJA JÄRJESTELMÄTESTI</button>
+    </div>
+    <pre id="diagLog" style="white-space:pre-wrap;margin:0 10px 10px;padding:10px;border-radius:12px;background:#07080a;border:1px solid #302128;color:#bfc4ca;font:10px/1.4 ui-monospace,monospace;max-height:190px;overflow:auto">V14 valmis.</pre>
+  </section>
+
   <div class="bottom">
     <div class="nav active"><div class="ico">⏱️</div><div class="txt">MITTAUS</div></div>
     <div class="nav"><div class="ico">🏁</div><div class="txt">VEDOT</div></div>
@@ -292,7 +305,7 @@ const infos={
   rpmprio:{title:"RPM lähde & prioriteetti",text:"Oletusjärjestys on nopeus → mikrofoni → kamera. Järjestystä voi vaihtaa asetuksista.",state:"Nopeus prioriteetti 1",value:"Mikrofoni 2 • Kamera 3"},
   settings:{title:"Mittausasetukset",text:"Kalibroi valitulle vaihteelle nopeuden ja RPM:n suhde. Aseta myös massan, aloitus-RPM:n ja stop-RPM:n arvot ennen vetoa.",state:"Valmis",value:"Asetukset tallennetaan selaimeen"}
 };
-document.querySelectorAll("[data-info]").forEach(el=>el.addEventListener("click",e=>{
+document.querySelectorAll(".info[data-info]").forEach(el=>el.addEventListener("click",e=>{
   e.stopPropagation();
   const d=infos[el.dataset.info];
   document.getElementById("mtitle").textContent=d.title;
@@ -333,126 +346,199 @@ function drawDyno(){
 drawDyno();
 
 
-let rpmPerKmh=+(localStorage.getItem("vanaV13ratio")||0);
+
+let rpmPerKmh=0;
+try{rpmPerKmh=+(localStorage.getItem("vanaV14ratio")||localStorage.getItem("vanaV13ratio")||0)}catch{}
 let armed=false,recording=false,run=[],prebuffer=[],lastV=0,lastT=0,filtA=0,imuA=0,lastImu=0,accelEndedAt=0;
 let gpsWatch=null,micRpm=NaN,micConf=0,cameraRpm=NaN,cameraConf=0,audioCtx=null,analyser=null,audioBuf=null,audioTimer=null;
+let motionBound=false;
 
-function setActive(id,on,stateId,onText="AKTIIVINEN",offText="POIS"){
-  const el=document.getElementById(id);
-  el.classList.toggle("green",!!on);
-  if(id==="armBtn") el.classList.toggle("arm",!!on);
-  if(stateId) document.getElementById(stateId).textContent=on?onText:offText;
+const $=id=>document.getElementById(id);
+function log(msg){
+  const stamp=new Date().toLocaleTimeString("fi-FI");
+  const el=$("diagLog"); if(el) el.textContent=`${stamp}  ${msg}\n`+el.textContent.slice(0,5000);
 }
-function setStatus(txt){document.getElementById("status").textContent=txt}
+window.addEventListener("error",e=>log("JS VIRHE: "+e.message));
+window.addEventListener("unhandledrejection",e=>log("PROMISE VIRHE: "+(e.reason?.message||e.reason)));
+
+function setStatus(txt){$("status").textContent=txt;log(txt)}
+function setActive(id,on,stateId,onText="AKTIIVINEN",offText="POIS"){
+  const el=$(id); if(!el)return;
+  if(id!=="armBtn")el.classList.toggle("green",!!on);
+  if(id==="armBtn")el.classList.toggle("arm",!!on);
+  if(stateId&&$(stateId))$(stateId).textContent=on?onText:offText;
+}
+function updateDiag(){
+  $("diagSecure").textContent=window.isSecureContext?"OK":"EI";
+  $("diagSecure").style.color=window.isSecureContext?"#39f061":"#ff233f";
+  $("diagGps").textContent=("geolocation" in navigator)?"OK":"EI";
+  $("diagMotion").textContent=(typeof DeviceMotionEvent!=="undefined")?"OK":"EI";
+  $("diagMedia").textContent=(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)?"OK":"EI";
+}
+updateDiag();
+
 function chooseRpm(speedRpm){
+  const primary=$("rpmP1")?.value||"speed";
   const vals={
-    speed:{rpm:speedRpm,conf:rpmPerKmh>0?.95:0},
-    mic:{rpm:micRpm,conf:micConf},
-    camera:{rpm:cameraRpm,conf:cameraConf}
+    speed:{rpm:speedRpm,conf:rpmPerKmh>0?.95:0,source:"NOPEUS"},
+    mic:{rpm:micRpm,conf:micConf,source:"MIKROFONI"},
+    camera:{rpm:cameraRpm,conf:cameraConf,source:"KAMERA"}
   };
-  const order=[document.getElementById("rpmP1").value,"mic","camera"];
+  const order=[primary,...["speed","mic","camera"].filter(x=>x!==primary)];
   for(const k of order){
     const v=vals[k];
-    if(v && isFinite(v.rpm) && v.rpm>0 && v.conf>.18)return {rpm:v.rpm,source:k.toUpperCase(),conf:v.conf};
+    if(v&&isFinite(v.rpm)&&v.rpm>0&&v.conf>.18)return v;
   }
-  return {rpm:speedRpm||0,source:"SPEED",conf:rpmPerKmh>0?.6:0};
+  return {rpm:speedRpm||0,conf:rpmPerKmh>0?.6:0,source:"NOPEUS"};
 }
 function updateLive(kmh){
   const now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0;
   let gpsA=dt>.15?(v-lastV)/dt:0;lastV=v;lastT=now;
   const imuDelta=imuA-lastImu;lastImu=imuA;
   let fused=isFinite(gpsA)?gpsA:0;
-  if(dt>0&&isFinite(imuDelta))fused=.85*fused+.15*(imuDelta/Math.max(.05,dt));
-  filtA=.75*filtA+.25*fused;
+  if(dt>0&&isFinite(imuDelta))fused=.88*fused+.12*(imuDelta/Math.max(.05,dt));
+  filtA=.78*filtA+.22*fused;
 
   const speedRpm=kmh*rpmPerKmh,p=chooseRpm(speedRpm),rpm=p.rpm;
-  const mass=+document.getElementById("mass").value||190;
+  const mass=+$("mass").value||190;
   const watts=Math.max(0,mass*filtA*v),hp=watts/735.49875,nm=rpm>200?watts/(rpm*2*Math.PI/60):0,g=filtA/9.80665;
 
-  document.getElementById("rpmMain").textContent=Math.round(rpm);
-  document.getElementById("speedMain").textContent=kmh.toFixed(0);
-  document.getElementById("hpMain").textContent=hp.toFixed(1);
-  document.getElementById("nmMain").textContent=nm.toFixed(1);
-  document.getElementById("gMain").textContent=g.toFixed(2);
-  const deg=-25+(rpm/12000)*125;document.getElementById("needle").style.transform=`rotate(${Math.max(-25,Math.min(100,deg))}deg)`;
+  $("rpmMain").textContent=Math.round(rpm);
+  $("speedMain").textContent=kmh.toFixed(0);
+  $("hpMain").textContent=hp.toFixed(1);
+  $("nmMain").textContent=nm.toFixed(1);
+  $("gMain").textContent=g.toFixed(2);
+  const deg=-25+(rpm/12000)*125;$("needle").style.transform=`rotate(${Math.max(-25,Math.min(100,deg))}deg)`;
 
   const sample={t:Date.now(),kmh,rpm,hp,nm,g,a:filtA,source:p.source};
   prebuffer.push(sample);while(prebuffer.length&&sample.t-prebuffer[0].t>5000)prebuffer.shift();
 
-  if(armed&&!recording&&rpm>=(+document.getElementById("recordFrom").value||1500)&&filtA>.15){
-    recording=true;run=prebuffer.slice();setStatus("AUTO VETO KÄYNNISSÄ");document.getElementById("armState").textContent="VETO";
+  if(armed&&!recording&&rpm>=(+$("recordFrom").value||1500)&&filtA>.15){
+    recording=true;run=prebuffer.slice();setStatus("AUTO VETO KÄYNNISSÄ");$("armState").textContent="VETO";
   }
   if(recording){
     run.push(sample);
     if(filtA<=.03){if(!accelEndedAt)accelEndedAt=sample.t}else accelEndedAt=0;
-    const stopR=+document.getElementById("stopRpm").value||10500,delay=(+document.getElementById("stopDelay").value||.7)*1000;
+    const stopR=+$("stopRpm").value||10500,delay=(+$("stopDelay").value||.7)*1000;
     if(rpm>=stopR||(accelEndedAt&&sample.t-accelEndedAt>=delay))finishRun("Automaattinen lopetus");
+  }
+}
+function motionHandler(e){
+  if(e.acceleration){
+    const a=e.acceleration;imuA=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
+  }else if(e.accelerationIncludingGravity){
+    const a=e.accelerationIncludingGravity;imuA=Math.abs(Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2)-9.80665);
   }
 }
 
 async function startSensors(){
+  log("Anturipainike painettu");
   try{
     if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
-      const p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("Liikeanturit estetty");
+      const perm=await DeviceMotionEvent.requestPermission();
+      log("Motion permission: "+perm);
+      if(perm!=="granted")throw new Error("Liikeanturit estetty");
     }
-    window.addEventListener("devicemotion",e=>{
-      if(e.acceleration){const a=e.acceleration;imuA=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2)}
-      else if(e.accelerationIncludingGravity){const a=e.accelerationIncludingGravity;imuA=Math.abs(Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2)-9.80665)}
-    });
-    setActive("sensorBtn",true,"sensorState");setStatus("Anturit sallittu. GPS käynnistyy.");
-  }catch(e){setStatus("Anturit: "+e.message)}
-  if(navigator.geolocation&&gpsWatch===null){
-    gpsWatch=navigator.geolocation.watchPosition(p=>{
-      const kmh=Math.max(0,(p.coords.speed||0)*3.6);updateLive(kmh);
-    },e=>setStatus("GPS: "+e.message),{enableHighAccuracy:true,maximumAge:0,timeout:10000});
-  }
+    if(!motionBound){window.addEventListener("devicemotion",motionHandler);motionBound=true}
+    setActive("sensorBtn",true,"sensorState");
+  }catch(e){setStatus("Liikeanturit: "+e.message)}
+  if(!("geolocation" in navigator)){setStatus("GPS API ei ole käytettävissä.");return}
+  if(gpsWatch!==null){setStatus("GPS on jo käynnissä.");return}
+  try{
+    gpsWatch=navigator.geolocation.watchPosition(
+      p=>{
+        const raw=p.coords.speed;
+        const kmh=Math.max(0,(isFinite(raw)?raw:0)*3.6);
+        updateLive(kmh);
+        setActive("sensorBtn",true,"sensorState");
+        if($("status").textContent.includes("GPS käynnistyy"))setStatus("GPS + anturit käytössä.");
+      },
+      e=>setStatus(`GPS virhe ${e.code}: ${e.message}`),
+      {enableHighAccuracy:true,maximumAge:0,timeout:15000}
+    );
+    setStatus("Anturit sallittu. GPS käynnistyy…");
+  }catch(e){setStatus("GPS käynnistys epäonnistui: "+e.message)}
 }
 
 function estimatePitch(buf,sr){
-  let rms=0;for(const v of buf)rms+=v*v;rms=Math.sqrt(rms/buf.length);if(rms<.01)return {rpm:NaN,conf:0};
+  let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/buf.length);if(rms<.008)return {rpm:NaN,conf:0};
   const minR=1200,maxR=12000,minLag=Math.max(2,Math.floor(sr/(maxR/60))),maxLag=Math.min(buf.length-2,Math.ceil(sr/(minR/60)));
   let best=-1,bestLag=0;
   for(let lag=minLag;lag<=maxLag;lag++){
     let c=0,e1=0,e2=0;
-    for(let i=0;i<buf.length-lag;i++){let a=buf[i],b=buf[i+lag];c+=a*b;e1+=a*a;e2+=b*b}
+    for(let i=0;i<buf.length-lag;i++){const a=buf[i],b=buf[i+lag];c+=a*b;e1+=a*a;e2+=b*b}
     const n=c/Math.sqrt(Math.max(1e-12,e1*e2));if(n>best){best=n;bestLag=lag}
   }
   return best>.18?{rpm:sr/bestLag*60,conf:Math.min(1,best)}:{rpm:NaN,conf:Math.max(0,best)};
 }
 async function startMic(){
+  log("Mikrofonipainike painettu");
+  if(!navigator.mediaDevices?.getUserMedia){setStatus("Media API ei ole käytettävissä.");return}
   try{
     const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();const src=audioCtx.createMediaStreamSource(st);
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended")await audioCtx.resume();
+    const src=audioCtx.createMediaStreamSource(st);
     analyser=audioCtx.createAnalyser();analyser.fftSize=4096;src.connect(analyser);audioBuf=new Float32Array(analyser.fftSize);
-    clearInterval(audioTimer);audioTimer=setInterval(()=>{analyser.getFloatTimeDomainData(audioBuf);const r=estimatePitch(audioBuf,audioCtx.sampleRate);micRpm=r.rpm;micConf=r.conf},120);
+    clearInterval(audioTimer);
+    audioTimer=setInterval(()=>{
+      analyser.getFloatTimeDomainData(audioBuf);
+      const r=estimatePitch(audioBuf,audioCtx.sampleRate);micRpm=r.rpm;micConf=r.conf;
+    },120);
     setActive("micBtn",true,"micState");setStatus("Mikrofoni RPM käytössä.");
   }catch(e){setStatus("Mikrofoni: "+e.message)}
 }
 async function startCamera(){
+  log("Kamerapainike painettu");
+  if(!navigator.mediaDevices?.getUserMedia){setStatus("Media API ei ole käytettävissä.");return}
   try{
     const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
-    const v=document.getElementById("camVideo");v.srcObject=st;await v.play();v.style.display="block";
-    setActive("camBtn",true,"camState","AKTIIVINEN","POIS");setStatus("Kamera käytössä. Kamera-RPM vaatii vielä mittarikalibroinnin.");
+    const v=$("camVideo");v.srcObject=st;await v.play();v.style.display="block";
+    setActive("camBtn",true,"camState");setStatus("Kamera käytössä. Kamera-RPM tarvitsee myöhemmin mittarikalibroinnin.");
   }catch(e){setStatus("Kamera: "+e.message)}
 }
 function finishRun(reason){
-  if(!recording)return;
-  recording=false;armed=false;setActive("armBtn",false,"armState","AKTIIVINEN","VALMIS");setActive("manualBtn",false,"manualState","KÄYNNISSÄ","VALMIS");
-  const runs=JSON.parse(localStorage.getItem("vanaV13runs")||"[]");
-  runs.unshift({date:new Date().toISOString(),gear:document.getElementById("gear").value,ratio:rpmPerKmh,data:run});
-  localStorage.setItem("vanaV13runs",JSON.stringify(runs.slice(0,10)));setStatus(reason+" • veto tallennettu • "+run.length+" näytettä");
+  if(!recording){setStatus("Ei käynnissä olevaa vetoa.");return}
+  recording=false;armed=false;
+  setActive("armBtn",false,"armState","AKTIIVINEN","VALMIS");
+  setActive("manualBtn",false,"manualState","KÄYNNISSÄ","VALMIS");
+  try{
+    const runs=JSON.parse(localStorage.getItem("vanaV14runs")||"[]");
+    runs.unshift({date:new Date().toISOString(),gear:$("gear").value,ratio:rpmPerKmh,data:run});
+    localStorage.setItem("vanaV14runs",JSON.stringify(runs.slice(0,10)));
+  }catch(e){log("Tallennusvirhe: "+e.message)}
+  setStatus(reason+" • veto tallennettu • "+run.length+" näytettä");
 }
 
-document.getElementById("sensorBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;startSensors()});
-document.getElementById("micBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;startMic()});
-document.getElementById("camBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;startCamera()});
-document.getElementById("armBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;armed=true;recording=false;run=[];prebuffer=[];accelEndedAt=0;setActive("armBtn",true,"armState");setStatus("ARMED • odottaa "+document.getElementById("recordFrom").value+" rpm ja kiihtyvyyttä")});
-document.getElementById("manualBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;armed=false;recording=true;run=[];setActive("manualBtn",true,"manualState","KÄYNNISSÄ","VALMIS");setStatus("Manuaalinen veto käynnissä")});
-document.getElementById("stopBtn").addEventListener("click",e=>{if(e.target.classList.contains("info"))return;finishRun("STOP")});
-document.getElementById("calBtn").onclick=()=>{
-  const s=+document.getElementById("calSpeed").value,r=+document.getElementById("calRpm").value;
-  if(!(s>0&&r>0)){setStatus("Tarkista kalibrointinopeus ja RPM.");return}
-  rpmPerKmh=r/s;localStorage.setItem("vanaV13ratio",rpmPerKmh);setStatus("RPM kalibroitu: "+rpmPerKmh.toFixed(2)+" rpm/km/h");
+$("sensorBtn").addEventListener("click",startSensors);
+$("micBtn").addEventListener("click",startMic);
+$("camBtn").addEventListener("click",startCamera);
+$("armBtn").addEventListener("click",()=>{
+  armed=true;recording=false;run=[];prebuffer=[];accelEndedAt=0;
+  setActive("armBtn",true,"armState");setStatus("ARMED • odottaa "+$("recordFrom").value+" rpm ja kiihtyvyyttä");
+});
+$("manualBtn").addEventListener("click",()=>{
+  armed=false;recording=true;run=[];setActive("manualBtn",true,"manualState","KÄYNNISSÄ","VALMIS");setStatus("Manuaalinen veto käynnissä");
+});
+$("stopBtn").addEventListener("click",()=>finishRun("STOP"));
+$("calBtn").onclick=()=>{
+  const spd=+$("calSpeed").value,rpm=+$("calRpm").value;
+  if(!(spd>0&&rpm>0)){setStatus("Tarkista kalibrointinopeus ja RPM.");return}
+  rpmPerKmh=rpm/spd;
+  try{localStorage.setItem("vanaV14ratio",rpmPerKmh)}catch{}
+  setStatus("RPM kalibroitu: "+rpmPerKmh.toFixed(2)+" rpm/km/h");
+};
+
+$("selfTestBtn").onclick=()=>{
+  updateDiag();
+  log("Secure context: "+window.isSecureContext);
+  log("Sivun osoite: "+location.href);
+  log("Geolocation: "+("geolocation" in navigator));
+  log("DeviceMotionEvent: "+(typeof DeviceMotionEvent!=="undefined"));
+  log("getUserMedia: "+!!navigator.mediaDevices?.getUserMedia);
+  log("RPM ratio: "+rpmPerKmh.toFixed(2));
+  setStatus(window.isSecureContext?"Järjestelmätesti valmis.":"Sivu ei ole secure contextissa — anturit/media voivat olla estetty.");
 };
 
 </script>
