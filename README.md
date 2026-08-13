@@ -1,21 +1,23 @@
-# VäNä AutoDyno v16 Red Clean
+# VäNä AutoDyno v10 AutoRide
 
-Muutokset:
-- Kamera poistettu kokonaan käyttöliittymästä ja koodista.
-- RPM-lähteet ovat nyt nopeus/välitys ja mikrofoni.
-- Asetuksiin lisätty ⓘ Info-napit PÄÄLLÄ/POIS.
-- Info-asetus tallentuu localStorageen ja palautuu seuraavalla avauksella.
-- Alavalikko, vedot, analyysi, AutoTune, asetukset, ARM, manuaali, STOP ja RPM-kalibrointi säilyvät.
+Pohjana on käyttäjän toimivaksi toteama v9 Blue Edition. V9:n mittaus- ja anturilogiikka on säilytetty ja sen päälle on lisätty jatkuva AUTO AJOT -tila.
 
-Testaus:
-- JavaScript-syntaksi tarkistettu.
-- Selain avattu headless Chromiumilla.
-- Alavalikon kaikki 5 näkymää testattu.
-- Info-nappien PÄÄLLÄ/POIS testattu ja pysyvyys tarkistettu sivun uudelleenlatauksen jälkeen.
-- Kameraan viittaavat UI-elementit ja JS-funktiot poistettu.
-- Console/page-errorit tarkistettu.
+## Uutta v10:ssä
+- AUTO AJOT: jatkuva automaattinen kiihdytysten tunnistus normaalin ajon aikana
+- Käynnistää anturit ja mikrofonin AUTO AJOT -painikkeesta
+- Tunnistaa kiihdytyksen GPS-nopeuden + suodatetun kiihtyvyyden perusteella
+- Oppii vaihteita mikrofonin RPM / GPS-nopeus -suhteesta
+- Pyrkii korjaamaan mikrofonin 1/2x ja 2x harmonisia opittujen välityssuhteiden avulla
+- Seuraa vaihteen vaihtumista saman vedon aikana
+- Tallentaa käytetyt vaihteet (esim. 2→3→4)
+- Laskee vedolle 0–100 % laatupisteet GPS-, mikrofoni-, kesto- ja nopeusmuutoksesta
+- Hylkää liian lyhyet / heikot satunnaiset tapahtumat
+- Jatkaa automaattista valvontaa cooldownin jälkeen ilman uutta painallusta
+- Auto-ajon käynnistys- ja lopetusherkkyys säädettävissä
+- Vedot-näkymässä näkyvät tila, vaihteet, laatupisteet ja huipputeho
 
-GitHub:
-1. korvaa `index.html`
-2. pidä `bike.png` samassa juuressa
-3. avaa `?v=16`
+## Testaus
+Katso TEST_REPORT.txt.
+
+## Huomio
+Puhelimen oikeat GPS-, mikrofoni-, IMU- ja iOS-luvat voidaan lopullisesti varmistaa vain oikealla puhelimella liikkeessä. Sisäinen logiikka, painikesidonnat, DOM-viitteet, vaihteenoppiminen, laatuarvio ja automaattisen vedon käynnistysehto on testattu ohjelmallisesti.

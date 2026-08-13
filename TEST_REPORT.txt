@@ -1,0 +1,28 @@
+VäNä AutoDyno v10 AutoRide - testiraportti
+==========================================
+
+1. JavaScript syntax check (Node v22): PASS
+2. Sisäinen self-test x5 peräkkäin: PASS x5
+   - gear-learning: PASS (2→3→4)
+   - run quality: PASS (97 %, 2→3→4 synthetic run)
+   - auto-start eligibility: PASS
+3. Kriittisten painikkeiden handler-audit: PASS
+   - ANTURIT
+   - MIKROFONI
+   - KAMERA
+   - NOLLAA ASENTO
+   - ARM AUTO
+   - AUTO AJOT
+   - MANUAALI
+   - STOP
+   - RPM KALIBROI
+   - TYHJENNÄ VEDOT
+   - NÄYTÄ VIIMEISET
+   - DELTA
+   - LUO EHDOTUS
+4. DOM id/reference audit: PASS
+   - 84 JavaScript-DOM-viitettä tarkistettu
+   - puuttuvia id-viitteitä: 0
+
+Rajoite:
+Oikeaa GPS-, IMU- ja mikrofonidataa ei voi simuloida täysin työympäristössä. Ensimmäinen ajotesti oikealla puhelimella tarvitaan anturien kohinan, mikrofonin 2T-harmonisten ja GPS-näytteenottotaajuuden hienosäätöön.
