@@ -1,146 +1,367 @@
 <!doctype html>
 <html lang="fi">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090d12"><title>VäNä AutoDyno v1</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070b">
+<title>VäNä AutoDyno v6</title>
 <style>
-:root{--bg:#070b10;--p:#101821;--p2:#0b1219;--line:#243341;--t:#f4f7fa;--m:#91a2b3;--a:#69e6ff;--g:#76efa8;--w:#ffd36b}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#10202a 0,transparent 28%),var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:1000px;margin:auto;padding:14px}.hero{padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#111c26,#0b1118);margin-bottom:12px}
-h1{margin:0;font-size:30px;letter-spacing:-1px}.sub,.note{color:var(--m);font-size:12px}.badge{display:inline-block;margin-top:8px;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:var(--a);font-size:11px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:rgba(16,24,33,.95);border:1px solid var(--line);border-radius:17px;padding:13px}.full{grid-column:1/-1}
-h2{font-size:15px;margin:0 0 10px}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{font-size:11px;color:var(--m);display:block;margin-bottom:4px}
-input,select{width:100%;background:var(--p2);color:var(--t);border:1px solid var(--line);border-radius:10px;padding:9px;font-size:15px}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.metric{background:var(--p2);border:1px solid var(--line);border-radius:12px;padding:9px}.metric span{font-size:10px;color:var(--m);display:block}.metric b{font-size:19px}
-button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:linear-gradient(135deg,var(--a),#bdf7ff);color:#061016}.alt{background:#15212c;color:var(--t);border:1px solid var(--line)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.status{font-size:12px;margin-top:8px;color:var(--m)}canvas{width:100%;height:260px;background:#091018;border:1px solid var(--line);border-radius:12px}
-.run{border:1px solid var(--line);border-radius:11px;padding:8px;margin-top:6px;font-size:12px;display:flex;justify-content:space-between;gap:8px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.metrics{grid-template-columns:1fr 1fr}.inputs{grid-template-columns:1fr}}
-</style></head>
-<body><div class="wrap">
-<div class="hero"><h1>VäNä AutoDyno <span style="font-size:13px;color:var(--a)">v5</span></h1><div class="sub">Road dyno • GPS + puhelimen liikeanturit • RPM/nopeus-kalibrointi • Arduino / Zeeltronic</div><span class="badge">Sensor fusion • GPS • IMU • gyro • mikrofoni • kamera • valittava RPM-prioriteetti</span></div>
-<div class="grid">
-<section class="card"><h2>Pyörä & veto</h2><div class="inputs">
-<div><label>Kokonaismassa pyörä + kuljettaja (kg)</label><input id="mass" type="number" value="190" step="1"></div>
-<div><label>Vaihteisto / ohjain</label><select id="ecu"><option>Arduino</option><option>Zeeltronic</option></select></div>
-<div><label>Vetovaihde</label><select id="gear"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div>
-<div><label>Kalibrointinopeus (km/h)</label><input id="calSpeed" type="number" value="60" step=".1"></div>
-<div><label>Kierrokset mittarista (rpm)</label><input id="calRpm" type="number" value="6000" step="50"></div>
-<div><label>Toinen nopeus (km/h, vapaaehtoinen)</label><input id="calSpeed2" type="number" placeholder="esim. 80"></div>
-<div><label>Toiset kierrokset (rpm)</label><input id="calRpm2" type="number" placeholder="esim. 8000"></div>
-<div><label>Record from RPM</label><input id="recordFrom" type="number" value="1500" step="100"></div>
-<div><label>Analyze from RPM</label><input id="analyzeFrom" type="number" value="4000" step="100"></div>
-<div><label>Stop RPM</label><input id="stopRpm" type="number" value="10500" step="100"></div>
-<div><label>Auto Stop -viive (s)</label><input id="stopDelay" type="number" value=".7" step=".1" min=".2" max="3"></div>
-<div><label>CdA ilmanvastus (m²)</label><input id="cda" type="number" value=".60" step=".01"></div>
-<div><label>Vierintävastus Crr</label><input id="crr" type="number" value=".015" step=".001"></div>
-<div><label>Tien kaltevuus (%)</label><input id="grade" type="number" value="0" step=".1"></div>
-<div><label>Ilman tiheys (kg/m³)</label><input id="rho" type="number" value="1.225" step=".01"></div>
-<div><label>GPS-kaltevuus</label><select id="autoGrade"><option value="on" selected>Automaattinen</option><option value="off">Käytä käsin syötettyä</option></select></div>
-<div><label>GPS tarkkuusraja (m)</label><input id="gpsAccLimit" type="number" value="25" step="1"></div>
-<div><label>RPM 1. prioriteetti</label><select id="rpmP1"><option value="speed" selected>Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera">Kamera</option></select></div>
-<div><label>RPM 2. prioriteetti</label><select id="rpmP2"><option value="speed">Nopeus / välitys</option><option value="mic" selected>Mikrofoni</option><option value="camera">Kamera</option></select></div>
-<div><label>RPM 3. prioriteetti</label><select id="rpmP3"><option value="speed">Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera" selected>Kamera</option></select></div>
-<div><label>Mikrofoni RPM min</label><input id="micRpmMin" type="number" value="1200" step="100"></div>
-<div><label>Mikrofoni RPM max</label><input id="micRpmMax" type="number" value="12000" step="100"></div>
-</div><div class="actions"><button id="cal">Kalibroi RPM</button></div><div id="calStatus" class="status">Ei kalibroitu.</div></section>
+:root{
+  --bg:#05070b;--panel:#0b1018;--panel2:#0f1722;--line:#263344;
+  --text:#f6fbff;--muted:#8fa2b6;--cyan:#00e7ff;--blue:#3f7cff;
+  --green:#39f58a;--red:#ff3f63;--yellow:#ffd447;--vio:#a866ff;
+  --orange:#ff8d42;--off:#465362;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 14% -5%,rgba(0,231,255,.17),transparent 28%),
+    radial-gradient(circle at 90% 2%,rgba(168,102,255,.14),transparent 25%),
+    radial-gradient(circle at 50% 100%,rgba(255,63,99,.09),transparent 33%),
+    linear-gradient(180deg,#05070b,#07101a 62%,#04060a);
+  min-height:100vh;
+}
+.wrap{max-width:1160px;margin:auto;padding:12px 12px 96px}
+.hero{
+  position:relative;min-height:230px;overflow:hidden;border-radius:26px;
+  border:1px solid #284357;background:
+    linear-gradient(135deg,rgba(0,231,255,.12),rgba(168,102,255,.08) 48%,rgba(255,63,99,.07)),
+    linear-gradient(180deg,#0d1520,#081019);
+  box-shadow:0 22px 70px rgba(0,0,0,.48),0 0 35px rgba(0,231,255,.07);
+}
+.hero:before{
+  content:"";position:absolute;inset:0;opacity:.11;
+  background-image:
+    linear-gradient(30deg,#ffffff12 12%,transparent 12.5%,transparent 87%,#ffffff12 87.5%,#ffffff12),
+    linear-gradient(150deg,#ffffff12 12%,transparent 12.5%,transparent 87%,#ffffff12 87.5%,#ffffff12),
+    linear-gradient(30deg,#ffffff12 12%,transparent 12.5%,transparent 87%,#ffffff12 87.5%,#ffffff12),
+    linear-gradient(150deg,#ffffff12 12%,transparent 12.5%,transparent 87%,#ffffff12 87.5%,#ffffff12);
+  background-size:38px 66px;background-position:0 0,0 0,19px 33px,19px 33px;
+}
+.brand{position:relative;z-index:2;padding:18px 18px 8px;max-width:55%}
+.brand h1{margin:0;font-size:36px;letter-spacing:-1.8px;text-shadow:0 0 26px rgba(0,231,255,.18)}
+.brand h1 small{font-size:13px;color:var(--cyan);letter-spacing:.08em}
+.brand p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.heroBike{position:absolute;right:-10px;bottom:-7px;width:min(54%,540px);filter:drop-shadow(0 16px 22px rgba(0,0,0,.6));z-index:2}
+.heroStatus{position:absolute;left:18px;bottom:17px;z-index:3;display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#08111ad9;font-size:11px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--off);box-shadow:0 0 0 2px #ffffff08}
+.dot.on{background:var(--green);box-shadow:0 0 13px rgba(57,245,138,.65)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.card{
+  background:linear-gradient(180deg,rgba(15,23,34,.97),rgba(8,14,22,.97));
+  border:1px solid var(--line);border-radius:21px;padding:14px;
+  box-shadow:0 10px 35px rgba(0,0,0,.25);
+}
+.full{grid-column:1/-1}
+h2{font-size:15px;margin:0 0 11px;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:5px;height:17px;border-radius:99px;background:linear-gradient(180deg,var(--cyan),var(--blue));box-shadow:0 0 14px rgba(0,231,255,.38)}
+.inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}
+input,select{
+  width:100%;background:#07101a;color:var(--text);border:1px solid var(--line);
+  border-radius:13px;padding:10px 11px;font-size:15px;outline:none;
+}
+input:focus,select:focus{border-color:#2a8ca0;box-shadow:0 0 0 2px rgba(0,231,255,.08)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.metric{
+  position:relative;overflow:hidden;background:linear-gradient(180deg,#08111a,#060b11);
+  border:1px solid var(--line);border-radius:15px;padding:10px;
+}
+.metric:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.6}
+.metric span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.metric b{display:inline-block;font-size:21px;margin-top:3px}
+.metric small{font-size:10px;color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.btn{
+  appearance:none;border:1px solid var(--line);border-radius:16px;padding:12px 10px;
+  font-size:12px;font-weight:800;color:var(--text);background:#111b27;
+  box-shadow:inset 0 1px 0 #ffffff0a,0 8px 18px rgba(0,0,0,.2);
+  transition:.15s transform,.15s border-color,.15s background,.15s box-shadow;
+}
+.btn:active{transform:scale(.97)}
+.btn.on{background:linear-gradient(135deg,#0c3b27,#0b2b20);border-color:#267c52;color:#b9ffd2;box-shadow:0 0 20px rgba(57,245,138,.12),inset 0 1px 0 #ffffff0b}
+.btn.off{background:#10161e;color:#8190a0;border-color:#26313d}
+.btn.arm{background:linear-gradient(135deg,#64162a,#35101a);border-color:#a72d49;color:#ffd9e1;box-shadow:0 0 22px rgba(255,63,99,.12)}
+.btn.arm.on{background:linear-gradient(135deg,#b1183e,#6c1029);border-color:#ff5e7d;color:white;box-shadow:0 0 28px rgba(255,63,99,.3)}
+.btn.blue.on{background:linear-gradient(135deg,#083b56,#0a2b45);border-color:#147da7;color:#c5f8ff;box-shadow:0 0 22px rgba(0,231,255,.14)}
+.btn.yellow.on{background:linear-gradient(135deg,#5a4509,#332803);border-color:#9b7612;color:#fff1b0}
+.btn.violet.on{background:linear-gradient(135deg,#3d1b62,#25113d);border-color:#7040a9;color:#e4d0ff}
+.sensorRow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:9px}
+.sensor{padding:9px;border-radius:13px;border:1px solid var(--line);background:#08111a;text-align:center;font-size:10px;color:var(--muted)}
+.sensor strong{display:block;font-size:11px;color:var(--text);margin-top:3px}
+.sensor.on{border-color:#267c52;background:#0b2519;color:#90efb5}
+canvas{width:100%;height:300px;background:#060c12;border:1px solid var(--line);border-radius:16px}
+.note,.status{font-size:11px;color:var(--muted);line-height:1.45}
+.status{margin-top:9px;padding:9px 10px;border-radius:12px;background:#07101a;border:1px solid var(--line)}
+.run{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:13px;padding:9px;margin-top:6px;background:#07101a;font-size:11px}
+.nav{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:max(8px,env(safe-area-inset-bottom));
+  width:min(96%,720px);z-index:20;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+  padding:7px;background:#071019e8;backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+.nav button{border:0;background:transparent;color:#7f91a3;border-radius:13px;padding:9px 4px;font-size:10px}
+.nav button.active{background:#102331;color:var(--cyan)}
+.priority{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.prio{border-radius:15px;padding:10px;border:1px solid var(--line);background:#07101a}
+.prio b{font-size:10px;color:var(--cyan);display:block;margin-bottom:5px}
+.videoWrap{display:none;margin-top:9px;border-radius:15px;overflow:hidden;border:1px solid var(--line);background:#000}
+.videoWrap.show{display:block}
+video{display:block;width:100%;max-height:230px;object-fit:cover}
+@media(max-width:780px){
+  .grid{grid-template-columns:1fr}.full{grid-column:auto}
+  .brand{max-width:64%}.heroBike{width:60%;right:-40px}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .controls{grid-template-columns:repeat(2,1fr)}
+  .sensorRow{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:520px){
+  .hero{min-height:255px}.brand{max-width:70%;padding:15px}.brand h1{font-size:30px}
+  .heroBike{width:72%;right:-80px;bottom:5px}
+  .inputs,.priority{grid-template-columns:1fr}
+  .sensorRow{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="brand">
+      <h1>VäNä AutoDyno <small>V6</small></h1>
+      <p>Road dyno • sensor fusion • RPM-prioriteetit • vetojen vertailu • AutoTune-pohja</p>
+    </div>
+    <img class="heroBike" src="bike.png" alt="">
+    <div class="heroStatus">
+      <div class="badge"><span id="heroGpsDot" class="dot"></span>GPS</div>
+      <div class="badge"><span id="heroImuDot" class="dot"></span>IMU</div>
+      <div class="badge"><span id="heroMicDot" class="dot"></span>MIC</div>
+      <div class="badge"><span id="heroCamDot" class="dot"></span>CAM</div>
+    </div>
+  </section>
 
-<section class="card"><h2>Mittaus</h2><div class="metrics">
-<div class="metric"><span>GPS</span><b id="spd">0.0</b><small> km/h</small></div>
-<div class="metric"><span>RPM</span><b id="rpm">0</b></div>
-<div class="metric"><span>G</span><b id="g">0.00</b></div>
-<div class="metric"><span>Teho*</span><b id="hp">0.0</b><small> hv</small></div>
-<div class="metric"><span>Vääntö*</span><b id="nm">0.0</b><small> Nm</small></div>
-<div class="metric"><span>GPS tarkkuus</span><b id="gpsAcc">–</b><small> m</small></div>
-<div class="metric"><span>Kaltevuus</span><b id="gradeLive">0.0</b><small> %</small></div>
-<div class="metric"><span>Gyro</span><b id="gyroLive">0</b><small> °/s</small></div>
-<div class="metric"><span>Pitch</span><b id="pitchLive">0.0</b><small> °</small></div>
-<div class="metric"><span>RPM lähde</span><b id="rpmSource">SPEED</b></div>
-<div class="metric"><span>Mic RPM</span><b id="micRpm">–</b></div>
-<div class="metric"><span>Cam RPM</span><b id="camRpm">–</b></div>
-<div class="metric"><span>RPM luottamus</span><b id="rpmConf">–</b></div>
-</div><div class="actions"><button id="permit">Salli anturit</button><button id="micBtn" class="alt">Salli mikrofoni</button><button id="camBtn" class="alt">Salli kamera</button><button id="zeroMount" class="alt">Nollaa puhelimen asento</button><button id="arm" class="alt">ARM AUTO</button><button id="start" class="alt">Manuaali</button><button id="stop" class="alt">Lopeta</button></div>
-<div id="status" class="status">Valmis. Kiinnitä puhelin tukevasti ennen mittausta.</div><p class="note">* v3 yhdistää GPS-kiihtyvyyttä ja puhelimen liikeanturista saatavaa kiihtyvyysmuutosta suodatetuksi arvioksi. Tehoon lisätään asetettu ilmanvastus, vierintävastus ja tien kaltevuus. Arvio ei korvaa oikeaa dynopenkkiä.</p><video id="camVideo" playsinline muted style="display:none;width:100%;max-height:180px;border-radius:10px;margin-top:8px"></video>
-</section>
+  <div class="grid">
+    <section class="card">
+      <h2>Pyörä & kalibrointi</h2>
+      <div class="inputs">
+        <div><label>Kokonaismassa pyörä + kuljettaja (kg)</label><input id="mass" type="number" value="190"></div>
+        <div><label>Ohjain</label><select id="ecu"><option>Arduino</option><option>Zeeltronic</option></select></div>
+        <div><label>Vetovaihde</label><select id="gear"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div><label>Kalibrointinopeus (km/h)</label><input id="calSpeed" type="number" value="60" step=".1"></div>
+        <div><label>Kierrokset mittarista (rpm)</label><input id="calRpm" type="number" value="6000" step="50"></div>
+        <div><label>Toinen nopeus (km/h)</label><input id="calSpeed2" type="number" placeholder="esim. 80"></div>
+        <div><label>Toiset kierrokset</label><input id="calRpm2" type="number" placeholder="esim. 8000"></div>
+        <div><label>Record from RPM</label><input id="recordFrom" type="number" value="1500" step="100"></div>
+        <div><label>Analyze from RPM</label><input id="analyzeFrom" type="number" value="4000" step="100"></div>
+        <div><label>Stop RPM</label><input id="stopRpm" type="number" value="10500" step="100"></div>
+        <div><label>Auto Stop -viive (s)</label><input id="stopDelay" type="number" value=".7" step=".1"></div>
+        <div><label>CdA (m²)</label><input id="cda" type="number" value=".60" step=".01"></div>
+        <div><label>Vierintävastus Crr</label><input id="crr" type="number" value=".015" step=".001"></div>
+        <div><label>Tien kaltevuus käsin (%)</label><input id="grade" type="number" value="0" step=".1"></div>
+        <div><label>Ilman tiheys (kg/m³)</label><input id="rho" type="number" value="1.225" step=".01"></div>
+        <div><label>GPS-kaltevuus</label><select id="autoGrade"><option value="on" selected>Automaattinen</option><option value="off">Käsin</option></select></div>
+        <div><label>GPS tarkkuusraja (m)</label><input id="gpsAccLimit" type="number" value="25"></div>
+      </div>
+      <div class="controls">
+        <button id="calBtn" class="btn blue off">RPM KALIBROI</button>
+        <button id="zeroMount" class="btn yellow off">NOLLAA ASENTO</button>
+      </div>
+      <div id="calStatus" class="status">RPM ei kalibroitu.</div>
+    </section>
 
-<section class="card full"><h2>Veto</h2><canvas id="chart" width="900" height="300"></canvas><div class="note">Käyrä: arvioitu teho (hv) suhteessa RPM:ään. Auto Tune ei muuta karttaa kesken vedon.</div></section>
-<section class="card"><h2>Tallennetut vedot</h2><div id="runs"></div><div class="actions"><button id="clear" class="alt">Tyhjennä vedot</button></div></section>
-<section class="card full"><h2>Vetojen päällekkäisvertailu</h2>
-<div class="actions"><button id="compareBtn" class="alt">Näytä viimeiset vedot</button><button id="deltaBtn" class="alt">Delta viimeisin vs edellinen</button></div>
-<canvas id="compareChart" width="900" height="300"></canvas>
-<div id="deltaText" class="note">Valitse vertailu. Käyrät piirretään samalle RPM-akselille.</div></section>
-<section class="card"><h2>Auto Tune — pohja</h2><div class="inputs"><div><label>Suurin muutos / veto (°)</label><input id="maxStep" type="number" value=".5" step=".1"></div><div><label>RPM-askel</label><input id="rpmStep" type="number" value="500" step="100"></div></div>
-<div class="actions"><button id="tuneSuggest" class="alt">Luo Auto Tune -ehdotus</button></div>
-<div id="tuneText" class="note" style="margin-top:8px">Auto Tune vertaa kahta viimeistä vetoa RPM-alueittain. v3 tekee vain ehdotuksen; se ei kirjoita ohjaimeen automaattisesti.</div></section>
-</div></div>
+    <section class="card">
+      <h2>Live mittaus</h2>
+      <div class="metrics">
+        <div class="metric"><span>Nopeus</span><b id="spd">0.0</b><small> km/h</small></div>
+        <div class="metric"><span>RPM</span><b id="rpm">0</b></div>
+        <div class="metric"><span>G</span><b id="g">0.00</b></div>
+        <div class="metric"><span>Teho</span><b id="hp">0.0</b><small> hv</small></div>
+        <div class="metric"><span>Vääntö</span><b id="nm">0.0</b><small> Nm</small></div>
+        <div class="metric"><span>RPM lähde</span><b id="rpmSource">SPEED</b></div>
+        <div class="metric"><span>Mic RPM</span><b id="micRpm">–</b></div>
+        <div class="metric"><span>Cam RPM</span><b id="camRpm">–</b></div>
+      </div>
+
+      <div class="controls">
+        <button id="sensorBtn" class="btn blue off">ANTURIT</button>
+        <button id="micBtn" class="btn violet off">MIKROFONI</button>
+        <button id="camBtn" class="btn yellow off">KAMERA</button>
+        <button id="armBtn" class="btn arm off">ARM AUTO</button>
+        <button id="manualBtn" class="btn off">MANUAALI</button>
+        <button id="stopBtn" class="btn arm">STOP</button>
+      </div>
+
+      <div class="sensorRow">
+        <div id="sGps" class="sensor"><span>GPS</span><strong id="gpsAcc">– m</strong></div>
+        <div id="sImu" class="sensor"><span>IMU</span><strong id="imuLive">0.00</strong></div>
+        <div id="sGyro" class="sensor"><span>GYRO</span><strong id="gyroLive">0</strong></div>
+        <div id="sGrade" class="sensor"><span>KALTEVUUS</span><strong id="gradeLive">0.0%</strong></div>
+        <div id="sConf" class="sensor"><span>RPM CONF</span><strong id="rpmConf">–</strong></div>
+      </div>
+      <div id="status" class="status">Valmis. Kiinnitä puhelin tukevasti ennen vetoa.</div>
+      <div id="videoWrap" class="videoWrap"><video id="camVideo" playsinline muted></video></div>
+    </section>
+
+    <section class="card full">
+      <h2>RPM-lähteiden prioriteetti</h2>
+      <div class="priority">
+        <div class="prio"><b>1. PRIORITEETTI</b><select id="rpmP1"><option value="speed" selected>Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera">Kamera</option></select></div>
+        <div class="prio"><b>2. PRIORITEETTI</b><select id="rpmP2"><option value="speed">Nopeus / välitys</option><option value="mic" selected>Mikrofoni</option><option value="camera">Kamera</option></select></div>
+        <div class="prio"><b>3. PRIORITEETTI</b><select id="rpmP3"><option value="speed">Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera" selected>Kamera</option></select></div>
+      </div>
+      <div class="inputs" style="margin-top:8px">
+        <div><label>Mikrofoni RPM min</label><input id="micRpmMin" type="number" value="1200" step="100"></div>
+        <div><label>Mikrofoni RPM max</label><input id="micRpmMax" type="number" value="12000" step="100"></div>
+      </div>
+    </section>
+
+    <section class="card full">
+      <h2>Dynokäyrä</h2>
+      <canvas id="chart" width="1000" height="320"></canvas>
+      <div class="note">V6 näyttää vedon tehoarvion RPM:n mukaan. Varsinaiseen säätöön käytä saman tien, saman vaihteen ja mahdollisimman saman olosuhteen A/B-vetoja.</div>
+    </section>
+
+    <section class="card">
+      <h2>Tallennetut vedot</h2>
+      <div id="runs"></div>
+      <div class="controls"><button id="clearBtn" class="btn off">TYHJENNÄ VEDOT</button></div>
+    </section>
+
+    <section class="card">
+      <h2>AutoTune-pohja</h2>
+      <div class="inputs">
+        <div><label>Suurin muutos / veto (°)</label><input id="maxStep" type="number" value=".5" step=".1"></div>
+        <div><label>RPM-askel</label><input id="rpmStep" type="number" value="500" step="100"></div>
+      </div>
+      <div class="controls"><button id="tuneBtn" class="btn violet off">LUO EHDOTUS</button></div>
+      <div id="tuneText" class="status">AutoTune ei muuta karttaa kesken vedon.</div>
+    </section>
+
+    <section class="card full">
+      <h2>Vetojen päällekkäisvertailu</h2>
+      <div class="controls">
+        <button id="compareBtn" class="btn blue off">NÄYTÄ VIIMEISET</button>
+        <button id="deltaBtn" class="btn yellow off">DELTA</button>
+      </div>
+      <canvas id="compareChart" width="1000" height="320"></canvas>
+      <div id="deltaText" class="note">Viimeiset 5 vetoa voidaan näyttää samalla RPM-akselilla.</div>
+    </section>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="active">MITTAUS</button><button>VEDOT</button><button>ANALYYSI</button><button>AUTOTUNE</button><button>ASETUKSET</button>
+</nav>
+
 <script>
-const $=x=>document.getElementById(x); let rpmPerKmh=0,recording=false,armed=false,run=[],prebuffer=[],lastV=0,lastT=0,imuA=0;
-let accelEndedAt=0;
-function saveSettings(){localStorage.setItem("vanaCfg",JSON.stringify({mass:$("mass").value,ecu:$("ecu").value,gear:$("gear").value,calSpeed:$("calSpeed").value,calRpm:$("calRpm").value,rpmPerKmh}))}
-function loadSettings(){try{let c=JSON.parse(localStorage.getItem("vanaCfg"));if(!c)return;Object.keys(c).forEach(k=>{if($(k))$(k).value=c[k]});rpmPerKmh=c.rpmPerKmh||0;if(rpmPerKmh)$("calStatus").textContent="Kalibrointi "+rpmPerKmh.toFixed(2)+" rpm / km/h"}catch{}}
-$("cal").onclick=()=>{let s=+$("calSpeed").value,r=+$("calRpm").value,s2=+$("calSpeed2").value,r2=+$("calRpm2").value;if(s<=0||r<=0)return;$("calStatus").textContent="Tarkista arvot.";let a=r/s;if(s2>0&&r2>0){let b=r2/s2;rpmPerKmh=(a+b)/2;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h • pisteiden ero ${Math.abs(a-b).toFixed(2)}`}else{rpmPerKmh=a;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h`}saveSettings()};
-let orient={alpha:null,beta:null,gamma:null}, rot={alpha:0,beta:0,gamma:0};
+const $=id=>document.getElementById(id);
+let rpmPerKmh=0,recording=false,armed=false,run=[],prebuffer=[],lastV=0,lastT=0,imuA=0,filtA=0,lastImu=0,accelEndedAt=0;
+let orient={alpha:null,beta:null,gamma:null},rot={alpha:0,beta:0,gamma:0},mountPitchZero=0;
 let gpsMeta={accuracy:null,altitude:null,altitudeAccuracy:null,heading:null,speed:null,lat:null,lon:null};
-let lastAltPoint=null, autoGradePct=0, mountPitchZero=0;
-let micRpmValue=NaN, micConfidence=0, cameraRpmValue=NaN, cameraConfidence=0;
-let audioCtx=null,audioAnalyser=null,audioBuf=null,audioTimer=null,cameraStream=null;
+let lastAltPoint=null,autoGradePct=0;
+let micRpmValue=NaN,micConfidence=0,cameraRpmValue=NaN,cameraConfidence=0;
+let audioCtx=null,audioAnalyser=null,audioBuf=null,audioTimer=null,cameraStream=null,gpsWatchId=null;
 
+function setBtn(btn,on){
+  btn.classList.toggle("on",!!on);btn.classList.toggle("off",!on);
+}
+function setSensor(id,on){$(id).classList.toggle("on",!!on)}
+function setHero(dot,on){$(dot).classList.toggle("on",!!on)}
+
+function saveCfg(){
+  let ids=["mass","ecu","gear","calSpeed","calRpm","recordFrom","analyzeFrom","stopRpm","stopDelay","cda","crr","grade","rho","autoGrade","gpsAccLimit","rpmP1","rpmP2","rpmP3","micRpmMin","micRpmMax"];
+  let o={rpmPerKmh};ids.forEach(id=>o[id]=$(id).value);localStorage.setItem("vanaV6cfg",JSON.stringify(o));
+}
+function loadCfg(){
+  try{let o=JSON.parse(localStorage.getItem("vanaV6cfg"));if(!o)return;Object.entries(o).forEach(([k,v])=>{if($(k))$(k).value=v});rpmPerKmh=o.rpmPerKmh||0;
+  if(rpmPerKmh)$("calStatus").textContent="Kalibroitu "+rpmPerKmh.toFixed(2)+" rpm / km/h"}catch{}
+}
+document.querySelectorAll("input,select").forEach(el=>el.addEventListener("change",saveCfg));
+
+$("calBtn").onclick=()=>{
+  let s=+$("calSpeed").value,r=+$("calRpm").value,s2=+$("calSpeed2").value,r2=+$("calRpm2").value;
+  if(!(s>0&&r>0)){ $("calStatus").textContent="Tarkista nopeus ja RPM.";return}
+  let a=r/s;
+  if(s2>0&&r2>0){let b=r2/s2;rpmPerKmh=(a+b)/2;$("calStatus").textContent=`${rpmPerKmh.toFixed(2)} rpm/km/h • pisteiden ero ${Math.abs(a-b).toFixed(2)}`}
+  else{rpmPerKmh=a;$("calStatus").textContent=`${rpmPerKmh.toFixed(2)} rpm/km/h`}
+  setBtn($("calBtn"),true);saveCfg();
+};
 
 function motionHandler(e){
-  let a=e.acceleration;
-  if(a){
-    // Gravity-free acceleration magnitude; orientation-independent fallback.
-    let vals=[a.x||0,a.y||0,a.z||0];
+  if(e.acceleration){
+    let a=e.acceleration,vals=[a.x||0,a.y||0,a.z||0];
     imuA=Math.sqrt(vals[0]*vals[0]+vals[1]*vals[1]+vals[2]*vals[2]);
   }else if(e.accelerationIncludingGravity){
-    let a2=e.accelerationIncludingGravity,vals=[a2.x||0,a2.y||0,a2.z||0];
+    let a=e.accelerationIncludingGravity,vals=[a.x||0,a.y||0,a.z||0];
     imuA=Math.abs(Math.sqrt(vals[0]*vals[0]+vals[1]*vals[1]+vals[2]*vals[2])-9.80665);
   }
+  $("imuLive").textContent=imuA.toFixed(2);
+  setSensor("sImu",true);setHero("heroImuDot",true);
   if(e.rotationRate){
-    rot.alpha=e.rotationRate.alpha||0; rot.beta=e.rotationRate.beta||0; rot.gamma=e.rotationRate.gamma||0;
-    let gm=Math.sqrt(rot.alpha*rot.alpha+rot.beta*rot.beta+rot.gamma*rot.gamma);
-    $("gyroLive").textContent=Math.round(gm);
+    rot.alpha=e.rotationRate.alpha||0;rot.beta=e.rotationRate.beta||0;rot.gamma=e.rotationRate.gamma||0;
+    $("gyroLive").textContent=Math.round(Math.sqrt(rot.alpha**2+rot.beta**2+rot.gamma**2));
+    setSensor("sGyro",true);
   }
 }
-function orientHandler(e){
-  orient.alpha=e.alpha; orient.beta=e.beta; orient.gamma=e.gamma;
-  let p=(isFinite(e.beta)?e.beta:0)-mountPitchZero;
-  $("pitchLive").textContent=p.toFixed(1);
-}
+function orientHandler(e){orient.alpha=e.alpha;orient.beta=e.beta;orient.gamma=e.gamma}
 
-function estimatePitchAutoCorrelation(buf, sampleRate){
-  let size=buf.length, rms=0;
-  for(let i=0;i<size;i++)rms+=buf[i]*buf[i];
-  rms=Math.sqrt(rms/size);
-  if(rms<0.01)return {hz:NaN,conf:0};
-  let minRpm=+$("micRpmMin").value||1200,maxRpm=+$("micRpmMax").value||12000;
-  let minLag=Math.max(2,Math.floor(sampleRate/(maxRpm/60)));
-  let maxLag=Math.min(size-2,Math.ceil(sampleRate/(minRpm/60)));
-  let bestLag=0,best=-1;
-  for(let lag=minLag;lag<=maxLag;lag++){
-    let corr=0,e1=0,e2=0;
-    for(let i=0;i<size-lag;i++){let a=buf[i],b=buf[i+lag];corr+=a*b;e1+=a*a;e2+=b*b}
-    let norm=corr/Math.sqrt(Math.max(1e-12,e1*e2));
-    if(norm>best){best=norm;bestLag=lag}
+async function startSensors(){
+  try{
+    if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
+      let p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("Liikeanturit estetty");
+    }
+    if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
+      let p=await DeviceOrientationEvent.requestPermission();if(p!=="granted")throw new Error("Suunta-anturit estetty");
+    }
+    window.removeEventListener("devicemotion",motionHandler);window.addEventListener("devicemotion",motionHandler);
+    window.removeEventListener("deviceorientation",orientHandler);window.addEventListener("deviceorientation",orientHandler);
+    setBtn($("sensorBtn"),true);$("status").textContent="Anturit käytössä. GPS käynnistyy.";
+  }catch(err){$("status").textContent="Anturit: "+(err.message||"lupaa ei saatu")}
+  if(navigator.geolocation && gpsWatchId===null){
+    gpsWatchId=navigator.geolocation.watchPosition(pos=>{
+      let c=pos.coords,kmh=Math.max(0,(c.speed||0)*3.6);
+      gpsMeta={accuracy:c.accuracy,altitude:c.altitude,altitudeAccuracy:c.altitudeAccuracy,heading:c.heading,speed:c.speed,lat:c.latitude,lon:c.longitude};
+      $("gpsAcc").textContent=isFinite(c.accuracy)?c.accuracy.toFixed(0)+" m":"–";
+      setSensor("sGps",true);setHero("heroGpsDot",true);
+      if(isFinite(c.altitude)&&isFinite(c.latitude)&&isFinite(c.longitude)){
+        if(lastAltPoint){
+          const R=6371000,rad=Math.PI/180,dlat=(c.latitude-lastAltPoint.lat)*rad,dlon=(c.longitude-lastAltPoint.lon)*rad;
+          const aa=Math.sin(dlat/2)**2+Math.cos(lastAltPoint.lat*rad)*Math.cos(c.latitude*rad)*Math.sin(dlon/2)**2;
+          const dist=2*R*Math.asin(Math.sqrt(aa));
+          if(dist>=15&&(c.accuracy||999)<=(+$("gpsAccLimit").value||25)){
+            let raw=(c.altitude-lastAltPoint.alt)/dist*100;if(Math.abs(raw)<20)autoGradePct=.8*autoGradePct+.2*raw;
+            lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+          }else if(dist>=40)lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+        }else lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+      }
+      $("gradeLive").textContent=autoGradePct.toFixed(1)+"%";setSensor("sGrade",true);update(kmh);
+    },err=>$("status").textContent="GPS: "+err.message,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   }
-  if(bestLag<=0||best<0.18)return {hz:NaN,conf:Math.max(0,best)};
-  return {hz:sampleRate/bestLag,conf:Math.min(1,best)};
+}
+$("sensorBtn").onclick=startSensors;
+$("zeroMount").onclick=()=>{mountPitchZero=isFinite(orient.beta)?orient.beta:0;setBtn($("zeroMount"),true);$("status").textContent="Puhelimen asento nollattu."};
+
+function estimatePitch(buf,sampleRate){
+  let n=buf.length,rms=0;for(let i=0;i<n;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/n);if(rms<.01)return{hz:NaN,conf:0};
+  let minRpm=+$("micRpmMin").value||1200,maxRpm=+$("micRpmMax").value||12000;
+  let minLag=Math.max(2,Math.floor(sampleRate/(maxRpm/60))),maxLag=Math.min(n-2,Math.ceil(sampleRate/(minRpm/60)));
+  let best=-1,bestLag=0;
+  for(let lag=minLag;lag<=maxLag;lag++){let corr=0,e1=0,e2=0;for(let i=0;i<n-lag;i++){let a=buf[i],b=buf[i+lag];corr+=a*b;e1+=a*a;e2+=b*b}
+    let norm=corr/Math.sqrt(Math.max(1e-12,e1*e2));if(norm>best){best=norm;bestLag=lag}}
+  if(bestLag<=0||best<.18)return{hz:NaN,conf:Math.max(0,best)};return{hz:sampleRate/bestLag,conf:Math.min(1,best)}
 }
 async function startMic(){
   try{
     let stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    let src=audioCtx.createMediaStreamSource(stream);
-    audioAnalyser=audioCtx.createAnalyser();audioAnalyser.fftSize=4096;audioAnalyser.smoothingTimeConstant=.2;
-    src.connect(audioAnalyser);audioBuf=new Float32Array(audioAnalyser.fftSize);
-    if(audioTimer)clearInterval(audioTimer);
-    audioTimer=setInterval(()=>{
-      audioAnalyser.getFloatTimeDomainData(audioBuf);
-      let est=estimatePitchAutoCorrelation(audioBuf,audioCtx.sampleRate);
-      micRpmValue=isFinite(est.hz)?est.hz*60:NaN;micConfidence=est.conf||0;
-      $("micRpm").textContent=isFinite(micRpmValue)?Math.round(micRpmValue):"–";
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();let src=audioCtx.createMediaStreamSource(stream);
+    audioAnalyser=audioCtx.createAnalyser();audioAnalyser.fftSize=4096;src.connect(audioAnalyser);audioBuf=new Float32Array(audioAnalyser.fftSize);
+    clearInterval(audioTimer);audioTimer=setInterval(()=>{audioAnalyser.getFloatTimeDomainData(audioBuf);let e=estimatePitch(audioBuf,audioCtx.sampleRate);
+      micRpmValue=isFinite(e.hz)?e.hz*60:NaN;micConfidence=e.conf||0;$("micRpm").textContent=isFinite(micRpmValue)?Math.round(micRpmValue):"–";
     },120);
-    $("status").textContent="Mikrofoni RPM käytössä.";
+    setBtn($("micBtn"),true);setHero("heroMicDot",true);$("status").textContent="Mikrofoni RPM käytössä.";
   }catch(err){$("status").textContent="Mikrofoni: "+(err.message||"lupaa ei saatu")}
 }
 $("micBtn").onclick=startMic;
@@ -148,156 +369,90 @@ $("micBtn").onclick=startMic;
 async function startCamera(){
   try{
     cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
-    let v=$("camVideo");v.srcObject=cameraStream;await v.play();v.style.display="block";
-    cameraRpmValue=NaN;cameraConfidence=0;
-    $("camRpm").textContent="CAL";
-    $("status").textContent="Kamera sallittu. Viisari-RPM vaatii vielä mittarikalibroinnin; jos sitä ei ole, AutoDyno ohittaa kameran.";
+    let v=$("camVideo");v.srcObject=cameraStream;await v.play();$("videoWrap").classList.add("show");
+    setBtn($("camBtn"),true);setHero("heroCamDot",true);$("camRpm").textContent="CAL";
+    $("status").textContent="Kamera käytössä. Viisari-RPM tarvitsee myöhemmin mittarikalibroinnin.";
   }catch(err){$("status").textContent="Kamera: "+(err.message||"lupaa ei saatu")}
 }
 $("camBtn").onclick=startCamera;
 
 function chooseRpm(speedRpm){
-  const values={
-    speed:{rpm:speedRpm,conf:(rpmPerKmh>0?0.95:0),name:"SPEED"},
-    mic:{rpm:micRpmValue,conf:micConfidence,name:"MIC"},
-    camera:{rpm:cameraRpmValue,conf:cameraConfidence,name:"CAM"}
-  };
-  let order=[$("rpmP1").value,$("rpmP2").value,$("rpmP3").value];
-  let picked=null;
-  for(let key of order){
-    let v=values[key];
-    if(v && isFinite(v.rpm) && v.rpm>0 && v.conf>=0.18){picked=v;break}
+  const vals={speed:{rpm:speedRpm,conf:rpmPerKmh>0?.95:0,name:"SPEED"},mic:{rpm:micRpmValue,conf:micConfidence,name:"MIC"},camera:{rpm:cameraRpmValue,conf:cameraConfidence,name:"CAM"}};
+  let order=[$("rpmP1").value,$("rpmP2").value,$("rpmP3").value],pick=null;
+  for(let k of order){let v=vals[k];if(v&&isFinite(v.rpm)&&v.rpm>0&&v.conf>=.18){pick=v;break}}
+  if(!pick)pick=vals.speed;
+  if(isFinite(speedRpm)&&speedRpm>0&&isFinite(micRpmValue)&&micRpmValue>0&&pick.name==="MIC"){
+    let d=Math.abs(micRpmValue-speedRpm)/Math.max(speedRpm,1);if(d>.18)pick={...pick,conf:pick.conf*.45};
   }
-  if(!picked)picked=values.speed;
-  // Cross-check mic against speed when both exist; large disagreement lowers confidence.
-  if(isFinite(speedRpm)&&speedRpm>0&&isFinite(micRpmValue)&&micRpmValue>0){
-    let diff=Math.abs(micRpmValue-speedRpm)/Math.max(speedRpm,1);
-    if(picked.name==="MIC" && diff>.18)picked={...picked,conf:picked.conf*.45};
-  }
-  $("rpmSource").textContent=picked.name;
-  $("rpmConf").textContent=Math.round((picked.conf||0)*100)+"%";
-  return picked.rpm||0;
+  $("rpmSource").textContent=pick.name;$("rpmConf").textContent=Math.round((pick.conf||0)*100)+"%";
+  setSensor("sConf",(pick.conf||0)>.6);return pick.rpm||0;
 }
-async function askSensorPermission(){
-  try{
-    if(typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function"){
-      let p=await DeviceMotionEvent.requestPermission(); if(p!=="granted")throw new Error("Liikeanturit estetty");
-    }
-    if(typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function"){
-      let p=await DeviceOrientationEvent.requestPermission(); if(p!=="granted")throw new Error("Suunta-anturit estetty");
-    }
-    window.removeEventListener("devicemotion",motionHandler);
-    window.removeEventListener("deviceorientation",orientHandler);
-    window.addEventListener("devicemotion",motionHandler);
-    window.addEventListener("deviceorientation",orientHandler);
-    $("status").textContent="Liike-, gyro- ja orientaatioanturit sallittu. GPS käynnistyy.";
-  }catch(err){
-    $("status").textContent="Anturilupa: "+(err.message||"ei saatu");
-  }
-  if(navigator.geolocation){
-    navigator.geolocation.watchPosition(pos=>{
-      let c=pos.coords, kmh=Math.max(0,(c.speed||0)*3.6);
-      gpsMeta={accuracy:c.accuracy,altitude:c.altitude,altitudeAccuracy:c.altitudeAccuracy,heading:c.heading,speed:c.speed,lat:c.latitude,lon:c.longitude};
-      $("gpsAcc").textContent=isFinite(c.accuracy)?c.accuracy.toFixed(0):"–";
-      // Estimate road grade from GPS altitude only over enough horizontal travel.
-      if(isFinite(c.altitude) && isFinite(c.latitude) && isFinite(c.longitude)){
-        if(lastAltPoint){
-          const R=6371000, rad=Math.PI/180;
-          const dlat=(c.latitude-lastAltPoint.lat)*rad, dlon=(c.longitude-lastAltPoint.lon)*rad;
-          const a=Math.sin(dlat/2)**2+Math.cos(lastAltPoint.lat*rad)*Math.cos(c.latitude*rad)*Math.sin(dlon/2)**2;
-          const dist=2*R*Math.asin(Math.sqrt(a));
-          if(dist>=15 && (c.accuracy||999)<= (+$("gpsAccLimit").value||25)){
-            let raw=(c.altitude-lastAltPoint.alt)/dist*100;
-            if(Math.abs(raw)<20) autoGradePct=.8*autoGradePct+.2*raw;
-            lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
-          }else if(dist>=40){
-            lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
-          }
-        }else lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
-      }
-      $("gradeLive").textContent=autoGradePct.toFixed(1);
-      update(kmh);
-    },err=>$("status").textContent="GPS: "+err.message,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
-  }
-}
-$("permit").onclick=askSensorPermission;
+
 function update(kmh){
- let now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0;
- let gpsA=dt>.15?(v-lastV)/dt:0; lastV=v; lastT=now;
- let speedRpm=kmh*rpmPerKmh; let rpm=chooseRpm(speedRpm);
- // GPS carries absolute longitudinal acceleration. IMU is used conservatively as a short-term stabilizer
- // because browser orientation relative to the bike can vary.
- let imuDelta=(imuA-lastImu); lastImu=imuA;
- let fused=isFinite(gpsA)?gpsA:0;
- if(dt>0 && isFinite(imuDelta)) fused=0.82*fused+0.18*(imuDelta/Math.max(dt,.05));
- filtA=0.72*filtA+0.28*fused;
- let mass=+$("mass").value||0, rho=+$("rho").value||1.225,cda=+$("cda").value||0,crr=+$("crr").value||0;
- let gradePct=$("autoGrade").value==="on"?autoGradePct:(+$("grade").value||0);
- let grade=gradePct/100;
- let Facc=mass*filtA, Faero=.5*rho*cda*v*v, Froll=mass*9.80665*crr, Fgrade=mass*9.80665*grade;
- let watts=Math.max(0,(Facc+Faero+Froll+Fgrade)*v);
- let hp=watts/735.49875;
- let nm=rpm>200 ? watts/(rpm*2*Math.PI/60) : 0;
- $("spd").textContent=kmh.toFixed(1); $("rpm").textContent=Math.round(rpm); $("hp").textContent=hp.toFixed(1); $("nm").textContent=nm.toFixed(1); $("g").textContent=(filtA/9.80665).toFixed(2);
- let sample={
-   t:Date.now(),kmh,rpm,hp,nm,a:filtA,g:filtA/9.80665,imuA,
-   gpsAccuracy:gpsMeta.accuracy,altitude:gpsMeta.altitude,altitudeAccuracy:gpsMeta.altitudeAccuracy,
-   heading:gpsMeta.heading,lat:gpsMeta.lat,lon:gpsMeta.lon,
-   pitch:orient.beta,roll:orient.gamma,yaw:orient.alpha,
-   gyroAlpha:rot.alpha,gyroBeta:rot.beta,gyroGamma:rot.gamma,
-   gradePct,
-   speedRpm,micRpm:micRpmValue,micConfidence,cameraRpm:cameraRpmValue,cameraConfidence,rpmSource:$("rpmSource").textContent
- };
- prebuffer.push(sample); while(prebuffer.length>0 && sample.t-prebuffer[0].t>5000)prebuffer.shift();
+  let now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0,gpsA=dt>.15?(v-lastV)/dt:0;lastV=v;lastT=now;
+  let imuDelta=imuA-lastImu;lastImu=imuA;let fused=isFinite(gpsA)?gpsA:0;if(dt>0&&isFinite(imuDelta))fused=.82*fused+.18*(imuDelta/Math.max(dt,.05));
+  filtA=.72*filtA+.28*fused;
+  let speedRpm=kmh*rpmPerKmh,rpm=chooseRpm(speedRpm);
+  let mass=+$("mass").value||0,rho=+$("rho").value||1.225,cda=+$("cda").value||0,crr=+$("crr").value||0;
+  let gradePct=$("autoGrade").value==="on"?autoGradePct:(+$("grade").value||0),grade=gradePct/100;
+  let Fa=.5*rho*cda*v*v,Frr=mass*9.80665*crr,Fgr=mass*9.80665*grade,Facc=mass*filtA;
+  let watts=Math.max(0,(Facc+Fa+Frr+Fgr)*v),hp=watts/735.49875,nm=rpm>200?watts/(rpm*2*Math.PI/60):0;
+  $("spd").textContent=kmh.toFixed(1);$("rpm").textContent=Math.round(rpm);$("g").textContent=(filtA/9.80665).toFixed(2);$("hp").textContent=hp.toFixed(1);$("nm").textContent=nm.toFixed(1);
+  let sample={t:Date.now(),kmh,rpm,hp,nm,a:filtA,g:filtA/9.80665,imuA,gpsAccuracy:gpsMeta.accuracy,altitude:gpsMeta.altitude,heading:gpsMeta.heading,lat:gpsMeta.lat,lon:gpsMeta.lon,gradePct,speedRpm,micRpm:micRpmValue,micConfidence,rpmSource:$("rpmSource").textContent};
+  prebuffer.push(sample);while(prebuffer.length&&sample.t-prebuffer[0].t>5000)prebuffer.shift();
 
- if(armed && !recording && rpm >= (+$("recordFrom").value||1500) && filtA>0.15){
-   recording=true; run=prebuffer.filter(x=>x.rpm>= (+$("recordFrom").value||1500));
-   $("status").textContent="AUTO VETO KÄYNNISSÄ";
- }
- if(recording){
-   run.push(sample);
-   let stopR=+$("stopRpm").value||10500, delay=(+$("stopDelay").value||.7)*1000;
-   if(filtA<=0.03){ if(!accelEndedAt)accelEndedAt=sample.t; } else accelEndedAt=0;
-   if(rpm>=stopR || (accelEndedAt && sample.t-accelEndedAt>=delay)) finishRun("Automaattinen lopetus");
-   draw(run);
- }
-}$("zeroMount").onclick=()=>{mountPitchZero=isFinite(orient.beta)?orient.beta:0;$("status").textContent="Puhelimen asento nollattu tähän kiinnitysasentoon.";};
-$("arm").onclick=()=>{armed=true;recording=false;run=[];prebuffer=[];accelEndedAt=0;$("status").textContent="ARMED • odottaa "+$("recordFrom").value+" rpm ja kiihtyvyyttä"};
-$("start").onclick=()=>{armed=false;run=[];recording=true;accelEndedAt=0;$("status").textContent="MANUAALINEN VETO KÄYNNISSÄ";draw(run)};
-function finishRun(reason){
- if(!recording)return; recording=false; armed=false;
- let runs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");
- runs.unshift({date:new Date().toISOString(),ecu:$("ecu").value,gear:$("gear").value,ratio:rpmPerKmh,recordFrom:+$("recordFrom").value,analyzeFrom:+$("analyzeFrom").value,stopRpm:+$("stopRpm").value,data:run});
- runs=runs.slice(0,10); localStorage.setItem("vanaRuns",JSON.stringify(runs));
- $("status").textContent=reason+" • veto tallennettu • "+run.length+" näytettä"; renderRuns();
+  if(armed&&!recording&&rpm>=(+$("recordFrom").value||1500)&&filtA>.15){
+    recording=true;run=prebuffer.filter(x=>x.rpm>=(+$("recordFrom").value||1500));$("status").textContent="AUTO VETO KÄYNNISSÄ";setBtn($("armBtn"),true);
+  }
+  if(recording){
+    run.push(sample);let stopR=+$("stopRpm").value||10500,delay=(+$("stopDelay").value||.7)*1000;
+    if(filtA<=.03){if(!accelEndedAt)accelEndedAt=sample.t}else accelEndedAt=0;
+    if(rpm>=stopR||(accelEndedAt&&sample.t-accelEndedAt>=delay))finishRun("Automaattinen lopetus");
+    draw(run,$("chart"));
+  }
 }
-$("stop").onclick=()=>finishRun("STOP");
-function draw(data){let c=$("chart"),x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.strokeStyle="#243341";x.lineWidth=1;for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}if(data.length<2)return;let minR=Math.min(...data.map(d=>d.rpm)),maxR=Math.max(...data.map(d=>d.rpm)),maxH=Math.max(1,...data.map(d=>d.hp));x.strokeStyle="#69e6ff";x.lineWidth=3;x.beginPath();data.forEach((d,i)=>{let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-15);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
-function renderRuns(){let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");$("runs").innerHTML=rs.length?rs.map((r,i)=>`<div class="run"><span>${new Date(r.date).toLocaleString("fi-FI")} • ${r.ecu} • ${r.gear}. vaihde</span><b>${r.data.length} näytettä</b></div>`).join(""):'<div class="note">Ei tallennettuja vetoja.</div>'}
+$("armBtn").onclick=()=>{armed=true;recording=false;run=[];prebuffer=[];accelEndedAt=0;setBtn($("armBtn"),true);$("status").textContent="ARMED • odottaa "+$("recordFrom").value+" rpm ja kiihtyvyyttä"};
+$("manualBtn").onclick=()=>{armed=false;recording=true;run=[];accelEndedAt=0;setBtn($("manualBtn"),true);$("status").textContent="MANUAALINEN VETO KÄYNNISSÄ"};
+$("stopBtn").onclick=()=>finishRun("STOP");
 
-function drawCompare(){
- let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]").slice(0,5), c=$("compareChart"),x=c.getContext("2d"),w=c.width,h=c.height;
- x.clearRect(0,0,w,h); x.strokeStyle="#243341"; for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}
- if(!rs.length)return;
- let all=rs.flatMap(r=>r.data.filter(d=>d.rpm>0)), minR=Math.min(...all.map(d=>d.rpm)),maxR=Math.max(...all.map(d=>d.rpm)),maxH=Math.max(1,...all.map(d=>d.hp));
- let strokes=["#69e6ff","#76efa8","#ffd36b","#d79cff","#ff8f8f"];
- rs.forEach((r,j)=>{x.strokeStyle=strokes[j];x.lineWidth=2.5;x.beginPath();let first=true;r.data.forEach(d=>{if(d.rpm<=0)return;let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-15);first?(x.moveTo(px,py),first=false):x.lineTo(px,py)});x.stroke()});
+function finishRun(reason){
+  if(!recording)return;recording=false;armed=false;setBtn($("armBtn"),false);setBtn($("manualBtn"),false);
+  let runs=JSON.parse(localStorage.getItem("vanaV6runs")||"[]");
+  runs.unshift({date:new Date().toISOString(),ecu:$("ecu").value,gear:$("gear").value,ratio:rpmPerKmh,data:run});
+  localStorage.setItem("vanaV6runs",JSON.stringify(runs.slice(0,10)));$("status").textContent=reason+" • veto tallennettu • "+run.length+" näytettä";renderRuns();
+}
+function draw(data,canvas){
+  let c=canvas,x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);
+  x.strokeStyle="#1d2a38";x.lineWidth=1;for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}
+  if(data.length<2)return;let minR=Math.min(...data.map(d=>d.rpm)),maxR=Math.max(...data.map(d=>d.rpm)),maxH=Math.max(1,...data.map(d=>d.hp));
+  x.strokeStyle="#00e7ff";x.shadowColor="#00e7ff";x.shadowBlur=8;x.lineWidth=3;x.beginPath();
+  data.forEach((d,i)=>{let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-18);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();x.shadowBlur=0;
+}
+function renderRuns(){
+  let rs=JSON.parse(localStorage.getItem("vanaV6runs")||"[]");$("runs").innerHTML=rs.length?rs.map(r=>`<div class="run"><span>${new Date(r.date).toLocaleString("fi-FI")} • ${r.ecu} • ${r.gear}. vaihde</span><b>${r.data.length} näytettä</b></div>`).join(""):'<div class="note">Ei tallennettuja vetoja.</div>';
 }
 function avgHpAt(data,rpm,band=150){let a=data.filter(d=>Math.abs(d.rpm-rpm)<=band);return a.length?a.reduce((s,d)=>s+d.hp,0)/a.length:NaN}
-$("compareBtn").onclick=drawCompare;
-$("deltaBtn").onclick=()=>{let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");if(rs.length<2){$("deltaText").textContent="Tarvitaan vähintään kaksi vetoa.";return}let a=rs[0],b=rs[1],from=Math.max(+$("analyzeFrom").value||4000,1500),to=Math.min(+$("stopRpm").value||10500,12000),step=+$("rpmStep").value||500,out=[];for(let r=from;r<=to;r+=step){let x=avgHpAt(a.data,r),y=avgHpAt(b.data,r);if(isFinite(x)&&isFinite(y))out.push(`${r} rpm: ${(x-y)>=0?"+":""}${(x-y).toFixed(2)} hv`)}$("deltaText").textContent=out.length?out.join(" • "):"Vertailukelpoista RPM-dataa ei löytynyt.";drawCompare()};
-
-$("tuneSuggest").onclick=()=>{
- let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");
- if(rs.length<2){$("tuneText").textContent="Tarvitaan vähintään kaksi vertailuvetoa.";return}
- let newest=rs[0],prev=rs[1],from=+$("analyzeFrom").value||4000,to=+$("stopRpm").value||10500,step=+$("rpmStep").value||500,maxStep=Math.abs(+$("maxStep").value||.5),out=[];
- for(let r=from;r<=to;r+=step){
-   let n=avgHpAt(newest.data,r),p=avgHpAt(prev.data,r);
-   if(!isFinite(n)||!isFinite(p)||p<=0)continue;
-   let gain=(n-p)/p*100;
-   let suggestion=Math.abs(gain)<1?0:(gain>0?maxStep:-maxStep);
-   out.push(`${r}: ${suggestion>0?"+":""}${suggestion.toFixed(1)}° (${gain>=0?"+":""}${gain.toFixed(1)}%)`);
- }
- $("tuneText").textContent=out.length?("Ehdotus seuraavaa testikarttaa varten: "+out.join(" • ")):"Riittävää vertailudataa ei löytynyt.";
-};$("clear").onclick=()=>{localStorage.removeItem("vanaRuns");renderRuns()};loadSettings();renderRuns();draw([]);
-</script></body></html>
+$("clearBtn").onclick=()=>{localStorage.removeItem("vanaV6runs");renderRuns()};
+$("compareBtn").onclick=()=>{
+  let rs=JSON.parse(localStorage.getItem("vanaV6runs")||"[]").slice(0,5),c=$("compareChart"),x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);
+  x.strokeStyle="#1d2a38";for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}
+  if(!rs.length)return;let all=rs.flatMap(r=>r.data.filter(d=>d.rpm>0)),minR=Math.min(...all.map(d=>d.rpm)),maxR=Math.max(...all.map(d=>d.rpm)),maxH=Math.max(1,...all.map(d=>d.hp)),cols=["#00e7ff","#39f58a","#ffd447","#a866ff","#ff3f63"];
+  rs.forEach((r,j)=>{x.strokeStyle=cols[j];x.lineWidth=2.5;x.beginPath();let first=true;r.data.forEach(d=>{if(d.rpm<=0)return;let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-18);first?(x.moveTo(px,py),first=false):x.lineTo(px,py)});x.stroke()});
+  setBtn($("compareBtn"),true);
+};
+$("deltaBtn").onclick=()=>{
+  let rs=JSON.parse(localStorage.getItem("vanaV6runs")||"[]");if(rs.length<2){$("deltaText").textContent="Tarvitaan vähintään kaksi vetoa.";return}
+  let from=+$("analyzeFrom").value||4000,to=+$("stopRpm").value||10500,step=+$("rpmStep").value||500,out=[];
+  for(let r=from;r<=to;r+=step){let a=avgHpAt(rs[0].data,r),b=avgHpAt(rs[1].data,r);if(isFinite(a)&&isFinite(b))out.push(`${r}: ${(a-b)>=0?"+":""}${(a-b).toFixed(2)} hv`)}
+  $("deltaText").textContent=out.length?out.join(" • "):"Vertailukelpoista dataa ei löytynyt.";setBtn($("deltaBtn"),true);
+};
+$("tuneBtn").onclick=()=>{
+  let rs=JSON.parse(localStorage.getItem("vanaV6runs")||"[]");if(rs.length<2){$("tuneText").textContent="Tarvitaan vähintään kaksi vertailuvetoa.";return}
+  let from=+$("analyzeFrom").value||4000,to=+$("stopRpm").value||10500,step=+$("rpmStep").value||500,maxStep=Math.abs(+$("maxStep").value||.5),out=[];
+  for(let r=from;r<=to;r+=step){let n=avgHpAt(rs[0].data,r),p=avgHpAt(rs[1].data,r);if(!isFinite(n)||!isFinite(p)||p<=0)continue;let gain=(n-p)/p*100,sug=Math.abs(gain)<1?0:(gain>0?maxStep:-maxStep);out.push(`${r}: ${sug>0?"+":""}${sug.toFixed(1)}°`)}
+  $("tuneText").textContent=out.length?"Seuraavan testikartan ehdotus: "+out.join(" • "):"Riittävää vertailudataa ei löytynyt.";setBtn($("tuneBtn"),true);
+};
+loadCfg();renderRuns();draw([],$("chart"));
+</script>
+</body>
+</html>

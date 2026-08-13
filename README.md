@@ -1,22 +1,33 @@
-# VäNä AutoDyno v5 — RPM Priority
+# VäNä AutoDyno v6
 
-RPM-lähteiden prioriteetti on valittavissa suoraan sovelluksesta.
+Täysi GitHub Pages -sovellus tyylitellyllä racing-käyttöliittymällä.
 
-Oletus:
-1. Nopeus / valitun vaihteen RPM-kalibrointi
-2. Mikrofoni
-3. Kamera
+Mukana:
+- pyörän hero-kuva
+- selkeät pehmeäreunaiset napit
+- aktiivinen/päällä = värillinen
+- pois = tumma/harmaa
+- GPS, kiihtyvyys, gyro, orientaatio
+- GPS-kaltevuusarvio
+- mikrofoni RPM
+- kamera käyttöön (viisari-RPM:n automaattikalibrointi myöhemmin)
+- RPM-lähteiden valittava prioriteetti
+- oletus: nopeus > mikrofoni > kamera
+- automaattinen veto
+- tallennus oletuksena 1500 rpm alkaen
+- analyysi- ja stop-RPM säädettävissä
+- hv/Nm
+- ilmanvastus, vierintävastus ja kaltevuuskorjaus
+- vedot talteen localStorageen
+- 5 vedon päällekkäisvertailu
+- delta
+- AutoTune-ehdotuspohja
+- Arduino / Zeeltronic -valinta
 
-Mikrofoni:
-- pyytää erillisen mikrofoniluvan
-- käyttää reaaliaikaista autokorrelaatiota moottorin perustaajuuden arviointiin
-- 1-sylinterisen 2T-moottorin lähtöoletus on yksi palotapahtumajakso / kampiakselikierros
-- näyttää oman RPM:n ja luottamuksen
-- verrataan nopeus-RPM:ään poikkeamien löytämiseksi
+Julkaisu:
+1. Pura ZIP.
+2. Lataa `index.html` ja `bike.png` GitHub Pages -repositorion juureen.
+3. GitHub Pages julkaisee sivun.
 
-Kamera:
-- kameran käyttöoikeus ja live-kuva ovat mukana
-- kamera on valittavana prioriteettilistassa
-- varsinainen analogisen kierroslukumittarin viisarin automaattinen tunnistus tarvitsee vielä mittarikohtaisen kalibroinnin, joten ilman kalibrointia kamera ohitetaan automaattisesti.
-
-Muu v4/v3-toiminta säilyy: GPS, IMU, gyro, orientaatio, korkeus/kaltevuus, hv/Nm, automaattinen veto, vertailu ja Auto Tune -ehdotuspohja.
+Turvallisuus:
+Kiinnitä puhelin tukevasti ennen ajoa. Käytä ARM-toimintoa ennen vetoa. Älä käsittele puhelinta vedon aikana.
