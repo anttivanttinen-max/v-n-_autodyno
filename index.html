@@ -18,7 +18,7 @@ button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:
 @media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.metrics{grid-template-columns:1fr 1fr}.inputs{grid-template-columns:1fr}}
 </style></head>
 <body><div class="wrap">
-<div class="hero"><h1>VäNä AutoDyno <span style="font-size:13px;color:var(--a)">v1</span></h1><div class="sub">Road dyno • GPS + puhelimen liikeanturit • RPM/nopeus-kalibrointi • Arduino / Zeeltronic</div><span class="badge">Mittaus tapahtuu puhelimessa</span></div>
+<div class="hero"><h1>VäNä AutoDyno <span style="font-size:13px;color:var(--a)">v5</span></h1><div class="sub">Road dyno • GPS + puhelimen liikeanturit • RPM/nopeus-kalibrointi • Arduino / Zeeltronic</div><span class="badge">Sensor fusion • GPS • IMU • gyro • mikrofoni • kamera • valittava RPM-prioriteetti</span></div>
 <div class="grid">
 <section class="card"><h2>Pyörä & veto</h2><div class="inputs">
 <div><label>Kokonaismassa pyörä + kuljettaja (kg)</label><input id="mass" type="number" value="190" step="1"></div>
@@ -28,6 +28,21 @@ button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:
 <div><label>Kierrokset mittarista (rpm)</label><input id="calRpm" type="number" value="6000" step="50"></div>
 <div><label>Toinen nopeus (km/h, vapaaehtoinen)</label><input id="calSpeed2" type="number" placeholder="esim. 80"></div>
 <div><label>Toiset kierrokset (rpm)</label><input id="calRpm2" type="number" placeholder="esim. 8000"></div>
+<div><label>Record from RPM</label><input id="recordFrom" type="number" value="1500" step="100"></div>
+<div><label>Analyze from RPM</label><input id="analyzeFrom" type="number" value="4000" step="100"></div>
+<div><label>Stop RPM</label><input id="stopRpm" type="number" value="10500" step="100"></div>
+<div><label>Auto Stop -viive (s)</label><input id="stopDelay" type="number" value=".7" step=".1" min=".2" max="3"></div>
+<div><label>CdA ilmanvastus (m²)</label><input id="cda" type="number" value=".60" step=".01"></div>
+<div><label>Vierintävastus Crr</label><input id="crr" type="number" value=".015" step=".001"></div>
+<div><label>Tien kaltevuus (%)</label><input id="grade" type="number" value="0" step=".1"></div>
+<div><label>Ilman tiheys (kg/m³)</label><input id="rho" type="number" value="1.225" step=".01"></div>
+<div><label>GPS-kaltevuus</label><select id="autoGrade"><option value="on" selected>Automaattinen</option><option value="off">Käytä käsin syötettyä</option></select></div>
+<div><label>GPS tarkkuusraja (m)</label><input id="gpsAccLimit" type="number" value="25" step="1"></div>
+<div><label>RPM 1. prioriteetti</label><select id="rpmP1"><option value="speed" selected>Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera">Kamera</option></select></div>
+<div><label>RPM 2. prioriteetti</label><select id="rpmP2"><option value="speed">Nopeus / välitys</option><option value="mic" selected>Mikrofoni</option><option value="camera">Kamera</option></select></div>
+<div><label>RPM 3. prioriteetti</label><select id="rpmP3"><option value="speed">Nopeus / välitys</option><option value="mic">Mikrofoni</option><option value="camera" selected>Kamera</option></select></div>
+<div><label>Mikrofoni RPM min</label><input id="micRpmMin" type="number" value="1200" step="100"></div>
+<div><label>Mikrofoni RPM max</label><input id="micRpmMax" type="number" value="12000" step="100"></div>
 </div><div class="actions"><button id="cal">Kalibroi RPM</button></div><div id="calStatus" class="status">Ei kalibroitu.</div></section>
 
 <section class="card"><h2>Mittaus</h2><div class="metrics">
@@ -35,25 +50,254 @@ button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:
 <div class="metric"><span>RPM</span><b id="rpm">0</b></div>
 <div class="metric"><span>G</span><b id="g">0.00</b></div>
 <div class="metric"><span>Teho*</span><b id="hp">0.0</b><small> hv</small></div>
-</div><div class="actions"><button id="permit">Salli anturit</button><button id="start" class="alt">Aloita veto</button><button id="stop" class="alt">Lopeta</button></div>
-<div id="status" class="status">Valmis. Kiinnitä puhelin tukevasti ennen mittausta.</div><p class="note">* v1:n teho on alustava inertiaalinen arvio massasta ja pitkittäiskiihtyvyydestä. Ilmanvastus, vierintävastus, mäki ja GPS/IMU-suodatus tarkennetaan seuraavissa versioissa.</p></section>
+<div class="metric"><span>Vääntö*</span><b id="nm">0.0</b><small> Nm</small></div>
+<div class="metric"><span>GPS tarkkuus</span><b id="gpsAcc">–</b><small> m</small></div>
+<div class="metric"><span>Kaltevuus</span><b id="gradeLive">0.0</b><small> %</small></div>
+<div class="metric"><span>Gyro</span><b id="gyroLive">0</b><small> °/s</small></div>
+<div class="metric"><span>Pitch</span><b id="pitchLive">0.0</b><small> °</small></div>
+<div class="metric"><span>RPM lähde</span><b id="rpmSource">SPEED</b></div>
+<div class="metric"><span>Mic RPM</span><b id="micRpm">–</b></div>
+<div class="metric"><span>Cam RPM</span><b id="camRpm">–</b></div>
+<div class="metric"><span>RPM luottamus</span><b id="rpmConf">–</b></div>
+</div><div class="actions"><button id="permit">Salli anturit</button><button id="micBtn" class="alt">Salli mikrofoni</button><button id="camBtn" class="alt">Salli kamera</button><button id="zeroMount" class="alt">Nollaa puhelimen asento</button><button id="arm" class="alt">ARM AUTO</button><button id="start" class="alt">Manuaali</button><button id="stop" class="alt">Lopeta</button></div>
+<div id="status" class="status">Valmis. Kiinnitä puhelin tukevasti ennen mittausta.</div><p class="note">* v3 yhdistää GPS-kiihtyvyyttä ja puhelimen liikeanturista saatavaa kiihtyvyysmuutosta suodatetuksi arvioksi. Tehoon lisätään asetettu ilmanvastus, vierintävastus ja tien kaltevuus. Arvio ei korvaa oikeaa dynopenkkiä.</p><video id="camVideo" playsinline muted style="display:none;width:100%;max-height:180px;border-radius:10px;margin-top:8px"></video>
+</section>
 
 <section class="card full"><h2>Veto</h2><canvas id="chart" width="900" height="300"></canvas><div class="note">Käyrä: arvioitu teho (hv) suhteessa RPM:ään. Auto Tune ei muuta karttaa kesken vedon.</div></section>
 <section class="card"><h2>Tallennetut vedot</h2><div id="runs"></div><div class="actions"><button id="clear" class="alt">Tyhjennä vedot</button></div></section>
+<section class="card full"><h2>Vetojen päällekkäisvertailu</h2>
+<div class="actions"><button id="compareBtn" class="alt">Näytä viimeiset vedot</button><button id="deltaBtn" class="alt">Delta viimeisin vs edellinen</button></div>
+<canvas id="compareChart" width="900" height="300"></canvas>
+<div id="deltaText" class="note">Valitse vertailu. Käyrät piirretään samalle RPM-akselille.</div></section>
 <section class="card"><h2>Auto Tune — pohja</h2><div class="inputs"><div><label>Suurin muutos / veto (°)</label><input id="maxStep" type="number" value=".5" step=".1"></div><div><label>RPM-askel</label><input id="rpmStep" type="number" value="500" step="100"></div></div>
-<p class="note">v1 tallentaa mittausdatan ja ohjainvalinnan. Varsinainen Arduino/Zeeltronic-kartan kirjoitus lisätään myöhemmin erillisenä Apply Map -kerroksena.</p></section>
+<div class="actions"><button id="tuneSuggest" class="alt">Luo Auto Tune -ehdotus</button></div>
+<div id="tuneText" class="note" style="margin-top:8px">Auto Tune vertaa kahta viimeistä vetoa RPM-alueittain. v3 tekee vain ehdotuksen; se ei kirjoita ohjaimeen automaattisesti.</div></section>
 </div></div>
 <script>
-const $=x=>document.getElementById(x); let rpmPerKmh=0,recording=false,run=[],lastV=0,lastT=0,imuA=0;
+const $=x=>document.getElementById(x); let rpmPerKmh=0,recording=false,armed=false,run=[],prebuffer=[],lastV=0,lastT=0,imuA=0;
+let accelEndedAt=0;
 function saveSettings(){localStorage.setItem("vanaCfg",JSON.stringify({mass:$("mass").value,ecu:$("ecu").value,gear:$("gear").value,calSpeed:$("calSpeed").value,calRpm:$("calRpm").value,rpmPerKmh}))}
 function loadSettings(){try{let c=JSON.parse(localStorage.getItem("vanaCfg"));if(!c)return;Object.keys(c).forEach(k=>{if($(k))$(k).value=c[k]});rpmPerKmh=c.rpmPerKmh||0;if(rpmPerKmh)$("calStatus").textContent="Kalibrointi "+rpmPerKmh.toFixed(2)+" rpm / km/h"}catch{}}
 $("cal").onclick=()=>{let s=+$("calSpeed").value,r=+$("calRpm").value,s2=+$("calSpeed2").value,r2=+$("calRpm2").value;if(s<=0||r<=0)return;$("calStatus").textContent="Tarkista arvot.";let a=r/s;if(s2>0&&r2>0){let b=r2/s2;rpmPerKmh=(a+b)/2;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h • pisteiden ero ${Math.abs(a-b).toFixed(2)}`}else{rpmPerKmh=a;$("calStatus").textContent=`Kalibroitu ${rpmPerKmh.toFixed(2)} rpm/km/h`}saveSettings()};
-$("permit").onclick=async()=>{try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){let p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw 0}window.addEventListener("devicemotion",e=>{let a=e.accelerationIncludingGravity||e.acceleration;if(a){let vals=[a.x||0,a.y||0,a.z||0];imuA=Math.max(...vals.map(Math.abs));$("g").textContent=(imuA/9.80665).toFixed(2)}});$("status").textContent="Liikeanturit sallittu."}catch{$("status").textContent="Liikeanturilupaa ei saatu."}
-if(navigator.geolocation)navigator.geolocation.watchPosition(pos=>{let kmh=Math.max(0,(pos.coords.speed||0)*3.6);update(kmh)},err=>$("status").textContent="GPS: "+err.message,{enableHighAccuracy:true,maximumAge:0,timeout:10000})};
-function update(kmh){let now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0;let gpsA=dt>.15?(v-lastV)/dt:0;lastV=v;lastT=now;let rpm=kmh*rpmPerKmh;let a=isFinite(gpsA)?gpsA:0;let watts=(+$("mass").value||0)*a*v;let hp=Math.max(0,watts/735.49875);$("spd").textContent=kmh.toFixed(1);$("rpm").textContent=Math.round(rpm);$("hp").textContent=hp.toFixed(1);if(recording&&rpm>0)run.push({t:Date.now(),kmh,rpm,hp,a,imuA});draw(run)}
-$("start").onclick=()=>{run=[];recording=true;$("status").textContent="VETO KÄYNNISSÄ";draw(run)};
-$("stop").onclick=()=>{if(!recording)return;recording=false;let runs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");runs.unshift({date:new Date().toISOString(),ecu:$("ecu").value,gear:$("gear").value,ratio:rpmPerKmh,data:run});runs=runs.slice(0,10);localStorage.setItem("vanaRuns",JSON.stringify(runs));$("status").textContent=`Veto tallennettu • ${run.length} näytettä`;renderRuns()};
+let orient={alpha:null,beta:null,gamma:null}, rot={alpha:0,beta:0,gamma:0};
+let gpsMeta={accuracy:null,altitude:null,altitudeAccuracy:null,heading:null,speed:null,lat:null,lon:null};
+let lastAltPoint=null, autoGradePct=0, mountPitchZero=0;
+let micRpmValue=NaN, micConfidence=0, cameraRpmValue=NaN, cameraConfidence=0;
+let audioCtx=null,audioAnalyser=null,audioBuf=null,audioTimer=null,cameraStream=null;
+
+
+function motionHandler(e){
+  let a=e.acceleration;
+  if(a){
+    // Gravity-free acceleration magnitude; orientation-independent fallback.
+    let vals=[a.x||0,a.y||0,a.z||0];
+    imuA=Math.sqrt(vals[0]*vals[0]+vals[1]*vals[1]+vals[2]*vals[2]);
+  }else if(e.accelerationIncludingGravity){
+    let a2=e.accelerationIncludingGravity,vals=[a2.x||0,a2.y||0,a2.z||0];
+    imuA=Math.abs(Math.sqrt(vals[0]*vals[0]+vals[1]*vals[1]+vals[2]*vals[2])-9.80665);
+  }
+  if(e.rotationRate){
+    rot.alpha=e.rotationRate.alpha||0; rot.beta=e.rotationRate.beta||0; rot.gamma=e.rotationRate.gamma||0;
+    let gm=Math.sqrt(rot.alpha*rot.alpha+rot.beta*rot.beta+rot.gamma*rot.gamma);
+    $("gyroLive").textContent=Math.round(gm);
+  }
+}
+function orientHandler(e){
+  orient.alpha=e.alpha; orient.beta=e.beta; orient.gamma=e.gamma;
+  let p=(isFinite(e.beta)?e.beta:0)-mountPitchZero;
+  $("pitchLive").textContent=p.toFixed(1);
+}
+
+function estimatePitchAutoCorrelation(buf, sampleRate){
+  let size=buf.length, rms=0;
+  for(let i=0;i<size;i++)rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/size);
+  if(rms<0.01)return {hz:NaN,conf:0};
+  let minRpm=+$("micRpmMin").value||1200,maxRpm=+$("micRpmMax").value||12000;
+  let minLag=Math.max(2,Math.floor(sampleRate/(maxRpm/60)));
+  let maxLag=Math.min(size-2,Math.ceil(sampleRate/(minRpm/60)));
+  let bestLag=0,best=-1;
+  for(let lag=minLag;lag<=maxLag;lag++){
+    let corr=0,e1=0,e2=0;
+    for(let i=0;i<size-lag;i++){let a=buf[i],b=buf[i+lag];corr+=a*b;e1+=a*a;e2+=b*b}
+    let norm=corr/Math.sqrt(Math.max(1e-12,e1*e2));
+    if(norm>best){best=norm;bestLag=lag}
+  }
+  if(bestLag<=0||best<0.18)return {hz:NaN,conf:Math.max(0,best)};
+  return {hz:sampleRate/bestLag,conf:Math.min(1,best)};
+}
+async function startMic(){
+  try{
+    let stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    let src=audioCtx.createMediaStreamSource(stream);
+    audioAnalyser=audioCtx.createAnalyser();audioAnalyser.fftSize=4096;audioAnalyser.smoothingTimeConstant=.2;
+    src.connect(audioAnalyser);audioBuf=new Float32Array(audioAnalyser.fftSize);
+    if(audioTimer)clearInterval(audioTimer);
+    audioTimer=setInterval(()=>{
+      audioAnalyser.getFloatTimeDomainData(audioBuf);
+      let est=estimatePitchAutoCorrelation(audioBuf,audioCtx.sampleRate);
+      micRpmValue=isFinite(est.hz)?est.hz*60:NaN;micConfidence=est.conf||0;
+      $("micRpm").textContent=isFinite(micRpmValue)?Math.round(micRpmValue):"–";
+    },120);
+    $("status").textContent="Mikrofoni RPM käytössä.";
+  }catch(err){$("status").textContent="Mikrofoni: "+(err.message||"lupaa ei saatu")}
+}
+$("micBtn").onclick=startMic;
+
+async function startCamera(){
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    let v=$("camVideo");v.srcObject=cameraStream;await v.play();v.style.display="block";
+    cameraRpmValue=NaN;cameraConfidence=0;
+    $("camRpm").textContent="CAL";
+    $("status").textContent="Kamera sallittu. Viisari-RPM vaatii vielä mittarikalibroinnin; jos sitä ei ole, AutoDyno ohittaa kameran.";
+  }catch(err){$("status").textContent="Kamera: "+(err.message||"lupaa ei saatu")}
+}
+$("camBtn").onclick=startCamera;
+
+function chooseRpm(speedRpm){
+  const values={
+    speed:{rpm:speedRpm,conf:(rpmPerKmh>0?0.95:0),name:"SPEED"},
+    mic:{rpm:micRpmValue,conf:micConfidence,name:"MIC"},
+    camera:{rpm:cameraRpmValue,conf:cameraConfidence,name:"CAM"}
+  };
+  let order=[$("rpmP1").value,$("rpmP2").value,$("rpmP3").value];
+  let picked=null;
+  for(let key of order){
+    let v=values[key];
+    if(v && isFinite(v.rpm) && v.rpm>0 && v.conf>=0.18){picked=v;break}
+  }
+  if(!picked)picked=values.speed;
+  // Cross-check mic against speed when both exist; large disagreement lowers confidence.
+  if(isFinite(speedRpm)&&speedRpm>0&&isFinite(micRpmValue)&&micRpmValue>0){
+    let diff=Math.abs(micRpmValue-speedRpm)/Math.max(speedRpm,1);
+    if(picked.name==="MIC" && diff>.18)picked={...picked,conf:picked.conf*.45};
+  }
+  $("rpmSource").textContent=picked.name;
+  $("rpmConf").textContent=Math.round((picked.conf||0)*100)+"%";
+  return picked.rpm||0;
+}
+async function askSensorPermission(){
+  try{
+    if(typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function"){
+      let p=await DeviceMotionEvent.requestPermission(); if(p!=="granted")throw new Error("Liikeanturit estetty");
+    }
+    if(typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function"){
+      let p=await DeviceOrientationEvent.requestPermission(); if(p!=="granted")throw new Error("Suunta-anturit estetty");
+    }
+    window.removeEventListener("devicemotion",motionHandler);
+    window.removeEventListener("deviceorientation",orientHandler);
+    window.addEventListener("devicemotion",motionHandler);
+    window.addEventListener("deviceorientation",orientHandler);
+    $("status").textContent="Liike-, gyro- ja orientaatioanturit sallittu. GPS käynnistyy.";
+  }catch(err){
+    $("status").textContent="Anturilupa: "+(err.message||"ei saatu");
+  }
+  if(navigator.geolocation){
+    navigator.geolocation.watchPosition(pos=>{
+      let c=pos.coords, kmh=Math.max(0,(c.speed||0)*3.6);
+      gpsMeta={accuracy:c.accuracy,altitude:c.altitude,altitudeAccuracy:c.altitudeAccuracy,heading:c.heading,speed:c.speed,lat:c.latitude,lon:c.longitude};
+      $("gpsAcc").textContent=isFinite(c.accuracy)?c.accuracy.toFixed(0):"–";
+      // Estimate road grade from GPS altitude only over enough horizontal travel.
+      if(isFinite(c.altitude) && isFinite(c.latitude) && isFinite(c.longitude)){
+        if(lastAltPoint){
+          const R=6371000, rad=Math.PI/180;
+          const dlat=(c.latitude-lastAltPoint.lat)*rad, dlon=(c.longitude-lastAltPoint.lon)*rad;
+          const a=Math.sin(dlat/2)**2+Math.cos(lastAltPoint.lat*rad)*Math.cos(c.latitude*rad)*Math.sin(dlon/2)**2;
+          const dist=2*R*Math.asin(Math.sqrt(a));
+          if(dist>=15 && (c.accuracy||999)<= (+$("gpsAccLimit").value||25)){
+            let raw=(c.altitude-lastAltPoint.alt)/dist*100;
+            if(Math.abs(raw)<20) autoGradePct=.8*autoGradePct+.2*raw;
+            lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+          }else if(dist>=40){
+            lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+          }
+        }else lastAltPoint={lat:c.latitude,lon:c.longitude,alt:c.altitude};
+      }
+      $("gradeLive").textContent=autoGradePct.toFixed(1);
+      update(kmh);
+    },err=>$("status").textContent="GPS: "+err.message,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+  }
+}
+$("permit").onclick=askSensorPermission;
+function update(kmh){
+ let now=performance.now(),v=kmh/3.6,dt=lastT?(now-lastT)/1000:0;
+ let gpsA=dt>.15?(v-lastV)/dt:0; lastV=v; lastT=now;
+ let speedRpm=kmh*rpmPerKmh; let rpm=chooseRpm(speedRpm);
+ // GPS carries absolute longitudinal acceleration. IMU is used conservatively as a short-term stabilizer
+ // because browser orientation relative to the bike can vary.
+ let imuDelta=(imuA-lastImu); lastImu=imuA;
+ let fused=isFinite(gpsA)?gpsA:0;
+ if(dt>0 && isFinite(imuDelta)) fused=0.82*fused+0.18*(imuDelta/Math.max(dt,.05));
+ filtA=0.72*filtA+0.28*fused;
+ let mass=+$("mass").value||0, rho=+$("rho").value||1.225,cda=+$("cda").value||0,crr=+$("crr").value||0;
+ let gradePct=$("autoGrade").value==="on"?autoGradePct:(+$("grade").value||0);
+ let grade=gradePct/100;
+ let Facc=mass*filtA, Faero=.5*rho*cda*v*v, Froll=mass*9.80665*crr, Fgrade=mass*9.80665*grade;
+ let watts=Math.max(0,(Facc+Faero+Froll+Fgrade)*v);
+ let hp=watts/735.49875;
+ let nm=rpm>200 ? watts/(rpm*2*Math.PI/60) : 0;
+ $("spd").textContent=kmh.toFixed(1); $("rpm").textContent=Math.round(rpm); $("hp").textContent=hp.toFixed(1); $("nm").textContent=nm.toFixed(1); $("g").textContent=(filtA/9.80665).toFixed(2);
+ let sample={
+   t:Date.now(),kmh,rpm,hp,nm,a:filtA,g:filtA/9.80665,imuA,
+   gpsAccuracy:gpsMeta.accuracy,altitude:gpsMeta.altitude,altitudeAccuracy:gpsMeta.altitudeAccuracy,
+   heading:gpsMeta.heading,lat:gpsMeta.lat,lon:gpsMeta.lon,
+   pitch:orient.beta,roll:orient.gamma,yaw:orient.alpha,
+   gyroAlpha:rot.alpha,gyroBeta:rot.beta,gyroGamma:rot.gamma,
+   gradePct,
+   speedRpm,micRpm:micRpmValue,micConfidence,cameraRpm:cameraRpmValue,cameraConfidence,rpmSource:$("rpmSource").textContent
+ };
+ prebuffer.push(sample); while(prebuffer.length>0 && sample.t-prebuffer[0].t>5000)prebuffer.shift();
+
+ if(armed && !recording && rpm >= (+$("recordFrom").value||1500) && filtA>0.15){
+   recording=true; run=prebuffer.filter(x=>x.rpm>= (+$("recordFrom").value||1500));
+   $("status").textContent="AUTO VETO KÄYNNISSÄ";
+ }
+ if(recording){
+   run.push(sample);
+   let stopR=+$("stopRpm").value||10500, delay=(+$("stopDelay").value||.7)*1000;
+   if(filtA<=0.03){ if(!accelEndedAt)accelEndedAt=sample.t; } else accelEndedAt=0;
+   if(rpm>=stopR || (accelEndedAt && sample.t-accelEndedAt>=delay)) finishRun("Automaattinen lopetus");
+   draw(run);
+ }
+}$("zeroMount").onclick=()=>{mountPitchZero=isFinite(orient.beta)?orient.beta:0;$("status").textContent="Puhelimen asento nollattu tähän kiinnitysasentoon.";};
+$("arm").onclick=()=>{armed=true;recording=false;run=[];prebuffer=[];accelEndedAt=0;$("status").textContent="ARMED • odottaa "+$("recordFrom").value+" rpm ja kiihtyvyyttä"};
+$("start").onclick=()=>{armed=false;run=[];recording=true;accelEndedAt=0;$("status").textContent="MANUAALINEN VETO KÄYNNISSÄ";draw(run)};
+function finishRun(reason){
+ if(!recording)return; recording=false; armed=false;
+ let runs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");
+ runs.unshift({date:new Date().toISOString(),ecu:$("ecu").value,gear:$("gear").value,ratio:rpmPerKmh,recordFrom:+$("recordFrom").value,analyzeFrom:+$("analyzeFrom").value,stopRpm:+$("stopRpm").value,data:run});
+ runs=runs.slice(0,10); localStorage.setItem("vanaRuns",JSON.stringify(runs));
+ $("status").textContent=reason+" • veto tallennettu • "+run.length+" näytettä"; renderRuns();
+}
+$("stop").onclick=()=>finishRun("STOP");
 function draw(data){let c=$("chart"),x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.strokeStyle="#243341";x.lineWidth=1;for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}if(data.length<2)return;let minR=Math.min(...data.map(d=>d.rpm)),maxR=Math.max(...data.map(d=>d.rpm)),maxH=Math.max(1,...data.map(d=>d.hp));x.strokeStyle="#69e6ff";x.lineWidth=3;x.beginPath();data.forEach((d,i)=>{let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-15);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
 function renderRuns(){let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");$("runs").innerHTML=rs.length?rs.map((r,i)=>`<div class="run"><span>${new Date(r.date).toLocaleString("fi-FI")} • ${r.ecu} • ${r.gear}. vaihde</span><b>${r.data.length} näytettä</b></div>`).join(""):'<div class="note">Ei tallennettuja vetoja.</div>'}
-$("clear").onclick=()=>{localStorage.removeItem("vanaRuns");renderRuns()};loadSettings();renderRuns();draw([]);
+
+function drawCompare(){
+ let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]").slice(0,5), c=$("compareChart"),x=c.getContext("2d"),w=c.width,h=c.height;
+ x.clearRect(0,0,w,h); x.strokeStyle="#243341"; for(let i=1;i<5;i++){x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke()}
+ if(!rs.length)return;
+ let all=rs.flatMap(r=>r.data.filter(d=>d.rpm>0)), minR=Math.min(...all.map(d=>d.rpm)),maxR=Math.max(...all.map(d=>d.rpm)),maxH=Math.max(1,...all.map(d=>d.hp));
+ let strokes=["#69e6ff","#76efa8","#ffd36b","#d79cff","#ff8f8f"];
+ rs.forEach((r,j)=>{x.strokeStyle=strokes[j];x.lineWidth=2.5;x.beginPath();let first=true;r.data.forEach(d=>{if(d.rpm<=0)return;let px=(d.rpm-minR)/Math.max(1,maxR-minR)*w,py=h-d.hp/maxH*(h-15);first?(x.moveTo(px,py),first=false):x.lineTo(px,py)});x.stroke()});
+}
+function avgHpAt(data,rpm,band=150){let a=data.filter(d=>Math.abs(d.rpm-rpm)<=band);return a.length?a.reduce((s,d)=>s+d.hp,0)/a.length:NaN}
+$("compareBtn").onclick=drawCompare;
+$("deltaBtn").onclick=()=>{let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");if(rs.length<2){$("deltaText").textContent="Tarvitaan vähintään kaksi vetoa.";return}let a=rs[0],b=rs[1],from=Math.max(+$("analyzeFrom").value||4000,1500),to=Math.min(+$("stopRpm").value||10500,12000),step=+$("rpmStep").value||500,out=[];for(let r=from;r<=to;r+=step){let x=avgHpAt(a.data,r),y=avgHpAt(b.data,r);if(isFinite(x)&&isFinite(y))out.push(`${r} rpm: ${(x-y)>=0?"+":""}${(x-y).toFixed(2)} hv`)}$("deltaText").textContent=out.length?out.join(" • "):"Vertailukelpoista RPM-dataa ei löytynyt.";drawCompare()};
+
+$("tuneSuggest").onclick=()=>{
+ let rs=JSON.parse(localStorage.getItem("vanaRuns")||"[]");
+ if(rs.length<2){$("tuneText").textContent="Tarvitaan vähintään kaksi vertailuvetoa.";return}
+ let newest=rs[0],prev=rs[1],from=+$("analyzeFrom").value||4000,to=+$("stopRpm").value||10500,step=+$("rpmStep").value||500,maxStep=Math.abs(+$("maxStep").value||.5),out=[];
+ for(let r=from;r<=to;r+=step){
+   let n=avgHpAt(newest.data,r),p=avgHpAt(prev.data,r);
+   if(!isFinite(n)||!isFinite(p)||p<=0)continue;
+   let gain=(n-p)/p*100;
+   let suggestion=Math.abs(gain)<1?0:(gain>0?maxStep:-maxStep);
+   out.push(`${r}: ${suggestion>0?"+":""}${suggestion.toFixed(1)}° (${gain>=0?"+":""}${gain.toFixed(1)}%)`);
+ }
+ $("tuneText").textContent=out.length?("Ehdotus seuraavaa testikarttaa varten: "+out.join(" • ")):"Riittävää vertailudataa ei löytynyt.";
+};$("clear").onclick=()=>{localStorage.removeItem("vanaRuns");renderRuns()};loadSettings();renderRuns();draw([]);
 </script></body></html>

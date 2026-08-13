@@ -1,20 +1,22 @@
-# VäNä AutoDyno v1
+# VäNä AutoDyno v5 — RPM Priority
 
-Staattinen GitHub Pages -sovellus.
+RPM-lähteiden prioriteetti on valittavissa suoraan sovelluksesta.
 
-## v1
-- GPS-nopeus
-- DeviceMotion-liikeanturilupa iPhonelle
-- RPM/nopeus-kalibrointi yhdellä tai kahdella pisteellä
-- Arduino / Zeeltronic -valinta
-- valittu vetovaihde
-- alustava inertiaalinen tehoarvio
-- veto tallennetaan selaimen localStorageen
-- viimeiset 10 vetoa
-- Auto Tune -asetusten pohja
+Oletus:
+1. Nopeus / valitun vaihteen RPM-kalibrointi
+2. Mikrofoni
+3. Kamera
 
-## Julkaisu
-Lataa `index.html` GitHub Pages -repositorion juureen.
+Mikrofoni:
+- pyytää erillisen mikrofoniluvan
+- käyttää reaaliaikaista autokorrelaatiota moottorin perustaajuuden arviointiin
+- 1-sylinterisen 2T-moottorin lähtöoletus on yksi palotapahtumajakso / kampiakselikierros
+- näyttää oman RPM:n ja luottamuksen
+- verrataan nopeus-RPM:ään poikkeamien löytämiseksi
 
-## Turvallisuus
-Älä käsittele puhelinta ajon aikana. Kiinnitä puhelin tukevasti ennen mittausta. Auto Tune ei muuta sytytyskarttaa kesken vedon.
+Kamera:
+- kameran käyttöoikeus ja live-kuva ovat mukana
+- kamera on valittavana prioriteettilistassa
+- varsinainen analogisen kierroslukumittarin viisarin automaattinen tunnistus tarvitsee vielä mittarikohtaisen kalibroinnin, joten ilman kalibrointia kamera ohitetaan automaattisesti.
+
+Muu v4/v3-toiminta säilyy: GPS, IMU, gyro, orientaatio, korkeus/kaltevuus, hv/Nm, automaattinen veto, vertailu ja Auto Tune -ehdotuspohja.
