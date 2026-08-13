@@ -1,25 +1,20 @@
-# VäNä AutoDyno v9 Blue Edition
+# VäNä AutoDyno v14 Red Reliable
 
-Valmis GitHub Pages -paketti sinisellä racing-pohjalla.
+v14 on tehty nimenomaan toimivuuden diagnosointiin ja iPhone-selainta varten.
 
-Mukana:
-- sininen/neon racing UI
-- pyörän kuva
-- iso RPM-gauge
-- GPS, IMU, gyro, orientaatio
-- mikrofoni RPM
-- kamera varalähteenä
-- RPM-prioriteetit: nopeus → mikrofoni → kamera
-- automaattinen ja manuaalinen veto
-- hv / Nm / G / nopeus
-- vetojen tallennus ja vertailu
-- AutoTune-ehdotuspohja
-- erilliset pienet info-napit tärkeille toiminnoille
-- info-kortit näyttävät toiminnon tarkoituksen, tilan ja nykyisen arvon/huomion
+Korjattu:
+- poistettu kaikki feikki/live-demoarvot
+- napit ovat oikeita toimintoja, info-nappi ei enää avaa infoa koko painikkeesta
+- GPS, DeviceMotion, mikrofoni ja kamera käynnistyvät erikseen
+- iOS permission -pyynnöt tehdään suoraan käyttäjän napinpainalluksesta
+- näkyvä Järjestelmätesti kertoo HTTPS/secure-contextin sekä API-tuen
+- näkyvä diagnostiikkaloki näyttää GPS/media/JS-virheet
+- RPM-kalibrointi ja localStorage
+- ARM AUTO / manuaali / STOP
+- vetojen tallennus
 
-GitHub Pages:
-1. Pura ZIP.
-2. Korvaa repossa vanha `index.html`.
-3. Lataa myös `bike.png` samaan juureen.
-4. Commit / push.
-5. Oikeassa versiossa näkyy `BUILD V9 BLUE EDITION`.
+GitHub:
+1. korvaa index.html
+2. pidä bike.png samassa kansiossa
+3. avaa ?v=14
+4. paina AJA JÄRJESTELMÄTESTI
