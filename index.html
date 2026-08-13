@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VäNä AutoDyno v10 Blue Mobile</title>
+<title>VäNä AutoDyno v9 Blue Edition</title>
 <style>
 :root{
   --bg:#06090f; --bg2:#0a111a; --panel:#0d1520; --panel2:#101a27; --line:#223446;
@@ -29,157 +29,83 @@ body{
   min-height:100vh;
 }
 .wrap{max-width:1200px; margin:auto; padding:14px 14px 100px}
-
 .hero{
-  position:relative;
-  min-height:680px;
-  overflow:hidden;
-  border-radius:30px;
-  padding:18px 18px 20px;
+  position:relative; min-height:290px; overflow:hidden;
+  border-radius:30px; padding:18px;
   background:
-    radial-gradient(circle at 74% 14%,rgba(37,137,255,.20),transparent 26%),
-    radial-gradient(circle at 14% 8%,rgba(45,233,255,.14),transparent 22%),
-    linear-gradient(135deg,rgba(17,31,47,.96),rgba(4,10,17,.98) 62%,rgba(3,7,12,.98));
-  border:1px solid #28577a;
-  box-shadow:0 26px 75px rgba(0,0,0,.52),0 0 42px rgba(35,136,255,.08);
+    linear-gradient(135deg, rgba(35,136,255,.16), rgba(45,233,255,.07) 34%, rgba(110,124,255,.10) 68%, rgba(35,136,255,.10)),
+    linear-gradient(180deg, #0e1825, #09121b);
+  border:1px solid #274e6a; box-shadow:var(--shadow);
 }
 .hero:before{
-  content:"";
-  position:absolute;inset:0;
+  content:""; position:absolute; inset:0;
   background:
-    linear-gradient(115deg,transparent 0 60%,rgba(35,136,255,.10) 60.3%,transparent 60.8%),
-    radial-gradient(circle at 82% 34%,rgba(34,145,255,.14),transparent 17%);
-  pointer-events:none;
+    linear-gradient(90deg, transparent 0 49.3%, rgba(255,255,255,.04) 49.5%, transparent 49.7%),
+    linear-gradient(0deg, transparent 0 83.5%, rgba(255,255,255,.03) 83.7%, transparent 83.9%);
+  opacity:.45; pointer-events:none;
 }
-.heroGrid{position:relative;z-index:2;display:block;min-height:640px}
-.brandBlock{display:block}
-.brand{position:relative;z-index:5;width:58%;padding-top:2px}
-.brand .version{font-size:11px;letter-spacing:.18em;color:#75eaff;font-weight:900}
-.brand h1{margin:6px 0 0;font-size:38px;line-height:.93;letter-spacing:-2.2px;text-shadow:0 0 30px rgba(35,136,255,.22)}
-.brand p{margin:8px 0 0;color:#9badc0;font-size:11px;line-height:1.45;max-width:310px}
+.heroGrid{position:relative; z-index:2; display:grid; grid-template-columns:390px 1fr; gap:14px; min-height:254px}
+.brandBlock{display:flex; flex-direction:column; justify-content:space-between}
+.brand h1{margin:0; font-size:38px; letter-spacing:-1.8px; text-shadow:0 0 26px rgba(0,231,255,.16)}
+.brand .version{font-size:12px; letter-spacing:.14em; color:#7fefff; font-weight:800}
+.brand p{margin:6px 0 0; color:var(--muted); font-size:12px; max-width:320px}
 .build{
-  display:inline-flex;align-items:center;gap:7px;
-  margin-top:10px;padding:6px 10px;border-radius:999px;
-  background:#07111bd9;border:1px solid #2b5371;color:#c8fbff;
-  font-size:10px;font-weight:800;
+  display:inline-flex; align-items:center; gap:7px;
+  margin-top:9px; padding:7px 11px; border-radius:999px;
+  background:#07111ac9; border:1px solid #294459; color:#b8fff0; font-size:11px; font-weight:800;
 }
-.glowDot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px rgba(60,248,143,.7)}
-
-.heroRight{position:absolute;inset:0}
-.heroBike{
-  position:absolute;
-  right:-24px;
-  top:18px;
-  width:min(69%,610px);
-  max-height:430px;
-  object-fit:contain;
-  filter:drop-shadow(0 18px 30px rgba(0,0,0,.62));
-  opacity:.99;
-  z-index:2;
-}
-.liveTop{position:absolute;right:12px;top:10px;display:flex;gap:6px;z-index:6;padding:0}
-.topStat{display:none}
-.sensorPills{
-  position:absolute;
-  top:10px;
-  right:10px;
-  display:flex;
-  gap:5px;
-  z-index:8;
-}
-.pill{
-  padding:7px 9px;
-  border-radius:12px;
-  background:#08121ccc;
-  border:1px solid #27445d;
-  color:#9eb0c1;
-  font-size:9px;
-  font-weight:800;
-  backdrop-filter:blur(8px);
-}
-.pill .miniDot{width:7px;height:7px}
-.pill:last-child{display:none}
-
+.glowDot{width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 16px rgba(60,248,143,.75)}
 .gaugeShell{
-  position:absolute;
-  left:8px;
-  top:275px;
-  width:min(54vw,390px);
-  max-width:390px;
-  aspect-ratio:1/1;
-  border-radius:50%;
-  padding:12px;
-  z-index:5;
+  width:100%; max-width:360px; aspect-ratio:1/1; border-radius:50%;
+  padding:14px; position:relative;
   background:
-    radial-gradient(circle at 50% 50%,#202c3c 0 18%,#0a1119 19% 54%,transparent 55%),
-    conic-gradient(from 210deg,rgba(255,255,255,.08) 0 240deg,transparent 240deg 360deg);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.05),
-    inset 0 0 26px rgba(35,136,255,.06),
-    0 0 40px rgba(0,0,0,.45);
-}
-.gaugeShell:before{
-  content:"";
-  position:absolute;
-  inset:8%;
-  border-radius:50%;
-  border:1px solid rgba(77,157,255,.28);
-  box-shadow:0 0 28px rgba(35,136,255,.08) inset;
-}
-.gaugeShell:after{
-  content:"0     2     4     6     8     10     12";
-  position:absolute;
-  left:11%;
-  right:11%;
-  bottom:17%;
-  font-size:9px;
-  letter-spacing:.03em;
-  color:#d4e7f8;
-  text-align:center;
-  opacity:.9;
+    radial-gradient(circle at 50% 50%, #1b2433 0 25%, #0a1018 26% 44%, transparent 45%),
+    conic-gradient(from 210deg, rgba(255,255,255,.08) 0 240deg, transparent 240deg 360deg);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), 0 0 30px rgba(0,0,0,.35);
 }
 .gauge{
-  width:100%;height:100%;border-radius:50%;position:relative;
-  background:conic-gradient(from 210deg,#2de9ff 0deg,#2388ff 105deg,#6e7cff 180deg,#143c9e 230deg,rgba(255,255,255,.07) 230deg 240deg,transparent 240deg 360deg);
-  -webkit-mask:radial-gradient(circle at 50% 50%,transparent 0 73%,#000 74%);
-          mask:radial-gradient(circle at 50% 50%,transparent 0 73%,#000 74%);
-  filter:drop-shadow(0 0 22px rgba(35,136,255,.30));
+  width:100%; height:100%; border-radius:50%; position:relative;
+  background:conic-gradient(from 210deg, #2de9ff 0deg, #2388ff 100deg, #6e7cff 180deg, #143c9e 230deg, rgba(255,255,255,.08) 230deg 240deg, transparent 240deg 360deg);
+  -webkit-mask: radial-gradient(circle at 50% 50%, transparent 0 55%, #000 56%);
+          mask: radial-gradient(circle at 50% 50%, transparent 0 55%, #000 56%);
+  filter:drop-shadow(0 0 22px rgba(0,231,255,.24));
 }
 .gaugeCenter{
-  position:absolute;
-  inset:28%;
-  border-radius:50%;
-  background:radial-gradient(circle at 50% 35%,#152234,#080e16 73%);
-  border:1px solid #2c4760;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
-  box-shadow:inset 0 0 28px rgba(255,255,255,.025),0 0 28px rgba(0,0,0,.35);
+  position:absolute; inset:26%; border-radius:50%;
+  background:radial-gradient(circle at 50% 35%, #162334, #0b121b 70%);
+  border:1px solid #2d4256; display:flex; flex-direction:column; justify-content:center; align-items:center;
+  text-align:center; box-shadow:inset 0 2px 18px rgba(255,255,255,.04);
 }
-.gaugeCenter .label{font-size:12px;color:#b7c7d7;letter-spacing:.14em;font-weight:700}
-.gaugeCenter .value{font-size:50px;font-weight:900;line-height:.95;margin-top:4px}
-.gaugeCenter .sub{font-size:11px;color:#58caff;margin-top:6px;font-weight:800}
-
-.heroMetrics{
-  position:absolute;
-  left:10px;
-  right:10px;
-  bottom:16px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  z-index:6;
+.gaugeCenter .label{font-size:11px; color:var(--muted); letter-spacing:.14em}
+.gaugeCenter .value{font-size:42px; font-weight:900; line-height:1}
+.gaugeCenter .sub{font-size:11px; color:#7fefff; margin-top:2px}
+.heroRight{position:relative; display:flex; flex-direction:column; justify-content:space-between}
+.heroBike{position:absolute; right:-12px; bottom:-8px; width:min(56%,520px); filter:drop-shadow(0 18px 24px rgba(0,0,0,.6)); opacity:.98}
+.liveTop{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding-right:34%;
 }
-.heroMetric{
-  min-height:86px;
-  padding:10px;
-  border-radius:17px;
-  background:linear-gradient(180deg,rgba(12,20,31,.96),rgba(6,11,17,.96));
-  border:1px solid #24415a;
-  box-shadow:0 10px 25px rgba(0,0,0,.26);
+.topStat{
+  position:relative; overflow:hidden; padding:12px; border-radius:18px;
+  background:linear-gradient(180deg, rgba(14,23,34,.92), rgba(7,12,19,.92));
+  border:1px solid var(--line); box-shadow:0 10px 28px rgba(0,0,0,.18);
 }
-.heroMetric span{display:block;color:#86bdf1;font-size:10px;font-weight:800;text-transform:uppercase}
-.heroMetric b{display:block;font-size:27px;margin-top:5px}
-.heroMetric small{font-size:10px;color:#8fa3b8}
-.grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+.topStat:after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--cyan), transparent); opacity:.7;
+}
+.topStat span{display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.topStat b{display:inline-block; font-size:25px; margin-top:4px}
+.topStat small{font-size:11px; color:var(--muted)}
+.sensorPills{display:flex; gap:8px; flex-wrap:wrap}
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:999px; font-size:11px; font-weight:700;
+  background:#09111abf; border:1px solid var(--line); color:var(--muted);
+}
+.pill .miniDot{width:8px; height:8px; border-radius:50%; background:var(--off); box-shadow:0 0 0 2px rgba(255,255,255,.04)}
+.pill.on{color:#dffef2; border-color:#2a7b53; background:#0a2218}
+.pill.on .miniDot{background:var(--green); box-shadow:0 0 14px rgba(60,248,143,.65)}
+.grid{display:grid; grid-template-columns:1.08fr .92fr; gap:12px; margin-top:12px}
 .card{
   background:linear-gradient(180deg, rgba(15,24,36,.98), rgba(7,12,19,.98));
   border:1px solid var(--line); border-radius:24px; padding:15px;
@@ -203,7 +129,7 @@ input,select{
   padding:10px 11px; font-size:15px; outline:none;
 }
 input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,255,.08)}
-.quickSetup{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.quickSetup{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:10px}
 .btn{
   appearance:none; border:1px solid var(--line); border-radius:18px;
   padding:13px 10px; font-size:12px; font-weight:900; color:var(--text);
@@ -212,13 +138,13 @@ input:focus,select:focus{border-color:#2b8ca1; box-shadow:0 0 0 2px rgba(0,231,2
 }
 .btn:active{transform:scale(.975)}
 .btn.off{background:#111925; color:#8190a0; border-color:#243240}
-.btn.blue.on{background:linear-gradient(135deg,#083d69,#0b2344);color:#e5fbff;border-color:#2f98e6;box-shadow:0 0 30px rgba(35,136,255,.24),inset 0 0 18px rgba(45,233,255,.05)}
+.btn.blue.on{background:linear-gradient(135deg,#083c5a,#0a263d); color:#d1fbff; border-color:#2679b9; box-shadow:0 0 22px rgba(35,136,255,.18)}
 .btn.green.on{background:linear-gradient(135deg,#0b412b,#0a2b1f); color:#c8ffdf; border-color:#2d8358; box-shadow:0 0 22px rgba(60,248,143,.12)}
 .btn.yellow.on{background:linear-gradient(135deg,#62490a,#362803); color:#fff2bf; border-color:#ab8420}
 .btn.violet.on{background:linear-gradient(135deg,#40205f,#26143d); color:#ead8ff; border-color:#7c4bb4}
 .btn.red{background:linear-gradient(135deg,#73172e,#3a1019); border-color:#a32c49; color:#ffdbe4}
 .btn.red.on{background:linear-gradient(135deg,#b91a44,#73142f); border-color:#ff6285; color:#fff}
-.sensorRow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+.sensorRow{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:10px}
 .sensorBox{
   padding:10px; border-radius:16px; border:1px solid var(--line); background:#0c0f16; text-align:center;
 }
@@ -295,36 +221,21 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
 .infoMeta b{display:block;margin-top:3px;font-size:13px}
 .closeInfo{width:100%;margin-top:12px}
 
-
 @media(max-width:920px){
-  .hero{min-height:690px}
-  .heroGrid{min-height:650px}
-  .heroBike{width:66%;right:-30px;top:34px;max-height:390px}
-  .brand{width:57%}
-  .gaugeShell{top:286px;width:min(58vw,390px)}
+  .heroGrid{grid-template-columns:1fr}
+  .brandBlock{gap:12px}
+  .heroBike{position:relative; width:min(100%,430px); right:auto; bottom:auto; align-self:flex-end}
+  .liveTop{padding-right:0}
   .grid{grid-template-columns:1fr}
   .full{grid-column:auto}
 }
 @media(max-width:620px){
-  .wrap{padding:8px 8px 96px}
-  .hero{min-height:650px;border-radius:24px;padding:14px}
-  .heroGrid{min-height:620px}
-  .brand{width:58%}
-  .brand h1{font-size:30px}
-  .brand p{font-size:10px;max-width:220px}
-  .build{font-size:9px;padding:5px 8px}
-  .heroBike{width:72%;right:-68px;top:36px;max-height:350px}
-  .sensorPills{top:8px;right:8px;gap:4px}
-  .pill{font-size:8px;padding:6px 7px}
-  .gaugeShell{left:2px;top:260px;width:66vw;max-width:360px}
-  .gaugeCenter .value{font-size:46px}
-  .heroMetrics{grid-template-columns:repeat(2,1fr);bottom:12px}
-  .heroMetric{min-height:76px}
-  .heroMetric b{font-size:24px}
+  .wrap{padding:10px 10px 96px}
+  .brand h1{font-size:31px}
+  .liveTop{grid-template-columns:repeat(2,minmax(0,1fr))}
   .inputs,.priority{grid-template-columns:1fr}
   .quickSetup{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sensorRow{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .nav{width:96%;padding:7px}
 }
 </style>
 </head>
@@ -334,7 +245,7 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
     <div class="heroGrid">
       <div class="brandBlock">
         <div class="brand">
-          <div class="version">BUILD V10 BLUE MOBILE</div>
+          <div class="version">BUILD V9 BLUE EDITION</div>
           <h1>VäNä AutoDyno</h1>
           <p>Road dyno • sensor fusion • RPM-prioriteetit • AutoTune • BLUE RACING UI</p>
           <div class="build"><span class="glowDot"></span> Sininen racing-versio • mallikuvan tyyli</div>
@@ -368,13 +279,6 @@ video{display:block; width:100%; max-height:240px; object-fit:cover}
 
         <img src="bike.png?v=7" class="heroBike" alt="">
       </div>
-    </div>
-  
-    <div class="heroMetrics">
-      <div class="heroMetric"><span>Nopeus</span><b id="spdHero">0.0</b><small>km/h</small></div>
-      <div class="heroMetric"><span>Teho</span><b id="hpHero">0.0</b><small>hv</small></div>
-      <div class="heroMetric"><span>Vääntö</span><b id="nmHero">0.0</b><small>Nm</small></div>
-      <div class="heroMetric"><span>G</span><b id="gHero">0.00</b><small>G</small></div>
     </div>
   </section>
 
@@ -753,7 +657,7 @@ function update(kmh){
 
   $("spd").value=kmh.toFixed(1); $("rpm").value=Math.round(rpm); $("g").value=(filtA/9.80665).toFixed(2);
   $("hp").value=hp.toFixed(1); $("nm").value=nm.toFixed(1);
-  $("spdTop").textContent=kmh.toFixed(1); $("hpTop").textContent=hp.toFixed(1); $("nmTop").textContent=nm.toFixed(1); $("gTop").textContent=(filtA/9.80665).toFixed(2); $("spdHero").textContent=kmh.toFixed(1); $("hpHero").textContent=hp.toFixed(1); $("nmHero").textContent=nm.toFixed(1); $("gHero").textContent=(filtA/9.80665).toFixed(2);
+  $("spdTop").textContent=kmh.toFixed(1); $("hpTop").textContent=hp.toFixed(1); $("nmTop").textContent=nm.toFixed(1); $("gTop").textContent=(filtA/9.80665).toFixed(2);
   updateGauge(rpm,pick.source);
 
   let sample={t:Date.now(), kmh,rpm,hp,nm,a:filtA,g:filtA/9.80665, imuA, gpsAccuracy:gpsMeta.accuracy, altitude:gpsMeta.altitude, gradePct, speedRpm, micRpm:micRpmValue, micConfidence, rpmSource:pick.source};
