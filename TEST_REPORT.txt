@@ -1,28 +1,22 @@
-VäNä AutoDyno v10 AutoRide - testiraportti
-==========================================
+VäNä AutoDyno v11 Reliable — TEST REPORT
 
-1. JavaScript syntax check (Node v22): PASS
-2. Sisäinen self-test x5 peräkkäin: PASS x5
-   - gear-learning: PASS (2→3→4)
-   - run quality: PASS (97 %, 2→3→4 synthetic run)
-   - auto-start eligibility: PASS
-3. Kriittisten painikkeiden handler-audit: PASS
-   - ANTURIT
-   - MIKROFONI
-   - KAMERA
-   - NOLLAA ASENTO
-   - ARM AUTO
-   - AUTO AJOT
-   - MANUAALI
-   - STOP
-   - RPM KALIBROI
-   - TYHJENNÄ VEDOT
-   - NÄYTÄ VIIMEISET
-   - DELTA
-   - LUO EHDOTUS
-4. DOM id/reference audit: PASS
-   - 84 JavaScript-DOM-viitettä tarkistettu
-   - puuttuvia id-viitteitä: 0
+PASS — JavaScript syntax: OK
+PASS — DOM id references: missing=none
+PASS — Duplicate ids: duplicates=none
+PASS — Button type safety: without type=none
+PASS — Critical button handlers: missing=none
+PASS — secure context guard: secureFeatureMessage
+PASS — GPS watch: navigator.geolocation.watchPosition
+PASS — GPS speed fallback: dist/dt
+PASS — microphone getUserMedia: navigator.mediaDevices.getUserMedia
+PASS — microphone live level: micLevelFill
+PASS — AudioContext resume: audioCtx.resume()
+PASS — RPM direct selector: setPrimaryRpmSource
+PASS — AUTO AJOT parallel permission: Promise.allSettled([sensorPromise,micPromise])
+PASS — gear learning: estimateGear
+PASS — 5x repeat structural verification: [True, True, True, True, True]
 
-Rajoite:
-Oikeaa GPS-, IMU- ja mikrofonidataa ei voi simuloida täysin työympäristössä. Ensimmäinen ajotesti oikealla puhelimella tarvitaan anturien kohinan, mikrofonin 2T-harmonisten ja GPS-näytteenottotaajuuden hienosäätöön.
+HUOMIO:
+GPS:n, mikrofonin ja iPhonen anturilupien todellista fyysistä toimintaa ei voi varmistaa tässä testiympäristössä.
+Ne vaativat HTTPS-osoitteen ja käyttäjän antamat selainluvat oikealla puhelimella.
+Versio näyttää tästä syystä nyt näkyvän virheen, jos se avataan file://-tiedostoesikatselusta.

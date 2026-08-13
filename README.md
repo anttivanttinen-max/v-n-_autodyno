@@ -1,28 +1,16 @@
-# VäNä AutoDyno v17 Sensor Fix
+# VäNä AutoDyno v11 Reliable
 
-Tämä versio korjaa iPhone-antureiden diagnosoinnin ja lupapyynnöt.
+Tämä versio on tehty suoraan v9/v10-pohjan päälle ja korjaa käyttäjän raportoimat kolme ongelmaa:
 
-Muutokset:
-- pyytää DeviceMotion-luvan käyttäjän ANTURIT-painalluksesta
-- pyytää myös DeviceOrientation-luvan samasta painalluksesta
-- rekisteröi devicemotion- ja deviceorientation-kuuntelijat
-- LIVE ANTURIT -paneeli näyttää:
-  - motion event count
-  - motion Hz
-  - acceleration X/Y/Z
-  - acceleration magnitude
-  - gyro alpha/beta/gamma
-  - orientation beta/gamma
-  - GPS speed, accuracy, update count
-- top GPS/IMU/MIC indikatorit ovat oikeasti dynaamisia
-- 3 sekunnin timeout kertoo jos devicemotion-eventtejä ei tule lainkaan
-- kamera pysyy poistettuna
-- info ON/OFF säilyy
+1. RPM-lähteen voi vaihtaa suoraan Mittaus-näkymästä.
+2. GPS käyttää oikeaa geolocation-watchia ja laskee nopeuden myös sijaintipisteistä, jos iPhone ei anna coords.speed-arvoa.
+3. Mikrofonissa on oikea äänitason mittari, joten reagointi ääneen näkyy heti vaikka RPM-lukitus ei vielä olisi hyvä.
 
-GitHub:
-1. korvaa index.html
-2. pidä bike.png samassa juuressa
-3. avaa ?v=17
-4. paina ANTURIT
-5. hyväksy mahdolliset Motion/Orientation- ja sijaintiluvat
-6. liikuta puhelinta ja katso LIVE ANTURIT -paneelia
+Lisäksi:
+- AUTO AJOT pyytää GPS- ja mikrofoniluvat rinnakkain samasta napinpainalluksesta (iOS-yhteensopivuus).
+- Järjestelmätesti näyttää secure context / GPS / media / WebAudio / DeviceMotion -tuen.
+- localStorage käsitellään virheenkestävästi.
+
+TÄRKEÄÄ iPhonella:
+GPS ja mikrofoni eivät toimi normaalisti, jos index.html avataan suoraan Tiedostot-esikatselusta (file://).
+Aja sovellus HTTPS-osoitteesta (esim. GitHub Pages / Railway) ja avaa se Safarissa.
