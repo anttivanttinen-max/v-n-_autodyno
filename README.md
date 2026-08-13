@@ -1,20 +1,21 @@
-# VäNä AutoDyno v18 — GPS + Mic + Priority Fix
+# VäNä AutoDyno v12 RED AUTO PRO
 
-Korjattu käyttäjän testin perusteella:
-- kiihtyvyys toimi jo
-- GPS: lisätty lupa-/sijainti-/päivitysdiagnostiikka
-- mikrofoni: AudioContext-tila näkyviin, FFT-koko 8192, herkempi autokorrelaatio, live RPM ja luottamus
-- mikrofonin min/max RPM asetettavissa
-- RPM-prioriteetti asetuksista vaikuttaa nyt heti päämittarin lähteeseen
-- päämittarin RPM-lähde näyttää dynaamisesti NOPEUS tai MIKROFONI
-- mikrofoni voi toimia prioriteetti 1:nä myös ennen nopeuskalibrointia
-- kamera pysyy poistettuna
-- JavaScript-syntaksi tarkistettu
+Rakennettu v9/v11-toimivan pohjan päälle. Tavoite: hyväksytyn punaisen RED EDITION -mockupin tunnelma ilman että toimivaa mittauslogiikkaa korvataan pelkällä UI-demolla.
 
-Testaa näin:
-1. GitHubiin index.html + bike.png
-2. avaa ?v=18
-3. ANTURIT → katso GPS lupa / sijainti / päivitykset
-4. MIKROFONI → katso Audio tila, Mic RPM, Mic luottamus
-5. Asetukset → RPM prioriteetti 1 = Mikrofoni
-6. palaa Mittaus-näkymään: päämittarin `RPM lähde` muuttuu MIKROFONIksi heti kun mic-RPM on kelvollinen.
+## Uutta v12
+- RED EDITION -teema koko sovelluksessa
+- AutoRide-herkkyys: Herkkä 0,18 g / Normaali 0,25 g / Tiukka 0,38 g + vapaa g-arvo
+- erillinen lopetusviive ja cooldown säilyvät
+- AutoRide-livekortti: tila, herkkyys, kynnys ja arvioitu vaihde
+- projekti: 2T/4T, cc, pakoputki ja ilmanotto
+- kaasarisäätö: koko, pääsuutin, tyhjäkäyntisuutin, neula, klipsi, seosruuvi, luisti, power jet
+- kaasariasetukset tallentuvat jokaisen vedon metatietoihin
+- teho (punainen) + vääntö (sininen) samaan dynokäyrään
+- JSON-datan vienti, vaihdeoppimisen nollaus, asetusten palautus
+- PWA manifest + service worker
+
+## iPhone
+GPS, mikrofoni ja liikeanturit on avattava HTTPS-osoitteesta Safarissa. Suora file:// / Tiedostot-esikatselu ei anna kaikkia anturioikeuksia.
+
+## Turvallisuus
+Älä käsittele puhelinta ajon aikana. AutoRide on tarkoitettu siihen, että sovellus jätetään valvomaan ajoa ilman ruudun koskettelua. Varsinaiset dynovedot vain turvallisessa testiympäristössä.

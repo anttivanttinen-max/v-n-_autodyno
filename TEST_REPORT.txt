@@ -1,0 +1,28 @@
+VäNä AutoDyno v12 RED AUTO PRO — TEST REPORT
+
+PASS — JavaScript syntax (node --check)
+PASS — DOM references — missing: none
+PASS — duplicate IDs — none
+PASS — button type safety — all explicit type=button
+PASS — critical controls present — all present
+PASS — Browser integration suite × 5 consecutive runs
+  - navigation: Mittaus / Vedot / Analyysi / AutoTune / Asetukset
+  - direct RPM source switching
+  - microphone start + live audio-level reaction using simulated media input
+  - GPS watch + speed update using simulated geolocation
+  - AutoRide sensitivity presets and custom g synchronization
+  - project and carb settings storage
+  - AutoRide on/off state
+  - manual run save + tune metadata snapshot
+  - gear learning 2→3→4 synthetic test
+  - JSON export
+  - critical button presence / unique IDs
+  - browser console errors: 0
+  - page JavaScript errors: 0
+
+IMPORTANT PHYSICAL-DEVICE LIMIT:
+Automated browser tests use simulated GPS and microphone devices. Actual iPhone GPS/microphone/IMU quality, microphone RPM harmonics and road-dyno accuracy still require a real ride test over HTTPS in Safari.
+GPS permission has already been verified to work on the user device after enabling Safari location permission.
+
+Visual check:
+Mobile 430 × 932 render inspected after final RED EDITION responsive layout patch.
