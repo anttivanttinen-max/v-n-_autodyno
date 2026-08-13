@@ -1,23 +1,28 @@
-# VäNä AutoDyno v10 AutoRide
+# VäNä AutoDyno v17 Sensor Fix
 
-Pohjana on käyttäjän toimivaksi toteama v9 Blue Edition. V9:n mittaus- ja anturilogiikka on säilytetty ja sen päälle on lisätty jatkuva AUTO AJOT -tila.
+Tämä versio korjaa iPhone-antureiden diagnosoinnin ja lupapyynnöt.
 
-## Uutta v10:ssä
-- AUTO AJOT: jatkuva automaattinen kiihdytysten tunnistus normaalin ajon aikana
-- Käynnistää anturit ja mikrofonin AUTO AJOT -painikkeesta
-- Tunnistaa kiihdytyksen GPS-nopeuden + suodatetun kiihtyvyyden perusteella
-- Oppii vaihteita mikrofonin RPM / GPS-nopeus -suhteesta
-- Pyrkii korjaamaan mikrofonin 1/2x ja 2x harmonisia opittujen välityssuhteiden avulla
-- Seuraa vaihteen vaihtumista saman vedon aikana
-- Tallentaa käytetyt vaihteet (esim. 2→3→4)
-- Laskee vedolle 0–100 % laatupisteet GPS-, mikrofoni-, kesto- ja nopeusmuutoksesta
-- Hylkää liian lyhyet / heikot satunnaiset tapahtumat
-- Jatkaa automaattista valvontaa cooldownin jälkeen ilman uutta painallusta
-- Auto-ajon käynnistys- ja lopetusherkkyys säädettävissä
-- Vedot-näkymässä näkyvät tila, vaihteet, laatupisteet ja huipputeho
+Muutokset:
+- pyytää DeviceMotion-luvan käyttäjän ANTURIT-painalluksesta
+- pyytää myös DeviceOrientation-luvan samasta painalluksesta
+- rekisteröi devicemotion- ja deviceorientation-kuuntelijat
+- LIVE ANTURIT -paneeli näyttää:
+  - motion event count
+  - motion Hz
+  - acceleration X/Y/Z
+  - acceleration magnitude
+  - gyro alpha/beta/gamma
+  - orientation beta/gamma
+  - GPS speed, accuracy, update count
+- top GPS/IMU/MIC indikatorit ovat oikeasti dynaamisia
+- 3 sekunnin timeout kertoo jos devicemotion-eventtejä ei tule lainkaan
+- kamera pysyy poistettuna
+- info ON/OFF säilyy
 
-## Testaus
-Katso TEST_REPORT.txt.
-
-## Huomio
-Puhelimen oikeat GPS-, mikrofoni-, IMU- ja iOS-luvat voidaan lopullisesti varmistaa vain oikealla puhelimella liikkeessä. Sisäinen logiikka, painikesidonnat, DOM-viitteet, vaihteenoppiminen, laatuarvio ja automaattisen vedon käynnistysehto on testattu ohjelmallisesti.
+GitHub:
+1. korvaa index.html
+2. pidä bike.png samassa juuressa
+3. avaa ?v=17
+4. paina ANTURIT
+5. hyväksy mahdolliset Motion/Orientation- ja sijaintiluvat
+6. liikuta puhelinta ja katso LIVE ANTURIT -paneelia
