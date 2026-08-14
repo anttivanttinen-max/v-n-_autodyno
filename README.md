@@ -1,45 +1,14 @@
-# VÄNÄ MOTOLAB v21 Unified
+# VÄNÄ MOTOLAB v22 RPM Fusion
 
-Yhdistetty master-versio kahden aiemman AutoDyno-pohjan parhaista osista.
+Päivityksen pääasia on RPM Fusion:
 
-## Tärkein periaate
-Mittausputki on prioriteetti #1. Teho/RPM/AutoRide/tallennuslogiikka ajetaan Web Workerissa 20 Hz:n sisäisellä näytteenotolla. UI saa Workerilta vain noin 10 päivitystä sekunnissa. Mikrofonin raskas RPM-laskenta ajetaan omassa RPM Workerissa ja AudioWorklet kerää audion.
+- Audio RPM hyväksytään vasta valitun minimi-RPM:n ja luottamuksen jälkeen.
+- Hyvä audio-RPM hallitsee mittausta.
+- Keskitasoinen audio yhdistetään GPS-nopeudesta + opitusta vaihdesuhteesta laskettuun RPM:ään.
+- Heikko audio korvataan nopeus-RPM:llä, jos vaihde on luotettavasti tunnistettu.
+- Audio- ja nopeus-RPM:n suuri ero tulkitaan mahdolliseksi kytkinluistoksi; silloin nopeus ei saa väkisin korjata audio-RPM:ää.
+- Jos kumpikaan lähde ei ole riittävän luotettava, Fusion hylkää RPM:n.
+- Run-dataan tallennetaan audioRpm, speedRpm, fusionRpm, source, confidence, fusionMode, slip ja agreement.
+- Kamera-RPM ei ole mukana.
 
-## Anturien toggle
-- GPS-painike: päälle / toinen painallus pois (clearWatch)
-- IMU-painike: päälle / toinen painallus pois (removeEventListener)
-- PUHELIN MIC: päälle / toinen painallus pois (stream tracks stop + AudioContext close)
-- BT / EXT MIC: sama, valittava audioinput asetuksista
-- ANTURIT: GPS + IMU yhdessä päälle/pois
-
-## Mukana
-- hyväksytty Red-racing ulkoasu, oma pyörä taustalla
-- akkupalkkia ei ole
-- RPM-mittarin neula reagoi RPM-arvoon
-- nykyisen vedon dynokäyrä pyörän päällä
-- GPS + IMU
-- Phone mic kokeellisena (ei oleteta toimivaksi ennen fyysistä testiä)
-- BT / EXT MIC kokeellisena ulkoisena RPM-lähteenä
-- RPM Fusion
-- Auto Gear Learn
-- Smart Bike Profiles
-- Gear Auto -näyttö
-- AutoRide / ARM AUTO
-- manuaaliveto, joka päättyy vain STOPista
-- vedon laatu
-- delta edelliseen
-- avattavat yksittäiset vedot
-- hylätyt vedot voidaan ottaa vertailuun
-- usean vedon päällekkäisvertailu
-- usean vedon yhdistetty referenssikäyrä
-- täysruudun dynokäyrä, zoom + pistearvon luku
-- kaasuttimen säätö ja suutin-ehdotus
-- AutoTune-testiehdotus
-- IndexedDB vetodatalle, localStorage fallback
-- Wake Lock
-- demo/stress-testitila
-
-## iPhone / selain
-GitHub Pages HTTPS tarvitaan GPS:lle, mikrofonille, Wake Lockille ja sensoreille. iOS pyytää Motion-luvan käyttäjän painalluksesta.
-
-Huom: fyysisiä GPS/IMU/Phone Mic/BT Mic signaaleja ei voida täysin validoida automaattisessa työpöytäselaimessa. V21 sisältää kuitenkin virheenkestävät fallbackit ja kaikki sensorit vapautetaan oikeasti OFF-tilassa.
+Laitekohtaiset testit on tehtävä HTTPS-osoitteessa iPhonella: GPS, DeviceMotion, puhelinmic, BT/EXT mic ja oikea maantie-/rullatesti turvallisessa ympäristössä.

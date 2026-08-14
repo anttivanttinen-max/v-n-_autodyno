@@ -1,8 +1,21 @@
-PASS: JavaScript syntax
-PASS: Static UI structure
-PASS: Browser interaction pass 1
-PASS: Browser interaction pass 2
-PASS: Stress navigation + 24 sensor state transitions + worker survival
-PASS: Final JS syntax re-check
+VÄNÄ MOTOLAB v22 RPM Fusion – TEST REPORT
 
-Device-only verification still required: actual iPhone GPS, DeviceMotion, phone microphone RPM, Bluetooth/EXT microphone routing, and a real road pull on HTTPS.
+PASS:
+- Outer JavaScript syntax (node --check)
+- V22 title/version
+- audioRpm stored in run samples
+- speedRpm stored in run samples
+- fusionRpm / fusionMode stored in run samples
+- clutch-slip flag stored in run samples
+- default audio minimum RPM = 3000
+- camera RPM absent
+- manual-run auto-stop protection remains (auto-stop only inside mode === "auto")
+
+NOT PHYSICALLY VALIDATED IN THIS ENVIRONMENT:
+- iPhone GPS and geolocation accuracy
+- iPhone DeviceMotion permission/stream
+- Phone microphone RPM accuracy
+- Bluetooth/EXT microphone routing
+- Real learned gear ratios on a motorcycle
+- Real clutch-slip detection
+- Real road/dyno pull over HTTPS
