@@ -1,14 +1,13 @@
-# VÄNÄ MOTOLAB v26 BT ONLY
+# VÄNÄ MOTOLAB v27 – GPS calibration + BT tester route
 
-Puhelimen oma mikrofoni on poistettu RPM-ketjusta kokonaan. Ainoa audio-RPM-lähde on BT-kuulokkeen/BT-headsetin mikrofoni.
+Muutokset:
+- RPM-lähde: GPS ONLY / BT MIC ONLY / AUTO FUSION.
+- GPS ONLY käyttää valitun vaihteen omaa RPM/km/h-kalibrointia.
+- Vaihde/RPM/GPS-kalibrointi: automaattinen vakaa nopeus, manuaalinen RPM+km/h, Auto Gear Learn.
+- Automaattinen kalibrointi: esim. G3 + 3000 rpm + 3 s vakaa GPS-nopeus -> tallennus.
+- BT audio avataan samalla yksinkertaisella getUserMedia-reitillä kuin toimivassa testerissä, ilman pakotettua deviceId:tä.
+- Audio-RPM yli asetetun max RPM:n hylätään ennen Fusionia.
+- Dynokäyrän ristikko on valittavissa Asetuksista; akselimerkintöjä lisätty.
+- Puhelimen omaa MIC-painiketta/RPM-lähdettä ei ole.
 
-Lisätty BT-vianhaku:
-- actual input track label
-- BT äänen taso
-- havaittu f0
-- raw fingerprint score
-- automaattinen AirPods/Bluetooth/headset-tyyppisen audiotulon valinta, jos selain näyttää laitteen nimen
-- audiolaitteen käsinvalinta Asetuksista
-
-Jos BT taso näyttää EI PCM/TASOA, ongelma on audioreitityksessä eikä RPM-laskennassa.
-Jos BT taso näkyy mutta f0/RPM ei, korjaus kohdistetaan pitch/fingerprint-algoritmiin.
+Huom: selain/iOS päättää fyysisen audioreitin. BT-testipainike näyttää selaimen ilmoittaman audiotulon nimen.

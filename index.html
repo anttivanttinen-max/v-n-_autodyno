@@ -125,7 +125,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
        <div class="card"><span>Auto Gear Learn</span><b id="learnState">ODOTTAA RPM:ÄÄ</b></div>
        <div class="card"><span>Mittausputki</span><b id="engineHealth">OK</b></div>
      </div>
-     <div id="measureStatus" class="statusbox">Valmis. Anturit voi kytkeä päälle ja pois myös yläreunan GPS / IMU / MIC / EXT -painikkeista.</div>
+     <div id="measureStatus" class="statusbox">Valmis. RPM-lähde valitaan Asetuksista: GPS ONLY / BT MIC ONLY / AUTO FUSION.</div>
    </div>
  </section>
 
@@ -177,25 +177,57 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
     <div class="profileRow"><select id="profileSelect"></select><button id="newProfileBtn" class="action">+ UUSI</button></div>
     <div id="profileInfo" class="statusbox">Profiili sisältää opitut vaihteet, säädöt ja vertailuvedot.</div>
   </div>
-  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">⚙️</span> ASETUKSET</div></div>
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎛️</span> MITTAUS & RPM</div><span class="tiny">ajon aikana käytettävä lähde</span></div>
+   <div class="form">
+    <label>RPM-lähde<select id="rpmSourceMode"><option value="gps">GPS ONLY</option><option value="bt">BT MIC ONLY</option><option value="fusion" selected>AUTO FUSION</option></select></label>
+    <label>Vedon / kalibroinnin vaihde<input id="manualGear" type="number" min="1" max="6" value="3"></label>
+    <label>AutoRide aloitus RPM<input id="recordFrom" type="number" value="1500"></label><label>AutoRide lopetus RPM<input id="stopRpm" type="number" value="10500"></label>
+    <label>AutoRide herkkyys G<input id="autoSensitivity" type="number" value=".28" step=".01"></label><label>Auto-stop viive s<input id="autoStopDelay" type="number" value=".7" step=".1"></label>
+    <div class="switchrow"><div><b style="font-size:9px">Auto Gear Learn</b><div class="tiny">Oppii vaihdesuhteita luotettavasta BT-RPM + GPS -datasta.</div></div><button id="gearLearnToggle" class="switch on"></button></div>
+   </div>
+   <div id="sourceModeStatus" class="statusbox">AUTO FUSION: BT-RPM + GPS/nopeus tukevat toisiaan.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧭</span> VAIHDE / RPM / GPS KALIBROINTI</div><span class="tiny">GPS ONLY -RPM</span></div>
+    <div class="statusbox">Valitse vaihde ja tapa. Esim. 3. vaihde + 3000 rpm. Automaattisessa tilassa pidä kierrokset mittarista 3000 rpm:ssä; sovellus odottaa vakaata GPS-nopeutta ja tallentaa suhteen itse.</div>
+    <div class="form">
+      <label>Kalibrointitapa<select id="calMode"><option value="auto">AUTOMAATTINEN – vakaa nopeus → tallenna</option><option value="manual">MANUAALINEN – syötä RPM + nopeus</option><option value="learn">AUTO GEAR LEARN – opi BT + GPS:stä</option></select></label>
+      <label>Vaihde<input id="calGear" type="number" min="1" max="6" value="3"></label>
+      <label>Tavoite RPM<input id="calTargetRpm" type="number" value="3000" step="100"></label>
+      <label>Vakaa aika s<input id="calStableSec" type="number" value="3" min="1" max="10" step="0.5"></label>
+      <label>Sallittu GPS-vaihtelu km/h<input id="calToleranceKmh" type="number" value="1.0" min="0.2" max="5" step="0.1"></label>
+      <label>Manuaalinen nopeus km/h<input id="calSpeed" type="number" value="60" step="0.1"></label>
+      <label>Manuaalinen RPM<input id="calRpm" type="number" value="6000" step="100"></label>
+      <button id="autoCalBtn" class="action full">ALOITA AUTOMAATTINEN KALIBROINTI</button>
+      <button id="calibrateBtn" class="action">TALLENNA MANUAALINEN</button><button id="clearGearCalBtn" class="action gray">TYHJENNÄ VAIHDE</button>
+    </div>
+    <div id="gearCalStatus" class="statusbox">Ei käynnissä.</div>
+    <div id="gearCalList" class="statusbox">Ei GPS-vaihdekalibrointeja.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🏍️</span> AJONEUVO & DYNO</div></div>
    <div class="form">
     <label>Profiilin nimi<input id="profileName" value="Oma pyörä"></label><label>Moottori<select id="engineType"><option>2T</option><option>4T</option></select></label>
-    <label>Massa ajossa kg<input id="mass" type="number" value="190"></label><label>Manuaalinen vaihde<input id="manualGear" type="number" min="1" max="6" value="3"></label>
-    <label>RPM kal. nopeus km/h<input id="calSpeed" type="number" value="60"></label><label>RPM kal. kierrokset<input id="calRpm" type="number" value="6000"></label>
-    <label>Audio min RPM<input id="micMin" type="number" value="3000"></label><label>Audio max RPM<input id="micMax" type="number" value="12500"></label>
-    <label>BT-kuulokkeen mikrofoni<select id="audioDevice"><option value="">Automaattinen BT-haku</option></select></label><label>CdA<input id="cda" type="number" value=".55" step=".01"></label>
-    <label>Audio korkea luottamus<input id="audioHighConf" type="number" value=".62" min=".3" max=".95" step=".01"></label><label>Audio min luottamus<input id="audioMidConf" type="number" value=".34" min=".1" max=".8" step=".01"></label>
-    <label>Kytkinluisto raja<input id="slipThreshold" type="number" value=".18" min=".08" max=".5" step=".01"></label><label>Speed RPM min km/h<input id="speedRpmMinKmh" type="number" value="12" min="3" max="80" step="1"></label>
+    <label>Massa ajossa kg<input id="mass" type="number" value="190"></label><label>CdA<input id="cda" type="number" value=".55" step=".01"></label>
     <label>Crr<input id="crr" type="number" value=".015" step=".001"></label><label>Ilman tiheys<input id="rho" type="number" value="1.225" step=".001"></label>
-    <div class="switchrow"><div><b style="font-size:9px">Auto Gear Learn</b><div class="tiny">Oppii vaihdesuhteet vain riittävän luotettavasta audio-RPM:stä.</div></div><button id="gearLearnToggle" class="switch on"></button></div>
+    <div class="switchrow"><div><b style="font-size:9px">Dynolapun ristikko</b><div class="tiny">RPM ja tehoalue luettavissa ilman kursorin liikuttelua.</div></div><button id="gridToggle" class="switch on"></button></div>
     <div class="switchrow"><div><b style="font-size:9px">ⓘ Info-napit</b></div><button id="infoToggle" class="switch on"></button></div>
     <div class="switchrow"><div><b style="font-size:9px">☀ Pidä näyttö päällä</b></div><button id="wakeToggle" class="switch on"></button></div>
-    <button id="calibrateBtn" class="action">RPM KALIBROI</button><button id="saveSettingsBtn" class="action">TALLENNA</button>
-    <button id="demoBtn" class="action gray full">DEMO / STRESS TEST</button>
+    <button id="saveSettingsBtn" class="action full">TALLENNA ASETUKSET</button>
    </div><div id="settingsStatus" class="statusbox">Asetukset tallennetaan paikallisesti.</div>
   </div>
 
-  
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎧</span> BT RPM – LISÄASETUKSET</div><span class="tiny">testerin toimiva audioavaus</span></div>
+    <div class="statusbox">BT MIC käyttää samaa yksinkertaista getUserMedia-audioavausta kuin toimivassa testerissä: ei pakotettua laite-ID:tä. Puhelimen omaa mikrofonia ei ole RPM-lähteenä.</div>
+    <div class="form">
+      <label>Audio min RPM<input id="micMin" type="number" value="3000"></label><label>Audio max RPM<input id="micMax" type="number" value="12500"></label>
+      <label>Audio korkea luottamus<input id="audioHighConf" type="number" value=".62" min=".3" max=".95" step=".01"></label><label>Audio min luottamus<input id="audioMidConf" type="number" value=".34" min=".1" max=".8" step=".01"></label>
+      <label>Kytkinluisto raja<input id="slipThreshold" type="number" value=".18" min=".08" max=".5" step=".01"></label><label>Speed RPM min km/h<input id="speedRpmMinKmh" type="number" value="12" min="3" max="80" step="1"></label>
+      <button id="btTestBtn" class="action full">TESTAA BT-AUDIOTULO</button>
+    </div>
+    <div id="btRouteStatus" class="statusbox">BT-audiotulo ei ole käynnissä.</div>
+  </div>
+
   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📱</span> SOVELLUS</div><span class="tiny">Asennettava puhelinnäkymä</span></div>
     <div class="statusbox">Julkaise HTTPS-osoitteeseen. iPhone: Safari → Jaa → Lisää Koti-valikkoon. Android: selaimen Asenna sovellus -toiminto, jos tarjolla.</div>
     <div class="grid2"><button id="installBtn" class="action">ASENNA / OHJE</button><button id="fullscreenBtn" class="action gray">KOKO NÄYTTÖ</button></div>
@@ -218,7 +250,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
   </div>
   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧪</span> JÄRJESTELMÄTESTI</div></div>
     <div class="grid2"><div class="card"><span>Secure context</span><b id="diagSecure">–</b></div><div class="card"><span>Worker</span><b id="diagWorker">–</b></div><div class="card"><span>GPS API</span><b id="diagGps">–</b></div><div class="card"><span>Media API</span><b id="diagMedia">–</b></div><div class="card"><span>AudioWorklet</span><b id="diagAudio">–</b></div><div class="card"><span>Wake Lock</span><b id="diagWake">–</b></div></div>
-    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">V26 BT ONLY käynnistyi.</div>
+    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">V27 GPS + BT käynnistyi.</div>
   </div>
  </section>
 
@@ -256,7 +288,7 @@ let db=null,useFallback=false;
 
 const infoDefs={
  sensors:"ANTURIT kytkee GPS:n ja IMU:n yhdessä. Yläreunan GPS- ja IMU-painikkeilla ne voi kytkeä myös erikseen. Toinen painallus sammuttaa.",
- mic:"Puhelimen mikrofoni on kokeellinen RPM-lähde. V26 hylkää liian matalat/epävarmat audiohavainnot ja yhdistää hyvän audio-RPM:n GPS-nopeuteen sekä opittuun vaihdesuhteeseen. Toinen painallus vapauttaa mikrofonin kokonaan.",
+ mic:"Puhelimen mikrofoni on kokeellinen RPM-lähde. V27 hylkää liian matalat/epävarmat audiohavainnot ja yhdistää hyvän audio-RPM:n GPS-nopeuteen sekä opittuun vaihdesuhteeseen. Toinen painallus vapauttaa mikrofonin kokonaan.",
  ext:"BT / EXT MIC käyttää valittua ulkoista audiotuloa, jos selain ja iPhone sallivat sen reitityksen. Toinen painallus pysäyttää streamin ja vapauttaa laitteen.",
  arm:"ARM AUTO odottaa kiihtyvyyttä ja RPM:ää. Mittausmoottori toimii Workerissa, käyttöliittymä päivittyy harvemmin.",
  manual:"Manuaalinen veto käynnistyy heti ja päättyy vain STOP-painikkeella.",
@@ -268,7 +300,7 @@ window.addEventListener("error",e=>log("JS: "+e.message));window.addEventListene
 
 const measurementWorkerSource=`
 "use strict";
-let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[]};
+let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[],rpmSourceMode:"fusion",selectedGear:3,gpsCalibrations:[],audioMaxRpm:12500};
 let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={ext:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,level:0,conf:0,t:0}};
 let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[];
 let lastGear=null,lastGearConf=0,lastFusionRpm=0;
@@ -313,10 +345,12 @@ function fuseRpm(){
    if(gear&&gearConf>.55){lastGear=gear;lastGearConf=gearConf}
  }
  const sorted=[...(cfg.gearRatios||[])].sort((x,y)=>y.ratio-x.ratio);
+ const selectedCal=(cfg.gpsCalibrations||[]).find(x=>+x.gear===+cfg.selectedGear&&x.ratio>0);
  if(!gear&&lastGear&&sorted[lastGear-1]){gear=lastGear;gearConf=Math.max(.35,lastGearConf*.92);gearRatio=sorted[lastGear-1].ratio}
+ if(selectedCal&&(!gearRatio||cfg.rpmSourceMode==="gps")){gear=+cfg.selectedGear||selectedCal.gear;gearConf=.96;gearRatio=selectedCal.ratio}
  let speedRpm=0,speedConf=0;
  if(gps.kmh>=cfg.speedRpmMinKmh){
-   if(gearRatio>0){speedRpm=gps.kmh*gearRatio;speedConf=clamp(.48+.42*gearConf,0, .92)}
+   if(gearRatio>0){speedRpm=gps.kmh*gearRatio;speedConf=selectedCal?.ratio===gearRatio?.82:clamp(.48+.42*gearConf,0,.92)}
    else if(cfg.manualRatio>0){speedRpm=gps.kmh*cfg.manualRatio;speedConf=.58}
  }
  const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioFpScore=a.fpScore||0,audioObservedF0=a.observedF0||0,audioLevel=a.level||0,audioConf=a.conf||0;
@@ -326,20 +360,25 @@ function fuseRpm(){
    slip=agreement>cfg.slipThreshold&&audioConf>=cfg.audioMidConf;
  }
  let rpm=0,conf=0,source="NO SIGNAL",fusionMode="NO SIGNAL";
- if(audioRpm&&audioConf>=cfg.audioHighConf){
+ const validAudio=(audioRpm>=cfg.fusionMinRpm && audioRpm<=cfg.audioMaxRpm);
+ if(cfg.rpmSourceMode==="gps"){
+   if(speedRpm){rpm=speedRpm;conf=speedConf;source=selectedCal?"GPS • G"+(cfg.selectedGear||gear):"GPS • SPEED";fusionMode="GPS ONLY"}
+ }else if(cfg.rpmSourceMode==="bt"){
+   if(validAudio&&audioConf>=cfg.audioMidConf){rpm=audioRpm;conf=audioConf;source="BT MIC";fusionMode="BT ONLY"}
+ }else if(validAudio&&audioConf>=cfg.audioHighConf){
    if(speedRpm&&!slip&&agreement<.12){
      rpm=audioRpm*.78+speedRpm*.22;conf=clamp(audioConf*.78+speedConf*.22+.06,0,1);source="AUDIO + SPEED";fusionMode="AUDIO DOM";
    }else{
      rpm=audioRpm;conf=audioConf;source=slip?"AUDIO • SLIP":"AUDIO";fusionMode=slip?"SLIP AUDIO":"AUDIO";
    }
- }else if(speedRpm&&audioRpm&&audioConf>=cfg.audioMidConf&&!slip){
+ }else if(speedRpm&&validAudio&&audioConf>=cfg.audioMidConf&&!slip){
    const wa=clamp((audioConf-cfg.audioMidConf)/Math.max(.01,cfg.audioHighConf-cfg.audioMidConf),0,1);
    const audioWeight=.25+.45*wa;
    rpm=audioRpm*audioWeight+speedRpm*(1-audioWeight);
    conf=clamp(audioConf*audioWeight+speedConf*(1-audioWeight),0,1);source="AUDIO + SPEED";fusionMode="BLEND";
  }else if(speedRpm&&!slip){
    rpm=speedRpm;conf=speedConf;source=gearRatio>0?"SPEED • GEAR":"SPEED CAL";fusionMode="SPEED";
- }else if(audioRpm&&audioConf>=cfg.audioMidConf){
+ }else if(validAudio&&audioConf>=cfg.audioMidConf){
    rpm=audioRpm;conf=audioConf*.86;source=slip?"AUDIO • SLIP":"AUDIO";fusionMode=slip?"SLIP AUDIO":"AUDIO WEAK";
  }
  if(rpm&&lastFusionRpm&&Math.abs(rpm-lastFusionRpm)/Math.max(lastFusionRpm,1)>.32&&conf<.72){conf*=.72}
@@ -548,9 +587,10 @@ measurementWorker.onmessage=e=>{
  if(m.type==="gearModel"){updateLearnedGears(m.ratios)}
 };
 
+function getGpsCalibrations(){const p=getCurrentProfile();return Array.isArray(p?.gpsCalibrations)?p.gpsCalibrations:[]}
 function currentSettings(){
  const p=getCurrentProfile();
- return {mass:+$("mass").value||190,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,manualRatio:+localStorage.getItem("motolab_v26_ratio")||0,gearLearn:$("gearLearnToggle").classList.contains("on"),gearRatios:p?.gearRatios||[],fusionMinRpm:+$("micMin").value||3000,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,micCal:getMicCalPoints()}
+ return {mass:+$("mass").value||190,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,manualRatio:+localStorage.getItem("motolab_v26_ratio")||0,gearLearn:$("gearLearnToggle").classList.contains("on"),gearRatios:p?.gearRatios||[],fusionMinRpm:+$("micMin").value||3000,audioMaxRpm:+$("micMax").value||12500,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,micCal:getMicCalPoints(),rpmSourceMode:$("rpmSourceMode")?.value||"fusion",selectedGear:+$("manualGear")?.value||3,gpsCalibrations:getGpsCalibrations()}
 }
 function pushConfig(){measurementWorker.postMessage({type:"config",config:currentSettings()});rpmWorker.postMessage({type:"config",min:+$("micMin").value||3000,max:+$("micMax").value||12500,fingerprint:RAW_AUDIO_FINGERPRINT.points})}
 
@@ -573,7 +613,7 @@ async function deleteRun(id){
  await new Promise((resolve,reject)=>{const tx=db.transaction("runs","readwrite");tx.objectStore("runs").delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});runs=runs.filter(r=>r.id!==id)
 }
 
-function defaultProfiles(){return [{id:"p1",name:"Oma pyörä",engineType:"2T",gearRatios:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null}]}
+function defaultProfiles(){return [{id:"p1",name:"Oma pyörä",engineType:"2T",gearRatios:[],gpsCalibrations:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null}]}
 function getProfiles(){try{return JSON.parse(localStorage.getItem(PROFILES_KEY)||"null")||defaultProfiles()}catch{return defaultProfiles()}}
 function setProfiles(p){localStorage.setItem(PROFILES_KEY,JSON.stringify(p))}
 function getCurrentProfile(){const ps=getProfiles(),id=localStorage.getItem("motolab_v26_profile")||ps[0].id;return ps.find(p=>p.id===id)||ps[0]}
@@ -628,14 +668,49 @@ function captureMicCalibration(targetId,slot){
 }
 function loadSettings(){
  let d={};try{d=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}catch{}
- const map={mass:"mass",manualGear:"manualGear",calSpeed:"calSpeed",calRpm:"calRpm",micMin:"micMin",micMax:"micMax",audioDevice:"audioDevice",cda:"cda",crr:"crr",rho:"rho",audioHighConf:"audioHighConf",audioMidConf:"audioMidConf",slipThreshold:"slipThreshold",speedRpmMinKmh:"speedRpmMinKmh",autoSensitivity:"autoSensitivity",autoStopDelay:"autoStopDelay",recordFrom:"recordFrom",stopRpm:"stopRpm"};
+ const map={mass:"mass",manualGear:"manualGear",calSpeed:"calSpeed",calRpm:"calRpm",calGear:"calGear",calTargetRpm:"calTargetRpm",calStableSec:"calStableSec",calToleranceKmh:"calToleranceKmh",calMode:"calMode",rpmSourceMode:"rpmSourceMode",micMin:"micMin",micMax:"micMax",cda:"cda",crr:"crr",rho:"rho",audioHighConf:"audioHighConf",audioMidConf:"audioMidConf",slipThreshold:"slipThreshold",speedRpmMinKmh:"speedRpmMinKmh",autoSensitivity:"autoSensitivity",autoStopDelay:"autoStopDelay",recordFrom:"recordFrom",stopRpm:"stopRpm"};
  for(const [k,id] of Object.entries(map))if(d[k]!=null&&$(id))$(id).value=d[k];
- setSwitch("gearLearnToggle",d.gearLearn!==false);setSwitch("infoToggle",d.infoButtons!==false);document.body.classList.toggle("info-off",d.infoButtons===false);setSwitch("wakeToggle",d.wakeOn!==false);
+ setSwitch("gearLearnToggle",d.gearLearn!==false);setSwitch("gridToggle",d.gridOn!==false);setSwitch("infoToggle",d.infoButtons!==false);document.body.classList.toggle("info-off",d.infoButtons===false);setSwitch("wakeToggle",d.wakeOn!==false);
+ updateSourceModeUI();renderGearCalibrations();
 }
 function saveSettings(){
- const d={mass:+$("mass").value||190,manualGear:+$("manualGear").value||3,calSpeed:+$("calSpeed").value||60,calRpm:+$("calRpm").value||6000,micMin:+$("micMin").value||3000,micMax:+$("micMax").value||12500,audioDevice:$("audioDevice").value,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,gearLearn:$("gearLearnToggle").classList.contains("on"),infoButtons:$("infoToggle").classList.contains("on"),wakeOn:$("wakeToggle").classList.contains("on")};
- localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value});$("settingsStatus").textContent="V26 Fusion-asetukset tallennettu.";pushConfig()
+ const d={mass:+$("mass").value||190,manualGear:+$("manualGear").value||3,calSpeed:+$("calSpeed").value||60,calRpm:+$("calRpm").value||6000,calGear:+$("calGear").value||3,calTargetRpm:+$("calTargetRpm").value||3000,calStableSec:+$("calStableSec").value||3,calToleranceKmh:+$("calToleranceKmh").value||1,calMode:$("calMode").value,rpmSourceMode:$("rpmSourceMode").value,micMin:+$("micMin").value||3000,micMax:+$("micMax").value||12500,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,gearLearn:$("gearLearnToggle").classList.contains("on"),gridOn:$("gridToggle").classList.contains("on"),infoButtons:$("infoToggle").classList.contains("on"),wakeOn:$("wakeToggle").classList.contains("on")};
+ localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value});$("settingsStatus").textContent="V27 asetukset tallennettu.";updateSourceModeUI();pushConfig()
 }
+let gpsCalTimer=null,gpsCalStarted=0,gpsCalSamples=[];
+function updateSourceModeUI(){
+ const mode=$("rpmSourceMode")?.value||"fusion",txt=mode==="gps"?"GPS ONLY: RPM lasketaan valitun vaihteen GPS-kalibroinnista. BT ei vaikuta RPM:ään.":mode==="bt"?"BT MIC ONLY: RPM tulee vain BT-kuulokkeen audiosta. GPS mittaa edelleen nopeuden ja tehon.":"AUTO FUSION: BT-RPM + GPS/nopeus tukevat toisiaan.";
+ if($("sourceModeStatus"))$("sourceModeStatus").textContent=txt;
+ pushConfig?.();
+}
+function renderGearCalibrations(){
+ if(!$("gearCalList"))return;const a=getGpsCalibrations().slice().sort((x,y)=>x.gear-y.gear);
+ $("gearCalList").innerHTML=a.length?a.map(x=>`G${x.gear}: ${Math.round(x.rpm)} rpm @ ${x.kmh.toFixed(1)} km/h → ${x.ratio.toFixed(2)} rpm/km/h${x.mode?" • "+x.mode:""}`).join("<br>"):"Ei GPS-vaihdekalibrointeja.";
+}
+function storeGearCalibration(gear,rpm,kmh,mode){
+ gear=+gear;rpm=+rpm;kmh=+kmh;if(!(gear>0&&rpm>0&&kmh>1))return false;
+ const p=getCurrentProfile(),arr=Array.isArray(p.gpsCalibrations)?p.gpsCalibrations.slice():[],ratio=rpm/kmh,rec={gear,rpm,kmh,ratio,mode:mode||"manual",t:Date.now()};
+ const i=arr.findIndex(x=>+x.gear===gear);if(i>=0)arr[i]=rec;else arr.push(rec);
+ saveCurrentProfile({gpsCalibrations:arr});localStorage.setItem("motolab_v26_ratio",String(ratio));renderGearCalibrations();pushConfig();return rec;
+}
+function stopAutoCalibration(msg){if(gpsCalTimer){clearInterval(gpsCalTimer);gpsCalTimer=null}gpsCalStarted=0;gpsCalSamples=[];if(msg&&$("gearCalStatus"))$("gearCalStatus").textContent=msg;if($("autoCalBtn"))$("autoCalBtn").textContent="ALOITA AUTOMAATTINEN KALIBROINTI"}
+async function startAutoCalibration(){
+ if(gpsCalTimer){stopAutoCalibration("Kalibrointi keskeytetty.");return}
+ const gear=+$("calGear").value||3,target=+$("calTargetRpm").value||3000,need=Math.max(1,+$("calStableSec").value||3),tol=Math.max(.2,+$("calToleranceKmh").value||1);
+ if(!gpsOn){const ok=await startGPS();if(!ok)return}
+ gpsCalSamples=[];gpsCalStarted=0;$("autoCalBtn").textContent="KESKEYTÄ KALIBROINTI";$("gearCalStatus").textContent=`G${gear} • pidä ${Math.round(target)} rpm tasaisena. Odottaa vakaata GPS-nopeutta…`;
+ gpsCalTimer=setInterval(()=>{
+   const v=+(lastUi.kmh||0),now=Date.now();if(v<5){gpsCalSamples=[];gpsCalStarted=0;$("gearCalStatus").textContent=`G${gear} • ${Math.round(target)} rpm • odottaa liikettä…`;return}
+   gpsCalSamples.push({t:now,v});gpsCalSamples=gpsCalSamples.filter(x=>now-x.t<=need*1000+800);
+   const windowStart=now-need*1000,win=gpsCalSamples.filter(x=>x.t>=windowStart),vals=win.map(x=>x.v),range=vals.length?Math.max(...vals)-Math.min(...vals):999;
+   if(range<=tol&&win.length>=Math.max(5,need*5)){
+     if(!gpsCalStarted)gpsCalStarted=now;const stable=(now-gpsCalStarted)/1000;$("gearCalStatus").textContent=`VAKAA ${Math.min(need,stable).toFixed(1)} / ${need.toFixed(1)} s • ${v.toFixed(1)} km/h`;
+     if(stable>=need){const avg=win.reduce((a,b)=>a+b.v,0)/win.length,rec=storeGearCalibration(gear,target,avg,"AUTO "+need+" s");stopAutoCalibration(`TALLENNETTU • G${gear} • ${Math.round(target)} rpm • ${avg.toFixed(1)} km/h • ${rec.ratio.toFixed(2)} rpm/km/h`)}
+   }else{gpsCalStarted=0;$("gearCalStatus").textContent=`ODOTTAA VAKAATA • ${v.toFixed(1)} km/h • vaihtelu ${range===999?"–":range.toFixed(1)} / ${tol.toFixed(1)} km/h`}
+ },200)
+}
+function clearSelectedGearCalibration(){const gear=+$("calGear").value||3,p=getCurrentProfile(),arr=(p.gpsCalibrations||[]).filter(x=>+x.gear!==gear);saveCurrentProfile({gpsCalibrations:arr});renderGearCalibrations();$("gearCalStatus").textContent=`G${gear} kalibrointi poistettu.`;pushConfig()}
+
 function setSwitch(id,on){$(id).classList.toggle("on",!!on)}
 
 async function requestWake(){if(!$("wakeToggle").classList.contains("on")||!("wakeLock" in navigator))return;try{if(!wakeLock||wakeLock.released)wakeLock=await navigator.wakeLock.request("screen")}catch(e){log("WakeLock: "+e.message)}}
@@ -683,17 +758,8 @@ async function startAudio(){
  if(!navigator.mediaDevices?.getUserMedia){$("measureStatus").textContent="Media API puuttuu.";return false}
  try{
   await requestWake();
-  let selected=$("audioDevice").value;
-  if(!selected){
-    const warm=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
-    const list=await enumerateAudio();
-    const bt=btLikeDevice(list);
-    if(bt){selected=bt.deviceId;$("audioDevice").value=bt.deviceId}
-    warm.getTracks().forEach(t=>t.stop());
-  }
-  const constraints={audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}};
-  if(selected)constraints.audio.deviceId={exact:selected};
-  const stream=await navigator.mediaDevices.getUserMedia(constraints);
+  // Sama audioavaus kuin toimivassa testerissä: selain/iOS valitsee aktiivisen HFP/BT-reitin.
+  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
   const track=stream.getAudioTracks()[0],actualLabel=track?.label||"tuntematon audiotulo",settings=track?.getSettings?.()||{};
   const ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume();
   const blob=URL.createObjectURL(new Blob([workletSource],{type:"text/javascript"}));await ac.audioWorklet.addModule(blob);URL.revokeObjectURL(blob);
@@ -701,10 +767,10 @@ async function startAudio(){
   node.port.onmessage=e=>{const mm=e.data;if(mm.type==="pcm")rpmWorker.postMessage(mm,[mm.buffer])};
   const src=ac.createMediaStreamSource(stream),mute=ac.createGain();mute.gain.value=0;src.connect(node);node.connect(mute);mute.connect(ac.destination);
   audioSessions.ext={stream,ac,node,src,mute,track};extMicOn=true;syncSensorUI();await enumerateAudio();
-  $("measureStatus").textContent="BT MIC aktiivinen: "+actualLabel;
-  if($("diagLog"))$("diagLog").textContent="BT input: "+actualLabel+" • "+(settings.sampleRate||ac.sampleRate)+" Hz";
+  const msg="Audiotulo: "+actualLabel+" • "+(settings.sampleRate||ac.sampleRate)+" Hz";
+  $("measureStatus").textContent=msg;if($("btRouteStatus"))$("btRouteStatus").textContent=msg;if($("diagLog"))$("diagLog").textContent=msg;
   return true
- }catch(e){$("measureStatus").textContent="BT MIC: "+e.message;log("BT start: "+e.message);return false}
+ }catch(e){$("measureStatus").textContent="BT MIC: "+e.message;if($("btRouteStatus"))$("btRouteStatus").textContent="VIRHE: "+e.message;log("BT start: "+e.message);return false}
 }
 async function stopAudio(){
  const s=audioSessions.ext;if(s){try{s.stream.getTracks().forEach(t=>t.stop())}catch{}try{s.node.disconnect();s.src.disconnect();s.mute.disconnect()}catch{}try{await s.ac.close()}catch{}audioSessions.ext=null}
@@ -760,7 +826,7 @@ function mergedRun(rr){
 }
 function mergeSelected(){const rr=selectedRuns();if(rr.length<2){$("compareText").textContent="Yhdistämiseen tarvitaan vähintään kaksi vetoa.";return}const mr=mergedRun(rr);currentChartRuns=[mr];drawChart($("compareChart"),[mr],true);$("compareText").textContent=`Yhdistetty ${rr.length} vedosta yhdeksi tasoitetuksi referenssikäyräksi.`}
 
-function drawGrid(ctx,w,h){ctx.clearRect(0,0,w,h);ctx.fillStyle="#06070a";ctx.fillRect(0,0,w,h);ctx.strokeStyle="rgba(80,100,115,.22)";ctx.lineWidth=1;for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(42,h*i/6);ctx.lineTo(w-12,h*i/6);ctx.stroke()}for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(42+i*(w-54)/8,8);ctx.lineTo(42+i*(w-54)/8,h-25);ctx.stroke()}}
+function drawGrid(ctx,w,h){ctx.clearRect(0,0,w,h);ctx.fillStyle="#06070a";ctx.fillRect(0,0,w,h);if($("gridToggle")&&!$("gridToggle").classList.contains("on"))return;ctx.strokeStyle="rgba(120,135,150,.24)";ctx.lineWidth=1;for(let i=1;i<7;i++){ctx.beginPath();ctx.moveTo(42,8+(h-33)*i/7);ctx.lineTo(w-12,8+(h-33)*i/7);ctx.stroke()}for(let i=0;i<=8;i++){const x=42+i*(w-54)/8;ctx.beginPath();ctx.moveTo(x,8);ctx.lineTo(x,h-25);ctx.stroke()}}
 const chartColors=["#ff263f","#35a7ff","#ffc62b","#7df08a","#d785ff","#f58a32"];
 function drawChart(canvas,rr,torque=true,zoom=1,center=7000){
  const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;drawGrid(ctx,w,h);if(!rr?.length)return;
@@ -769,7 +835,9 @@ function drawChart(canvas,rr,torque=true,zoom=1,center=7000){
  const filtered=all.filter(p=>p.rpm>=minR&&p.rpm<=maxR),maxY=Math.max(1,...filtered.map(p=>Math.max(p.hp||0,torque?p.nm||0:0)))*1.08;
  const sx=r=>42+(r-minR)/Math.max(1,maxR-minR)*(w-56),sy=v=>h-25-(v/maxY)*(h-38);
  rr.forEach((r,ri)=>{const d=(r.data||[]).filter(p=>p.rpm>=minR&&p.rpm<=maxR);ctx.strokeStyle=chartColors[ri%chartColors.length];ctx.lineWidth=2.7;ctx.beginPath();d.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.hp||0)):ctx.moveTo(sx(p.rpm),sy(p.hp||0)));ctx.stroke();if(torque){ctx.strokeStyle=chartColors[ri%chartColors.length]+"88";ctx.lineWidth=1.5;ctx.beginPath();d.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.nm||0)):ctx.moveTo(sx(p.rpm),sy(p.nm||0)));ctx.stroke()}});
- ctx.fillStyle="#aaa";ctx.font="12px sans-serif";ctx.fillText(`${Math.round(minR)} RPM`,42,h-7);ctx.fillText(`${Math.round(maxR)} RPM`,w-86,h-7)
+ ctx.fillStyle="#aaa";ctx.font="11px sans-serif";
+ for(let i=0;i<=8;i++){const rpm=minR+(maxR-minR)*i/8,x=sx(rpm);ctx.fillText(String(Math.round(rpm/100)*100),Math.max(2,x-16),h-7)}
+ for(let i=0;i<=6;i++){const val=maxY*(6-i)/6,y=sy(val);ctx.fillText(val.toFixed(val<10?1:0),4,Math.max(12,y+4))}
 }
 function drawHero(){const d=measurementTrace.slice(-160);const c=$("heroChart"),ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(255,45,70,.13)";for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,h*i/5);ctx.lineTo(w,h*i/5);ctx.stroke()}if(!d.length)return;const vals=d.filter(x=>x.rpm>0);if(!vals.length)return;const min=Math.min(...vals.map(x=>x.rpm)),max=Math.max(...vals.map(x=>x.rpm)),my=Math.max(1,...vals.map(x=>Math.max(x.hp,x.nm)));const sx=r=>(r-min)/Math.max(1,max-min)*w,sy=v=>h-v/my*(h-4);ctx.strokeStyle="#ff263f";ctx.lineWidth=2.3;ctx.beginPath();vals.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.hp)):ctx.moveTo(sx(p.rpm),sy(p.hp)));ctx.stroke();ctx.strokeStyle="rgba(240,240,240,.6)";ctx.lineWidth=1.2;ctx.beginPath();vals.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.nm)):ctx.moveTo(sx(p.rpm),sy(p.nm)));ctx.stroke()}
 let measurementTrace=[];const _renderLive=renderLive;renderLive=function(d,m){measurementTrace.push(d);if(measurementTrace.length>300)measurementTrace.shift();_renderLive(d,m);drawHero()}
@@ -792,28 +860,34 @@ function startDemo(){
 function openFull(rr,title){currentChartRuns=rr;$("fcTitle").textContent=title||"Dynokäyrä";fullChartState={zoom:1,center:7000,showTorque:true};$("fullChart").classList.add("show");setTimeout(redrawFull,30)}
 function redrawFull(){const all=currentChartRuns.flatMap(r=>r.data||[]).filter(x=>x.rpm>0);if(all.length&&fullChartState.center===7000)fullChartState.center=(Math.min(...all.map(x=>x.rpm))+Math.max(...all.map(x=>x.rpm)))/2;drawChart($("fullChartCanvas"),currentChartRuns,fullChartState.showTorque,fullChartState.zoom,fullChartState.center)}
 function chartPoint(e){if(!currentChartRuns.length)return;const c=$("fullChartCanvas"),rect=c.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;const all=currentChartRuns.flatMap(r=>r.data||[]).filter(p=>p.rpm>0);if(!all.length)return;const min=Math.min(...all.map(p=>p.rpm)),max=Math.max(...all.map(p=>p.rpm)),span=(max-min)/fullChartState.zoom,lo=Math.max(min,fullChartState.center-span/2),hi=Math.min(max,fullChartState.center+span/2),target=lo+x*(hi-lo);let best=null;for(const r of currentChartRuns)for(const p of r.data||[]){const d=Math.abs(p.rpm-target);if(!best||d<best.d)best={d,p,r}}if(best)$("pointRead").textContent=`${Math.round(best.p.rpm)} rpm • ${best.p.hp.toFixed(2)} hv • ${best.p.nm.toFixed(2)} Nm • ${best.r.profileName||""}`}
-function createProfileFromSuggestion(){const ps=getProfiles(),src=runs.find(r=>r.id===$("createSuggestedProfile").dataset.runId),id="p"+Date.now();ps.push({id,name:"Uusi pyörä "+(ps.length+1),engineType:$("engineType").value,gearRatios:src?.gearRatioMedian?[{ratio:src.gearRatioMedian,count:8}]:[],carb:getCurrentProfile().carb,baselineHp:src?.maxHp||null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);$("profileModal").classList.remove("show");renderProfiles();pushConfig()}
-function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:"Pyörä "+(ps.length+1),engineType:"2T",gearRatios:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);renderProfiles();pushConfig()}
+function createProfileFromSuggestion(){const ps=getProfiles(),src=runs.find(r=>r.id===$("createSuggestedProfile").dataset.runId),id="p"+Date.now();ps.push({id,name:"Uusi pyörä "+(ps.length+1),engineType:$("engineType").value,gearRatios:src?.gearRatioMedian?[{ratio:src.gearRatioMedian,count:8}]:[],gpsCalibrations:[],carb:getCurrentProfile().carb,baselineHp:src?.maxHp||null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);$("profileModal").classList.remove("show");renderProfiles();pushConfig()}
+function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:"Pyörä "+(ps.length+1),engineType:"2T",gearRatios:[],gpsCalibrations:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);renderProfiles();pushConfig()}
 
 document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>switchScreen(b.dataset.screen));
 document.querySelectorAll(".ib").forEach(b=>b.onclick=e=>{e.stopPropagation();$("infoText").textContent=infoDefs[b.dataset.info]||"";$("infoModal").classList.add("show")});
 $("closeInfo").onclick=()=>$("infoModal").classList.remove("show");$("closeRun").onclick=()=>$("runModal").classList.remove("show");
-$("gpsChip").onclick=toggleGPS;$("imuChip").onclick=toggleIMU;$("extChip").onclick=()=>toggleAudio();
-$("sensorBtn").onclick=e=>{if(!e.target.classList.contains("ib"))toggleSensors()};$("extMicBtn").onclick=e=>{if(!e.target.classList.contains("ib"))toggleAudio()};
-$("armBtn").onclick=e=>{if(!e.target.classList.contains("ib")){requestWake();pushConfig();measurementWorker.postMessage({type:"arm"})}};$("manualBtn").onclick=e=>{if(!e.target.classList.contains("ib")){requestWake();pushConfig();measurementWorker.postMessage({type:"manual"})}};$("stopBtn").onclick=e=>{if(!e.target.classList.contains("ib"))measurementWorker.postMessage({type:"stop"})};
+$("gpsChip").onclick=toggleGPS;$("imuChip").onclick=toggleIMU;$("extChip").onclick=()=>{$("rpmSourceMode").value==="gps"?$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä. Vaihda RPM-lähde Asetuksista.":toggleAudio()};
+$("sensorBtn").onclick=e=>{if(!e.target.classList.contains("ib"))toggleSensors()};$("extMicBtn").onclick=e=>{if(!e.target.classList.contains("ib")){if($("rpmSourceMode").value==="gps")$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä.";else toggleAudio()}};
+$("armBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();measurementWorker.postMessage({type:"arm"})}};$("manualBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();measurementWorker.postMessage({type:"manual"})}};$("stopBtn").onclick=e=>{if(!e.target.classList.contains("ib"))measurementWorker.postMessage({type:"stop"})};
 $("compareSelectedBtn").onclick=compareSelected;$("mergeSelectedBtn").onclick=mergeSelected;$("showFailedBtn").onclick=()=>{showFailed=!showFailed;$("showFailedBtn").textContent=showFailed?"MYÖS HYLÄTYT":"VAIN HYVÄT";renderRuns()};
 $("openCompareFull").onclick=()=>{if(currentChartRuns.length)openFull(currentChartRuns,"Päällekkäisvertailu")};$("openRunFull").onclick=()=>{const r=runs.find(x=>x.id===currentRunModalId);if(r){$("runModal").classList.remove("show");openFull([r],"Yksittäinen veto")}};
 $("deleteRunBtn").onclick=async()=>{if(currentRunModalId){await deleteRun(currentRunModalId);selectedRunIds.delete(currentRunModalId);$("runModal").classList.remove("show");renderRuns();renderAnalysis()}};
 $("closeFullChart").onclick=()=>$("fullChart").classList.remove("show");$("zoomIn").onclick=()=>{fullChartState.zoom=Math.min(8,fullChartState.zoom*1.5);redrawFull()};$("zoomOut").onclick=()=>{fullChartState.zoom=Math.max(1,fullChartState.zoom/1.5);redrawFull()};$("zoomReset").onclick=()=>{fullChartState.zoom=1;redrawFull()};$("toggleTorque").onclick=()=>{fullChartState.showTorque=!fullChartState.showTorque;$("toggleTorque").textContent=fullChartState.showTorque?"HP + Nm":"VAIN HP";redrawFull()};$("fullChartCanvas").addEventListener("click",chartPoint);
 $("saveCarbBtn").onclick=saveCarb;$("jetSuggestBtn").onclick=jetSuggest;$("autoTuneBtn").onclick=autoTune;
 $("profileSelect").onchange=()=>{localStorage.setItem("motolab_v26_profile",$("profileSelect").value);renderProfiles();pushConfig()};$("newProfileBtn").onclick=newProfile;
+$("rpmSourceMode").onchange=async()=>{updateSourceModeUI();saveSettings();if($("rpmSourceMode").value==="gps"&&extMicOn)await stopAudio()};
+$("manualGear").onchange=()=>{pushConfig();};$("calGear").onchange=renderGearCalibrations;
+$("autoCalBtn").onclick=startAutoCalibration;$("clearGearCalBtn").onclick=clearSelectedGearCalibration;
+$("btTestBtn").onclick=async()=>{if(extMicOn){await stopAudio();$("btRouteStatus").textContent="BT-audiotulo pysäytetty."}else await startAudio()};
+$("gridToggle").onclick=()=>{setSwitch("gridToggle",!$("gridToggle").classList.contains("on"));saveSettings();redrawFull();if(currentChartRuns.length)drawChart($("compareChart"),currentChartRuns,true)};
+$("calMode").onchange=()=>{const m=$("calMode").value;$("gearLearnToggle").classList.toggle("on",m==="learn"||$("gearLearnToggle").classList.contains("on"));$("gearCalStatus").textContent=m==="auto"?"Automaattinen: pidä tavoite-RPM ja vakaa nopeus.":m==="manual"?"Manuaalinen: syötä nopeus + RPM ja tallenna.":"Auto Gear Learn käyttää BT-RPM + GPS -dataa vedon aikana."};
 
 $("micCalBtn1").onclick=()=>captureMicCalibration("micCalTarget1",0);
 $("micCalBtn2").onclick=()=>captureMicCalibration("micCalTarget2",1);
 $("micCalBtn3").onclick=()=>captureMicCalibration("micCalTarget3",2);
 $("micCalClearBtn").onclick=()=>{localStorage.removeItem(MIC_CAL_KEY);renderMicCalibration();pushConfig();$("micCalStatus").textContent="MIC-kalibrointi tyhjennetty.";};
 $("gearLearnToggle").onclick=()=>{setSwitch("gearLearnToggle",!$("gearLearnToggle").classList.contains("on"));saveSettings()};$("infoToggle").onclick=()=>{const on=!$("infoToggle").classList.contains("on");setSwitch("infoToggle",on);document.body.classList.toggle("info-off",!on);saveSettings()};$("wakeToggle").onclick=()=>{const on=!$("wakeToggle").classList.contains("on");setSwitch("wakeToggle",on);on?requestWake():releaseWake();saveSettings()};
-$("calibrateBtn").onclick=()=>{const s=+$("calSpeed").value,r=+$("calRpm").value;if(s>0&&r>0){localStorage.setItem("motolab_v26_ratio",String(r/s));$("settingsStatus").textContent=`Kalibroitu ${(r/s).toFixed(2)} rpm/km/h`;pushConfig()}else $("settingsStatus").textContent="Tarkista nopeus ja RPM."};$("saveSettingsBtn").onclick=saveSettings;$("demoBtn").onclick=startDemo;$("selfTestBtn").onclick=selfTests;
+$("calibrateBtn").onclick=()=>{const g=+$("calGear").value||+$("manualGear").value||3,speed=+$("calSpeed").value,rpm=+$("calRpm").value;const rec=storeGearCalibration(g,rpm,speed,"MANUAL");if(rec)$("gearCalStatus").textContent=`TALLENNETTU • G${g} • ${Math.round(rpm)} rpm • ${speed.toFixed(1)} km/h • ${rec.ratio.toFixed(2)} rpm/km/h`;else $("gearCalStatus").textContent="Tarkista vaihde, nopeus ja RPM."};$("saveSettingsBtn").onclick=saveSettings;$("demoBtn").onclick=startDemo;$("selfTestBtn").onclick=selfTests;
 $("resetBtn").onclick=()=>{localStorage.removeItem(SETTINGS_KEY);localStorage.removeItem(PROFILES_KEY);localStorage.removeItem(FALLBACK_RUNS);localStorage.removeItem("motolab_v26_ratio");localStorage.removeItem(MIC_CAL_KEY);location.reload()};
 $("createSuggestedProfile").onclick=createProfileFromSuggestion;$("keepCurrentProfile").onclick=()=>$("profileModal").classList.remove("show");
 
