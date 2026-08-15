@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VÄNÄ MOTOLAB v23 MIC Calibration</title>
+<title>VÄNÄ MOTOLAB v25 RAW Fingerprint</title>
 <style>
 :root{
  --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
@@ -58,6 +58,15 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 .fullchart{position:fixed;inset:0;z-index:120;display:none;background:#050507;padding:calc(10px + env(safe-area-inset-top)) 8px calc(10px + env(safe-area-inset-bottom));flex-direction:column}.fullchart.show{display:flex}.fcTop{display:flex;align-items:center;justify-content:space-between;gap:6px}.fcTop h3{margin:0;font-size:13px}.fcCanvasWrap{flex:1;min-height:0;padding-top:8px}.fcCanvasWrap canvas{width:100%;height:100%;background:#06070a;border-radius:12px;border:1px solid #282b31}.fcControls{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding-top:7px}.pointread{font-size:9px;color:#ddd;padding:6px 0;text-align:center;min-height:27px}
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b0b0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 </head>
 <body>
 <div class="app">
@@ -68,13 +77,13 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
      <button class="spill clickable" id="imuChip"><span id="imuDot" class="dot"></span>IMU</button>
      <button class="spill clickable" id="micChip"><span id="micDot" class="dot"></span>MIC</button>
      <button class="spill clickable" id="extChip"><span id="extDot" class="dot"></span>EXT</button>
-     <div class="ver">v23</div>
+     <div class="ver">v25</div>
    </div>
  </div>
 
  <section class="hero">
    <div class="logo"><div class="logo1">VÄNÄ</div><div class="logo2">MOTOLAB</div><div class="tag">DYNO • TUNE • RIDE</div></div>
-   <img src="bike.png?v=23" class="bike" alt="">
+   <img src="bike.png?v=25" class="bike" alt="">
    <div class="heroChartBox"><div class="heroChartTitle">NYKYINEN VETO • HP / Nm</div><canvas id="heroChart" width="230" height="178"></canvas></div>
    <div class="gauge">
      <div class="gaugeRing"></div>
@@ -110,6 +119,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
        <div class="card"><span>Nopeus-RPM</span><b id="speedRpmState">–</b></div>
        <div class="card"><span>Fusion tila</span><b id="fusionModeState">–</b></div>
        <div class="card"><span>MIC kalibrointi</span><b id="micCalMain">0 pistettä</b></div>
+       <div class="card"><span>Raakadata</span><b id="rawFpMain">REFERENCE ON</b></div>
        <div class="card"><span>Vedon laatu</span><b id="qualityMain">–</b></div>
        <div class="card"><span>Delta edelliseen</span><b id="deltaMain">–</b></div>
        <div class="card"><span>Auto Gear Learn</span><b id="learnState">ODOTTAA RPM:ÄÄ</b></div>
@@ -185,7 +195,18 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
    </div><div id="settingsStatus" class="statusbox">Asetukset tallennetaan paikallisesti.</div>
   </div>
 
-  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎤</span> MIC CALIBRATION</div><span class="tiny">3 pisteen ääni-RPM kalibrointi</span></div>
+  
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📱</span> SOVELLUS</div><span class="tiny">Asennettava puhelinnäkymä</span></div>
+    <div class="statusbox">Julkaise HTTPS-osoitteeseen. iPhone: Safari → Jaa → Lisää Koti-valikkoon. Android: selaimen Asenna sovellus -toiminto, jos tarjolla.</div>
+    <div class="grid2"><button id="installBtn" class="action">ASENNA / OHJE</button><button id="fullscreenBtn" class="action gray">KOKO NÄYTTÖ</button></div>
+    <div id="installStatus" class="statusbox">Selain-tila.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧬</span> RAW AUDIO FINGERPRINT</div><span class="tiny">Kerätty referenssidata käytössä</span></div>
+    <div class="statusbox">Live-mikrofoni pisteytetään kerättyä raakadataa vasten ennen RPM Fusionia. Referenssin RPM-arvoina käytetään testidatan rpm_reference-arvoja, ei testialgoritmin omia RPM-arvioita.</div>
+    <div id="rawFpStatus" class="statusbox"></div>
+  </div>
+<div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎤</span> MIC CALIBRATION</div><span class="tiny">3 pisteen ääni-RPM kalibrointi</span></div>
     <div class="statusbox">Kytke PHONE MIC tai BT/EXT MIC päälle. Pidä moottori tasaisella tunnetulla kierrosluvulla, syötä oikea RPM ja paina TALLENNA.</div>
     <div class="form">
       <label>Piste 1 RPM<input id="micCalTarget1" type="number" value="3000"></label><button id="micCalBtn1" class="action">TALLENNA 1</button>
@@ -197,7 +218,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
   </div>
   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧪</span> JÄRJESTELMÄTESTI</div></div>
     <div class="grid2"><div class="card"><span>Secure context</span><b id="diagSecure">–</b></div><div class="card"><span>Worker</span><b id="diagWorker">–</b></div><div class="card"><span>GPS API</span><b id="diagGps">–</b></div><div class="card"><span>Media API</span><b id="diagMedia">–</b></div><div class="card"><span>AudioWorklet</span><b id="diagAudio">–</b></div><div class="card"><span>Wake Lock</span><b id="diagWake">–</b></div></div>
-    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">V23 RPM Fusion käynnistyi.</div>
+    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">V25 RPM Fusion käynnistyi.</div>
   </div>
  </section>
 
@@ -224,7 +245,8 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const SETTINGS_KEY="motolab_v23_settings",PROFILES_KEY="motolab_v23_profiles",FALLBACK_RUNS="motolab_v23_runs",MIC_CAL_KEY="motolab_v23_mic_cal";
+const RAW_AUDIO_FINGERPRINT={"name":"VÄNÄ MotoLab raw reference fingerprint","source":"VANA_MotoLab_test_1786803700939.json","project":"DT testimoottori","created_from":"2026-08-15T14:21:40.939Z","reference_note":"rpm_reference labels are used as truth; measured rpm estimates are not used as labels","points":[{"rpm":1800,"f0_hz":41.0,"f0_p20":40.0,"f0_p80":41.5,"conf_median":30.0,"harm_rel_db":[-38.68,-35.49,-28.87,-17.62,0.0,-8.49],"samples":894,"places":["Paisarin loppu / stingerin alku"]},{"rpm":3000,"f0_hz":64.0,"f0_p20":54.5,"f0_p80":75.0,"conf_median":34.0,"harm_rel_db":[-35.96,-23.14,-8.84,-4.82,-5.43,-1.11],"samples":7122,"places":["Mikrofoni suoraan pinnapulttiin","Paisarin loppu / stingerin alku","Pinnapultti + lyhyt jäykkä letku","Tulpan metalliosa","Vapaa mikrofoni 0,5 m moottorista","Vapaa mikrofoni 0,5 m pakoputkesta"]},{"rpm":5000,"f0_hz":89.333,"f0_p20":45.833,"f0_p80":99.833,"conf_median":30.0,"harm_rel_db":[-25.22,-2.66,-5.66,0.0,-6.21,-10.05],"samples":1782,"places":["Paisarin loppu / stingerin alku","Vapaa mikrofoni 0,5 m pakoputkesta"]}]};
+const SETTINGS_KEY="motolab_v25_settings",PROFILES_KEY="motolab_v25_profiles",FALLBACK_RUNS="motolab_v25_runs",MIC_CAL_KEY="motolab_v25_mic_cal";
 let gpsWatch=null,gpsOn=false,imuOn=false,phoneMicOn=false,extMicOn=false,wakeLock=null;
 let motionHandlerRef=null,orientationHandlerRef=null;
 let audioSessions={phone:null,ext:null},audioDeviceList=[];
@@ -234,7 +256,7 @@ let db=null,useFallback=false;
 
 const infoDefs={
  sensors:"ANTURIT kytkee GPS:n ja IMU:n yhdessä. Yläreunan GPS- ja IMU-painikkeilla ne voi kytkeä myös erikseen. Toinen painallus sammuttaa.",
- mic:"Puhelimen mikrofoni on kokeellinen RPM-lähde. V23 hylkää liian matalat/epävarmat audiohavainnot ja yhdistää hyvän audio-RPM:n GPS-nopeuteen sekä opittuun vaihdesuhteeseen. Toinen painallus vapauttaa mikrofonin kokonaan.",
+ mic:"Puhelimen mikrofoni on kokeellinen RPM-lähde. V25 hylkää liian matalat/epävarmat audiohavainnot ja yhdistää hyvän audio-RPM:n GPS-nopeuteen sekä opittuun vaihdesuhteeseen. Toinen painallus vapauttaa mikrofonin kokonaan.",
  ext:"BT / EXT MIC käyttää valittua ulkoista audiotuloa, jos selain ja iPhone sallivat sen reitityksen. Toinen painallus pysäyttää streamin ja vapauttaa laitteen.",
  arm:"ARM AUTO odottaa kiihtyvyyttä ja RPM:ää. Mittausmoottori toimii Workerissa, käyttöliittymä päivittyy harvemmin.",
  manual:"Manuaalinen veto käynnistyy heti ja päättyy vain STOP-painikkeella.",
@@ -247,7 +269,7 @@ window.addEventListener("error",e=>log("JS: "+e.message));window.addEventListene
 const measurementWorkerSource=`
 "use strict";
 let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[]};
-let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={phone:{rpm:0,conf:0,t:0},ext:{rpm:0,conf:0,t:0}};
+let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={phone:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,conf:0,t:0},ext:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,conf:0,t:0}};
 let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[];
 let lastGear=null,lastGearConf=0,lastFusionRpm=0;
 function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
@@ -282,13 +304,13 @@ function audioEstimate(){
  for(const [name,s] of Object.entries(rpmSources)){
    if(s.rpm>=cfg.fusionMinRpm&&s.conf>=.16&&now-s.t<900)valid.push({name,...s});
  }
- if(!valid.length)return {rpm:0,rawRpm:0,conf:0,source:"NO AUDIO"};
+ if(!valid.length)return {rpm:0,rawRpm:0,fpScore:0,observedF0:0,conf:0,source:"NO AUDIO"};
  valid.sort((a,b)=>b.conf-a.conf);
  if(valid.length>=2&&Math.abs(valid[0].rpm-valid[1].rpm)/Math.max(valid[0].rpm,1)<.08){
    const w=valid[0].conf+valid[1].conf;
-   const raw=(valid[0].rpm*valid[0].conf+valid[1].rpm*valid[1].conf)/w;return {rpm:calibratedAudioRpm(raw),rawRpm:raw,conf:clamp((valid[0].conf+valid[1].conf)/1.5,0,1),source:"MIC FUSION"};
+   const raw=(valid[0].rpm*valid[0].conf+valid[1].rpm*valid[1].conf)/w;return {rpm:calibratedAudioRpm(raw),rawRpm:raw,fpScore:((valid[0].fpScore||0)+(valid[1].fpScore||0))/2,observedF0:((valid[0].observedF0||0)+(valid[1].observedF0||0))/2,conf:clamp((valid[0].conf+valid[1].conf)/1.5,0,1),source:"MIC FUSION"};
  }
- return {rpm:calibratedAudioRpm(valid[0].rpm),rawRpm:valid[0].rpm,conf:valid[0].conf,source:valid[0].name==="ext"?"EXT MIC":"PHONE MIC"};
+ return {rpm:calibratedAudioRpm(valid[0].rpm),rawRpm:valid[0].rawRpm||valid[0].rpm,fpScore:valid[0].fpScore||0,observedF0:valid[0].observedF0||0,conf:valid[0].conf,source:valid[0].name==="ext"?"EXT MIC":"PHONE MIC"};
 }
 function fuseRpm(){
  const a=audioEstimate();
@@ -305,7 +327,7 @@ function fuseRpm(){
    if(gearRatio>0){speedRpm=gps.kmh*gearRatio;speedConf=clamp(.48+.42*gearConf,0, .92)}
    else if(cfg.manualRatio>0){speedRpm=gps.kmh*cfg.manualRatio;speedConf=.58}
  }
- const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioConf=a.conf||0;
+ const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioFpScore=a.fpScore||0,audioObservedF0=a.observedF0||0,audioConf=a.conf||0;
  let slip=false,agreement=0;
  if(audioRpm&&speedRpm){
    agreement=Math.abs(audioRpm-speedRpm)/Math.max(audioRpm,speedRpm,1);
@@ -332,7 +354,7 @@ function fuseRpm(){
  if(rpm)lastFusionRpm=lastFusionRpm?lastFusionRpm*.72+rpm*.28:rpm;
  if(rpm&&conf<.28){rpm=0;source="NO SIGNAL";fusionMode="REJECTED"}
  const ratio=(audioRpm&&audioConf>=cfg.audioHighConf&&gps.kmh>=cfg.speedRpmMinKmh&&!slip)?audioRpm/gps.kmh:0;
- return {rpm,conf,source,fusionMode,gear,gearConf,ratio,audioRpm,audioRawRpm,audioConf,speedRpm,speedConf,slip,agreement}
+ return {rpm,conf,source,fusionMode,gear,gearConf,ratio,audioRpm,audioRawRpm,audioFpScore,audioObservedF0,audioConf,speedRpm,speedConf,slip,agreement}
 }
 function learnGear(f){
  if(!cfg.gearLearn||f.audioConf<cfg.audioHighConf||gps.kmh<cfg.speedRpmMinKmh||!f.ratio||f.slip)return;
@@ -353,7 +375,7 @@ function sample(){
  const force=m*accel+.5*(cfg.rho||1.225)*(cfg.cda||.55)*v*v+(cfg.crr||.015)*m*9.80665;
  const watts=Math.max(0,force*v),hp=watts/735.49875,nm=f.rpm>200?watts/(f.rpm*2*Math.PI/60):0,q=quality(f,g);
  const s={t:Date.now(),rpm:f.rpm,kmh:gps.kmh,hp,nm,g,a:accel,source:f.source,conf:f.conf,gear:f.gear,gearConf:f.gearConf,ratio:f.ratio,quality:q,gpsAcc:gps.acc,
-   audioRpm:f.audioRpm,audioRawRpm:f.audioRawRpm,audioConf:f.audioConf,speedRpm:f.speedRpm,speedConf:f.speedConf,fusionRpm:f.rpm,fusionMode:f.fusionMode,slip:f.slip,agreement:f.agreement};
+   audioRpm:f.audioRpm,audioRawRpm:f.audioRawRpm,audioFpScore:f.audioFpScore,audioObservedF0:f.audioObservedF0,audioConf:f.audioConf,speedRpm:f.speedRpm,speedConf:f.speedConf,fusionRpm:f.rpm,fusionMode:f.fusionMode,slip:f.slip,agreement:f.agreement};
  pre.push(s);while(pre.length&&s.t-pre[0].t>5000)pre.shift();
  learnGear(f);
  if(armed&&!recording&&f.rpm>=cfg.recordFrom&&g>=cfg.autoSensitivity){recording=true;mode="auto";run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})}
@@ -382,7 +404,7 @@ onmessage=e=>{
  if(m.type==="config"){cfg={...cfg,...m.config};gearClusters=(cfg.gearRatios||[]).map(x=>({...x}))}
  if(m.type==="gps"){const now=m.t||Date.now(),v=m.kmh/3.6;if(lastGps&&now-lastGps.t>120){const raw=(v-lastGps.v)/((now-lastGps.t)/1000);if(Number.isFinite(raw))accel=accel*.76+raw*.24}lastGps={v,t:now};gps={kmh:m.kmh||0,acc:m.acc||999,t:now}}
  if(m.type==="motion")motion={mag:m.mag||0,t:m.t||Date.now()}
- if(m.type==="rpm")rpmSources[m.source]={rpm:m.rpm||0,conf:m.conf||0,t:m.t||Date.now()}
+ if(m.type==="rpm")rpmSources[m.source]={rpm:m.rpm||0,rawRpm:m.rawRpm||0,fpScore:m.fpScore||0,observedF0:m.observedF0||0,conf:m.conf||0,t:m.t||Date.now()}
  if(m.type==="arm"){armed=true;recording=false;mode="none";run=[];pre=[];postMessage({type:"state",state:"ARMED"})}
  if(m.type==="manual"){armed=false;recording=true;mode="manual";run=[];pre=[];postMessage({type:"state",state:"MANUAL RUN"})}
  if(m.type==="stop")finish("STOP")
@@ -393,25 +415,122 @@ setInterval(sample,50);
 const measurementWorker=new Worker(URL.createObjectURL(new Blob([measurementWorkerSource],{type:"text/javascript"})));
 
 const rpmWorkerSource=`
-"use strict";let minR=3000,maxR=12500,last={phone:0,ext:0};
-function estimate(arr,sr){
+"use strict";
+let minR=3000,maxR=12500,last={phone:0,ext:0},fingerprint=[];
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function interpExpectedF0(rpm){
+ const p=fingerprint.filter(x=>x.rpm>=3000).sort((a,b)=>a.rpm-b.rpm);
+ if(!p.length)return rpm/60;
+ if(p.length===1)return p[0].f0_hz*(rpm/p[0].rpm);
+ if(rpm<=p[0].rpm)return p[0].f0_hz*(rpm/p[0].rpm);
+ if(rpm>=p[p.length-1].rpm){
+   const a=p[p.length-2],b=p[p.length-1];
+   const slope=(b.f0_hz-a.f0_hz)/Math.max(1,b.rpm-a.rpm);
+   return b.f0_hz+(rpm-b.rpm)*slope;
+ }
+ for(let i=0;i<p.length-1;i++){
+   const a=p[i],b=p[i+1];
+   if(rpm>=a.rpm&&rpm<=b.rpm){
+     const u=(rpm-a.rpm)/(b.rpm-a.rpm);
+     return a.f0_hz+u*(b.f0_hz-a.f0_hz);
+   }
+ }
+ return rpm/60;
+}
+function rpmFromObservedF0(f){
+ const p=fingerprint.filter(x=>x.rpm>=3000).sort((a,b)=>a.f0_hz-b.f0_hz);
+ if(!p.length)return f*60;
+ if(p.length===1)return f*(p[0].rpm/p[0].f0_hz);
+ if(f<=p[0].f0_hz)return f*(p[0].rpm/p[0].f0_hz);
+ if(f>=p[p.length-1].f0_hz){
+   const a=p[p.length-2],b=p[p.length-1];
+   const slope=(b.rpm-a.rpm)/Math.max(.001,b.f0_hz-a.f0_hz);
+   return b.rpm+(f-b.f0_hz)*slope;
+ }
+ for(let i=0;i<p.length-1;i++){
+   const a=p[i],b=p[i+1];
+   if(f>=a.f0_hz&&f<=b.f0_hz){
+     const u=(f-a.f0_hz)/(b.f0_hz-a.f0_hz);
+     return a.rpm+u*(b.rpm-a.rpm);
+   }
+ }
+ return f*60;
+}
+function goertzel(x,fs,f){
+ if(f<=0||f>=fs/2)return -120;
+ const w=2*Math.PI*f/fs,cos=Math.cos(w),coeff=2*cos;let s0=0,s1=0,s2=0;
+ for(let i=0;i<x.length;i++){s0=x[i]+coeff*s1-s2;s2=s1;s1=s0}
+ const power=s1*s1+s2*s2-coeff*s1*s2;
+ return 10*Math.log10(Math.max(1e-12,power/(x.length*x.length)));
+}
+function nearestTemplate(rpm){
+ let best=null;
+ for(const p of fingerprint){
+   if(p.rpm<3000)continue;
+   const e=Math.abs(p.rpm-rpm);
+   if(!best||e<best.e)best={p,e};
+ }
+ return best?.p||null;
+}
+function spectralScore(x,fs,rpm){
+ const f0=interpExpectedF0(rpm),tpl=nearestTemplate(rpm);
+ if(!tpl||!tpl.harm_rel_db)return .5;
+ const db=[];for(let h=1;h<=6;h++)db.push(goertzel(x,fs,f0*h));
+ const mx=Math.max(...db),rel=db.map(v=>v-mx);
+ let err=0,n=0;
+ for(let i=0;i<6;i++){
+   const t=tpl.harm_rel_db[i];
+   if(t==null)continue;
+   err+=Math.min(35,Math.abs(rel[i]-t));n++;
+ }
+ if(!n)return .5;
+ return clamp(1-(err/n)/28,0,1);
+}
+function estimate(arr,sr,source){
  const ds=Math.max(1,Math.round(sr/8000)),n=Math.floor(arr.length/ds),x=new Float32Array(n);let mean=0;
  for(let i=0;i<n;i++){let v=arr[i*ds];x[i]=v;mean+=v}mean/=n;
- let rms=0;for(let i=0;i<n;i++){x[i]-=mean;rms+=x[i]*x[i]}rms=Math.sqrt(rms/n);if(rms<.004)return {rpm:0,conf:0};
- const fs=sr/ds,minLag=Math.max(2,Math.floor(fs/(maxR/60))),maxLag=Math.min(n-4,Math.ceil(fs/(minR/60)));
- let best=-1,bestLag=0;
- for(let lag=minLag;lag<=maxLag;lag++){let c=0,e1=0,e2=0;for(let i=0;i<n-lag;i+=2){const a=x[i],b=x[i+lag];c+=a*b;e1+=a*a;e2+=b*b}const q=c/Math.sqrt(Math.max(1e-12,e1*e2));if(q>best){best=q;bestLag=lag}}
- if(best<.18||!bestLag)return {rpm:0,conf:Math.max(0,best)};
- let rpm=fs/bestLag*60;
- // prefer plausible fundamental if half/double correlation is similar
- function corr(lag){if(lag<minLag||lag>maxLag)return -1;let c=0,e1=0,e2=0;for(let i=0;i<n-lag;i+=2){let a=x[i],b=x[i+lag];c+=a*b;e1+=a*a;e2+=b*b}return c/Math.sqrt(Math.max(1e-12,e1*e2))}
- const dbl=bestLag*2,half=Math.round(bestLag/2),cd=corr(dbl),ch=corr(half);
- if(cd>best*.88)rpm/=2;else if(ch>best*.98&&rpm*2<=maxR)rpm*=2;
- if(rpm<minR||rpm>maxR)return {rpm:0,conf:0};return {rpm,conf:Math.min(1,best)}
+ let rms=0;for(let i=0;i<n;i++){x[i]-=mean;rms+=x[i]*x[i]}rms=Math.sqrt(rms/n);if(rms<.004)return {rpm:0,conf:0,rawRpm:0,fpScore:0};
+ const fs=sr/ds;
+ // Wide frequency search: collected reference f0 does not equal RPM/60 exactly.
+ const minF=35,maxF=Math.min(260,fs/3),minLag=Math.max(2,Math.floor(fs/maxF)),maxLag=Math.min(n-4,Math.ceil(fs/minF));
+ let candidates=[];
+ function corr(lag){let c=0,e1=0,e2=0;for(let i=0;i<n-lag;i+=2){const a=x[i],b=x[i+lag];c+=a*b;e1+=a*a;e2+=b*b}return c/Math.sqrt(Math.max(1e-12,e1*e2))}
+ for(let lag=minLag;lag<=maxLag;lag++){
+   const q=corr(lag);
+   if(q<.12)continue;
+   if(candidates.length<12||q>candidates[candidates.length-1].q){
+     candidates.push({lag,q});candidates.sort((a,b)=>b.q-a.q);if(candidates.length>12)candidates.pop();
+   }
+ }
+ if(!candidates.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0};
+ const prev=last[source]||0;
+ let scored=[];
+ for(const c of candidates){
+   const f=fs/c.lag;
+   let rpm=rpmFromObservedF0(f);
+   for(const mult of [1,.5,2]){
+     const rr=rpm*mult;if(rr<minR||rr>maxR)continue;
+     const fp=spectralScore(x,fs,rr);
+     const continuity=prev?clamp(1-Math.abs(rr-prev)/Math.max(prev,1),0,1):.65;
+     const score=c.q*.48+fp*.37+continuity*.15;
+     scored.push({rpm:rr,rawRpm:f*60,q:c.q,fp,score,f});
+   }
+ }
+ if(!scored.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0};
+ scored.sort((a,b)=>b.score-a.score);const b=scored[0];
+ let conf=clamp((b.q-.10)/.55,0,1)*.58+b.fp*.42;
+ if(b.fp<.22)conf*=.55;
+ if(conf<.20)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp};
+ last[source]=prev?prev*.68+b.rpm*.32:b.rpm;
+ return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f};
 }
 onmessage=e=>{
- const m=e.data;if(m.type==="config"){minR=m.min||1200;maxR=m.max||13000}
- if(m.type==="pcm"){const a=new Float32Array(m.buffer),r=estimate(a,m.sampleRate||48000);if(r.rpm){const prev=last[m.source]||0;if(prev&&Math.abs(r.rpm-prev)/prev>.55)r.conf*=.45;last[m.source]=prev?prev*.65+r.rpm*.35:r.rpm;r.rpm=last[m.source]}postMessage({type:"rpm",source:m.source,rpm:r.rpm,conf:r.conf,t:Date.now()})}
+ const m=e.data;
+ if(m.type==="config"){minR=m.min||3000;maxR=m.max||12500;fingerprint=m.fingerprint||fingerprint}
+ if(m.type==="pcm"){
+   const a=new Float32Array(m.buffer),r=estimate(a,m.sampleRate||48000,m.source);
+   postMessage({type:"rpm",source:m.source,rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,t:Date.now()})
+ }
 };
 `;
 const rpmWorker=new Worker(URL.createObjectURL(new Blob([rpmWorkerSource],{type:"text/javascript"})));
@@ -439,9 +558,9 @@ measurementWorker.onmessage=e=>{
 
 function currentSettings(){
  const p=getCurrentProfile();
- return {mass:+$("mass").value||190,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,manualRatio:+localStorage.getItem("motolab_v23_ratio")||0,gearLearn:$("gearLearnToggle").classList.contains("on"),gearRatios:p?.gearRatios||[],fusionMinRpm:+$("micMin").value||3000,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,micCal:getMicCalPoints()}
+ return {mass:+$("mass").value||190,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,manualRatio:+localStorage.getItem("motolab_v25_ratio")||0,gearLearn:$("gearLearnToggle").classList.contains("on"),gearRatios:p?.gearRatios||[],fusionMinRpm:+$("micMin").value||3000,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,micCal:getMicCalPoints()}
 }
-function pushConfig(){measurementWorker.postMessage({type:"config",config:currentSettings()});rpmWorker.postMessage({type:"config",min:+$("micMin").value||3000,max:+$("micMax").value||12500})}
+function pushConfig(){measurementWorker.postMessage({type:"config",config:currentSettings()});rpmWorker.postMessage({type:"config",min:+$("micMin").value||3000,max:+$("micMax").value||12500,fingerprint:RAW_AUDIO_FINGERPRINT.points})}
 
 async function openStorage(){
  try{
@@ -465,7 +584,7 @@ async function deleteRun(id){
 function defaultProfiles(){return [{id:"p1",name:"Oma pyörä",engineType:"2T",gearRatios:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null}]}
 function getProfiles(){try{return JSON.parse(localStorage.getItem(PROFILES_KEY)||"null")||defaultProfiles()}catch{return defaultProfiles()}}
 function setProfiles(p){localStorage.setItem(PROFILES_KEY,JSON.stringify(p))}
-function getCurrentProfile(){const ps=getProfiles(),id=localStorage.getItem("motolab_v23_profile")||ps[0].id;return ps.find(p=>p.id===id)||ps[0]}
+function getCurrentProfile(){const ps=getProfiles(),id=localStorage.getItem("motolab_v25_profile")||ps[0].id;return ps.find(p=>p.id===id)||ps[0]}
 function saveCurrentProfile(patch){const ps=getProfiles(),cur=getCurrentProfile(),i=ps.findIndex(x=>x.id===cur.id);ps[i]={...cur,...patch};setProfiles(ps);renderProfiles();pushConfig()}
 function renderProfiles(){
  const ps=getProfiles(),cur=getCurrentProfile();$("profileSelect").innerHTML=ps.map(p=>`<option value="${p.id}" ${p.id===cur.id?"selected":""}>${escapeHtml(p.name)}</option>`).join("");
@@ -479,6 +598,14 @@ function updateLearnedGears(ratios){
 }
 
 
+
+function renderRawFingerprint(){
+ const p=RAW_AUDIO_FINGERPRINT.points||[];
+ if($("rawFpMain"))$("rawFpMain").textContent=p.length+" REF PISTETTÄ";
+ if($("rawFpStatus"))$("rawFpStatus").innerHTML=
+   "Lähde: <b>"+RAW_AUDIO_FINGERPRINT.project+"</b><br>"+
+   p.map(x=>x.rpm+" rpm: f0≈"+Math.round(x.f0_hz*10)/10+" Hz • "+x.samples+" näytettä").join("<br>");
+}
 function getMicCalPoints(){
  try{
    const pts=JSON.parse(localStorage.getItem(MIC_CAL_KEY)||"[]");
@@ -515,7 +642,7 @@ function loadSettings(){
 }
 function saveSettings(){
  const d={mass:+$("mass").value||190,manualGear:+$("manualGear").value||3,calSpeed:+$("calSpeed").value||60,calRpm:+$("calRpm").value||6000,micMin:+$("micMin").value||3000,micMax:+$("micMax").value||12500,audioDevice:$("audioDevice").value,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,gearLearn:$("gearLearnToggle").classList.contains("on"),infoButtons:$("infoToggle").classList.contains("on"),wakeOn:$("wakeToggle").classList.contains("on")};
- localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value});$("settingsStatus").textContent="V23 Fusion-asetukset tallennettu.";pushConfig()
+ localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value});$("settingsStatus").textContent="V25 Fusion-asetukset tallennettu.";pushConfig()
 }
 function setSwitch(id,on){$(id).classList.toggle("on",!!on)}
 
@@ -650,8 +777,8 @@ function startDemo(){
 function openFull(rr,title){currentChartRuns=rr;$("fcTitle").textContent=title||"Dynokäyrä";fullChartState={zoom:1,center:7000,showTorque:true};$("fullChart").classList.add("show");setTimeout(redrawFull,30)}
 function redrawFull(){const all=currentChartRuns.flatMap(r=>r.data||[]).filter(x=>x.rpm>0);if(all.length&&fullChartState.center===7000)fullChartState.center=(Math.min(...all.map(x=>x.rpm))+Math.max(...all.map(x=>x.rpm)))/2;drawChart($("fullChartCanvas"),currentChartRuns,fullChartState.showTorque,fullChartState.zoom,fullChartState.center)}
 function chartPoint(e){if(!currentChartRuns.length)return;const c=$("fullChartCanvas"),rect=c.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;const all=currentChartRuns.flatMap(r=>r.data||[]).filter(p=>p.rpm>0);if(!all.length)return;const min=Math.min(...all.map(p=>p.rpm)),max=Math.max(...all.map(p=>p.rpm)),span=(max-min)/fullChartState.zoom,lo=Math.max(min,fullChartState.center-span/2),hi=Math.min(max,fullChartState.center+span/2),target=lo+x*(hi-lo);let best=null;for(const r of currentChartRuns)for(const p of r.data||[]){const d=Math.abs(p.rpm-target);if(!best||d<best.d)best={d,p,r}}if(best)$("pointRead").textContent=`${Math.round(best.p.rpm)} rpm • ${best.p.hp.toFixed(2)} hv • ${best.p.nm.toFixed(2)} Nm • ${best.r.profileName||""}`}
-function createProfileFromSuggestion(){const ps=getProfiles(),src=runs.find(r=>r.id===$("createSuggestedProfile").dataset.runId),id="p"+Date.now();ps.push({id,name:"Uusi pyörä "+(ps.length+1),engineType:$("engineType").value,gearRatios:src?.gearRatioMedian?[{ratio:src.gearRatioMedian,count:8}]:[],carb:getCurrentProfile().carb,baselineHp:src?.maxHp||null});setProfiles(ps);localStorage.setItem("motolab_v23_profile",id);$("profileModal").classList.remove("show");renderProfiles();pushConfig()}
-function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:"Pyörä "+(ps.length+1),engineType:"2T",gearRatios:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null});setProfiles(ps);localStorage.setItem("motolab_v23_profile",id);renderProfiles();pushConfig()}
+function createProfileFromSuggestion(){const ps=getProfiles(),src=runs.find(r=>r.id===$("createSuggestedProfile").dataset.runId),id="p"+Date.now();ps.push({id,name:"Uusi pyörä "+(ps.length+1),engineType:$("engineType").value,gearRatios:src?.gearRatioMedian?[{ratio:src.gearRatioMedian,count:8}]:[],carb:getCurrentProfile().carb,baselineHp:src?.maxHp||null});setProfiles(ps);localStorage.setItem("motolab_v25_profile",id);$("profileModal").classList.remove("show");renderProfiles();pushConfig()}
+function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:"Pyörä "+(ps.length+1),engineType:"2T",gearRatios:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null});setProfiles(ps);localStorage.setItem("motolab_v25_profile",id);renderProfiles();pushConfig()}
 
 document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>switchScreen(b.dataset.screen));
 document.querySelectorAll(".ib").forEach(b=>b.onclick=e=>{e.stopPropagation();$("infoText").textContent=infoDefs[b.dataset.info]||"";$("infoModal").classList.add("show")});
@@ -664,19 +791,58 @@ $("openCompareFull").onclick=()=>{if(currentChartRuns.length)openFull(currentCha
 $("deleteRunBtn").onclick=async()=>{if(currentRunModalId){await deleteRun(currentRunModalId);selectedRunIds.delete(currentRunModalId);$("runModal").classList.remove("show");renderRuns();renderAnalysis()}};
 $("closeFullChart").onclick=()=>$("fullChart").classList.remove("show");$("zoomIn").onclick=()=>{fullChartState.zoom=Math.min(8,fullChartState.zoom*1.5);redrawFull()};$("zoomOut").onclick=()=>{fullChartState.zoom=Math.max(1,fullChartState.zoom/1.5);redrawFull()};$("zoomReset").onclick=()=>{fullChartState.zoom=1;redrawFull()};$("toggleTorque").onclick=()=>{fullChartState.showTorque=!fullChartState.showTorque;$("toggleTorque").textContent=fullChartState.showTorque?"HP + Nm":"VAIN HP";redrawFull()};$("fullChartCanvas").addEventListener("click",chartPoint);
 $("saveCarbBtn").onclick=saveCarb;$("jetSuggestBtn").onclick=jetSuggest;$("autoTuneBtn").onclick=autoTune;
-$("profileSelect").onchange=()=>{localStorage.setItem("motolab_v23_profile",$("profileSelect").value);renderProfiles();pushConfig()};$("newProfileBtn").onclick=newProfile;
+$("profileSelect").onchange=()=>{localStorage.setItem("motolab_v25_profile",$("profileSelect").value);renderProfiles();pushConfig()};$("newProfileBtn").onclick=newProfile;
 
 $("micCalBtn1").onclick=()=>captureMicCalibration("micCalTarget1",0);
 $("micCalBtn2").onclick=()=>captureMicCalibration("micCalTarget2",1);
 $("micCalBtn3").onclick=()=>captureMicCalibration("micCalTarget3",2);
 $("micCalClearBtn").onclick=()=>{localStorage.removeItem(MIC_CAL_KEY);renderMicCalibration();pushConfig();$("micCalStatus").textContent="MIC-kalibrointi tyhjennetty.";};
 $("gearLearnToggle").onclick=()=>{setSwitch("gearLearnToggle",!$("gearLearnToggle").classList.contains("on"));saveSettings()};$("infoToggle").onclick=()=>{const on=!$("infoToggle").classList.contains("on");setSwitch("infoToggle",on);document.body.classList.toggle("info-off",!on);saveSettings()};$("wakeToggle").onclick=()=>{const on=!$("wakeToggle").classList.contains("on");setSwitch("wakeToggle",on);on?requestWake():releaseWake();saveSettings()};
-$("calibrateBtn").onclick=()=>{const s=+$("calSpeed").value,r=+$("calRpm").value;if(s>0&&r>0){localStorage.setItem("motolab_v23_ratio",String(r/s));$("settingsStatus").textContent=`Kalibroitu ${(r/s).toFixed(2)} rpm/km/h`;pushConfig()}else $("settingsStatus").textContent="Tarkista nopeus ja RPM."};$("saveSettingsBtn").onclick=saveSettings;$("demoBtn").onclick=startDemo;$("selfTestBtn").onclick=selfTests;
-$("resetBtn").onclick=()=>{localStorage.removeItem(SETTINGS_KEY);localStorage.removeItem(PROFILES_KEY);localStorage.removeItem(FALLBACK_RUNS);localStorage.removeItem("motolab_v23_ratio");localStorage.removeItem(MIC_CAL_KEY);location.reload()};
+$("calibrateBtn").onclick=()=>{const s=+$("calSpeed").value,r=+$("calRpm").value;if(s>0&&r>0){localStorage.setItem("motolab_v25_ratio",String(r/s));$("settingsStatus").textContent=`Kalibroitu ${(r/s).toFixed(2)} rpm/km/h`;pushConfig()}else $("settingsStatus").textContent="Tarkista nopeus ja RPM."};$("saveSettingsBtn").onclick=saveSettings;$("demoBtn").onclick=startDemo;$("selfTestBtn").onclick=selfTests;
+$("resetBtn").onclick=()=>{localStorage.removeItem(SETTINGS_KEY);localStorage.removeItem(PROFILES_KEY);localStorage.removeItem(FALLBACK_RUNS);localStorage.removeItem("motolab_v25_ratio");localStorage.removeItem(MIC_CAL_KEY);location.reload()};
 $("createSuggestedProfile").onclick=createProfileFromSuggestion;$("keepCurrentProfile").onclick=()=>$("profileModal").classList.remove("show");
 
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+ e.preventDefault();
+ deferredInstallPrompt=e;
+ if($("installStatus"))$("installStatus").textContent="Asennus on saatavilla tällä laitteella.";
+});
+window.addEventListener("appinstalled",()=>{
+ if($("installStatus"))$("installStatus").textContent="VÄNÄ MOTOLAB on asennettu.";
+});
+function standaloneMode(){
+ return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone===true;
+}
+function updateInstallStatus(){
+ if(!$("installStatus"))return;
+ $("installStatus").textContent=standaloneMode()
+   ?"Sovellus toimii standalone-tilassa."
+   :"Selain-tila. iPhone: Safari → Jaa → Lisää Koti-valikkoon.";
+}
+function setupAppInstall(){
+ if($("installBtn"))$("installBtn").onclick=async()=>{
+   if(deferredInstallPrompt){
+     deferredInstallPrompt.prompt();
+     try{await deferredInstallPrompt.userChoice}catch{}
+     deferredInstallPrompt=null;
+     updateInstallStatus();
+   }else{
+     alert("iPhone: Safari → Jaa → Lisää Koti-valikkoon. Android: selaimen valikko → Asenna sovellus / Lisää aloitusnäyttöön.");
+   }
+ };
+ if($("fullscreenBtn"))$("fullscreenBtn").onclick=async()=>{
+   try{
+     if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();
+     else await document.exitFullscreen?.();
+   }catch{}
+ };
+ updateInstallStatus();
+}
+
 (async function boot(){
- await openStorage();await loadRuns();loadSettings();renderProfiles();renderRuns();renderAnalysis();updateDelta();renderMicCalibration();pushConfig();syncSensorUI();updateDiag();requestWake();enumerateAudio()
+ await openStorage();await loadRuns();loadSettings();renderProfiles();renderRuns();renderAnalysis();updateDelta();renderMicCalibration();setupAppInstall();renderRawFingerprint();pushConfig();syncSensorUI();updateDiag();requestWake();enumerateAudio()
 })();
 </script>
 </body>

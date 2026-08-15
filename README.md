@@ -1,16 +1,24 @@
-# VÄNÄ MOTOLAB v23 MIC Calibration
+# VÄNÄ MOTOLAB v25 RAW Fingerprint
 
-Lisätty 3-pisteinen mikrofonin RPM-kalibrointi.
+Tässä versiossa kerätty raakadata on ensimmäistä kertaa osa live-RPM-mittausta.
 
-Käyttö:
-1. Kytke PHONE MIC tai BT/EXT MIC päälle.
-2. Pidä moottori tasaisella tunnetulla kierrosluvulla.
-3. Syötä oikea kierrosluku (esim. 3000 rpm) ja paina TALLENNA.
-4. Tee sama mieluiten kolmessa pisteessä, esimerkiksi 3000 / 6000 / 9000 rpm.
+Mitä raakadatasta käytetään
+- rpm_reference = oikea referenssi-RPM / opetustieto
+- f0-havainnot
+- 1.–6. harmonisten suhteelliset voimakkuudet
+- eri mikrofonipaikkojen näytteet
 
-V23 tallentaa jokaisessa pisteessä äänen raakaa RPM-arvoa ja käyttäjän antaman oikean RPM:n.
-Yhdellä pisteellä käytetään suhdekorjausta.
-Kahdella tai kolmella pisteellä käytetään pisteiden välistä lineaarista interpolointia.
-Korjaus tehdään ennen RPM Fusionia.
+Tärkeä ero:
+Testidatan oman RPM-algoritmin arvioita EI käytetä totuusarvoina. Totuutena käytetään rpm_reference-kenttää.
 
-V22:n RPM Fusion säilyy mukana: audio + nopeus-RPM, Auto Gear Learn ja kytkinluiston tunnistus.
+Live RPM -ketju
+1. AudioWorker lähettää PCM-palan RPM Workerille.
+2. Worker etsii useita taajuusehdokkaita.
+3. Ehdokkaat muunnetaan raakadatasta opitulla f0→RPM-suhteella.
+4. 1/2x, 1x ja 2x vaihtoehdot pisteytetään raakadatasta johdettua harmonista fingerprintiä vasten.
+5. Heikko fingerprint-osuma laskee confidencea tai hylkää havainnon.
+6. MIC Calibration tekee pyörä-/mikrofonikohtaisen lisäkorjauksen.
+7. RPM Fusion yhdistää hyväksytyn audio-RPM:n nopeus-RPM:ään ja Auto Gear Learn -tietoon.
+8. Kytkinluistossa nopeus ei saa pakottaa RPM:ää.
+
+Mukana oleva raw_audio_fingerprint.json on auditointia varten.

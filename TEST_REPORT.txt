@@ -1,16 +1,21 @@
-VÄNÄ MOTOLAB v23 MIC Calibration – TEST REPORT
+VÄNÄ MOTOLAB v25 RAW Fingerprint – TEST REPORT
 
 PASS
 - JavaScript syntax
-- 3-point MIC calibration UI
-- raw audio RPM retained separately
-- calibration points passed to measurement worker
-- single-point ratio correction
-- multi-point linear interpolation
-- calibration reset
+- collected raw-data fingerprint embedded
+- rpm_reference used as training/reference label
+- f0 reference curve embedded
+- harmonic 1..6 relative signature embedded
+- live worker evaluates multiple RPM candidates
+- 1/2x, 1x, 2x candidates scored
+- fingerprint score affects confidence
+- fingerprint diagnostics stored into run samples
+- MIC Calibration retained
+- RPM Fusion retained
+- camera RPM absent
 
-DEVICE TEST REQUIRED
-- actual iPhone microphone
-- BT/EXT microphone routing
-- known real RPM references
-- road/dyno test
+DEVICE VALIDATION REQUIRED
+- live iPhone microphone against known RPM
+- BT/EXT mic
+- higher RPM reference data above 5000 rpm
+- GPS + Gear Learn road pull
