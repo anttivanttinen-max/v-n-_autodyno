@@ -1,21 +1,16 @@
-VÄNÄ MOTOLAB v22 RPM Fusion – TEST REPORT
+VÄNÄ MOTOLAB v23 MIC Calibration – TEST REPORT
 
-PASS:
-- Outer JavaScript syntax (node --check)
-- V22 title/version
-- audioRpm stored in run samples
-- speedRpm stored in run samples
-- fusionRpm / fusionMode stored in run samples
-- clutch-slip flag stored in run samples
-- default audio minimum RPM = 3000
-- camera RPM absent
-- manual-run auto-stop protection remains (auto-stop only inside mode === "auto")
+PASS
+- JavaScript syntax
+- 3-point MIC calibration UI
+- raw audio RPM retained separately
+- calibration points passed to measurement worker
+- single-point ratio correction
+- multi-point linear interpolation
+- calibration reset
 
-NOT PHYSICALLY VALIDATED IN THIS ENVIRONMENT:
-- iPhone GPS and geolocation accuracy
-- iPhone DeviceMotion permission/stream
-- Phone microphone RPM accuracy
-- Bluetooth/EXT microphone routing
-- Real learned gear ratios on a motorcycle
-- Real clutch-slip detection
-- Real road/dyno pull over HTTPS
+DEVICE TEST REQUIRED
+- actual iPhone microphone
+- BT/EXT microphone routing
+- known real RPM references
+- road/dyno test

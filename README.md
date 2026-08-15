@@ -1,14 +1,16 @@
-# VÄNÄ MOTOLAB v22 RPM Fusion
+# VÄNÄ MOTOLAB v23 MIC Calibration
 
-Päivityksen pääasia on RPM Fusion:
+Lisätty 3-pisteinen mikrofonin RPM-kalibrointi.
 
-- Audio RPM hyväksytään vasta valitun minimi-RPM:n ja luottamuksen jälkeen.
-- Hyvä audio-RPM hallitsee mittausta.
-- Keskitasoinen audio yhdistetään GPS-nopeudesta + opitusta vaihdesuhteesta laskettuun RPM:ään.
-- Heikko audio korvataan nopeus-RPM:llä, jos vaihde on luotettavasti tunnistettu.
-- Audio- ja nopeus-RPM:n suuri ero tulkitaan mahdolliseksi kytkinluistoksi; silloin nopeus ei saa väkisin korjata audio-RPM:ää.
-- Jos kumpikaan lähde ei ole riittävän luotettava, Fusion hylkää RPM:n.
-- Run-dataan tallennetaan audioRpm, speedRpm, fusionRpm, source, confidence, fusionMode, slip ja agreement.
-- Kamera-RPM ei ole mukana.
+Käyttö:
+1. Kytke PHONE MIC tai BT/EXT MIC päälle.
+2. Pidä moottori tasaisella tunnetulla kierrosluvulla.
+3. Syötä oikea kierrosluku (esim. 3000 rpm) ja paina TALLENNA.
+4. Tee sama mieluiten kolmessa pisteessä, esimerkiksi 3000 / 6000 / 9000 rpm.
 
-Laitekohtaiset testit on tehtävä HTTPS-osoitteessa iPhonella: GPS, DeviceMotion, puhelinmic, BT/EXT mic ja oikea maantie-/rullatesti turvallisessa ympäristössä.
+V23 tallentaa jokaisessa pisteessä äänen raakaa RPM-arvoa ja käyttäjän antaman oikean RPM:n.
+Yhdellä pisteellä käytetään suhdekorjausta.
+Kahdella tai kolmella pisteellä käytetään pisteiden välistä lineaarista interpolointia.
+Korjaus tehdään ennen RPM Fusionia.
+
+V22:n RPM Fusion säilyy mukana: audio + nopeus-RPM, Auto Gear Learn ja kytkinluiston tunnistus.
