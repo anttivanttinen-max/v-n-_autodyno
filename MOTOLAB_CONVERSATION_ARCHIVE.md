@@ -1,6 +1,6 @@
 # VÄNÄ MotoLab — conversation archive and durable project memory
 
-Updated: 2026-08-16
+Updated: 2026-08-17
 
 ## Purpose
 This file is the durable GitHub memory for MotoLab development conversations. Important decisions, test results, constraints, implementation notes, unfinished work, data-analysis findings and cross-thread handoff notes must be copied here so they are not lost when a ChatGPT conversation is closed or becomes unavailable.
@@ -12,6 +12,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Do not rely on one chat thread as the only place where a decision exists.
 - When two MotoLab conversations run in parallel, both must inherit the same repository state and neither should create a competing "latest" version.
 - Raw measurement data belongs in the private `Motolab-data` repository; implementation/project memory belongs in `v-n-_autodyno`.
+- A recurring project-memory job checks for new MotoLab decisions/results and updates this archive and, when needed, `MOTOLAB_SYNC_STATUS.md`. It must not modify application code and must avoid empty/no-op commits.
 
 ## Current core constraints
 - GPS MASTER remains authoritative during GPS + microphone learning. Microphone data must not alter displayed RPM, run acceptance or gear learning while GPS MASTER is selected.
@@ -30,6 +31,24 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Harmonic jumping was visible in historical microphone data, which motivated retaining multiple candidate alternatives and continuity tracking.
 - Preferred historical contact mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
 - Strong contact reference: about 6600 rpm truth, 6591 rpm audio average, ~92.2% confidence, f0 about 109–112 Hz and harmonics near 220/330/440/550/660 Hz.
+
+## Adaptive RPM-learning implementation retained from current development
+- `rpm-learning-model.json` exists in the application repository using schema `motolab_rpm_learning_model_v1`.
+- Baseline model starts with no learned bands and explicit acceptance limits; later accepted trainer models may replace the baseline only after validation.
+- Adaptive GPS-taught RPM learning and RAW replay were added on 2026-08-16 (`58c1feb`, `fd6cfe4`, `fe66331`).
+- The design learns RPM-region behavior in 500 rpm bands and can prefer 0.5x / 1x / 2x harmonic branches when GPS-reference evidence supports the choice.
+- Continuity/prediction is part of candidate selection so one-frame harmonic jumps are disfavored.
+- Local RAW history can be replayed through newer learning logic instead of requiring every algorithm revision to be tested only with new rides.
+- Auto Gear Learn remains available but GPS MASTER + MIC LEARN must not let microphone shadow RPM gain gear-learning authority.
+- The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
+
+## Current research / build handoff
+- Current `version.js` at this archive update is **v32.5 / build `2026-08-16x-gear-confirm`**.
+- Third-gear research now has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
+- Gear guard transitions are logged into the research timeline.
+- Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
+- Finland vehicle database v2 files have been installed in the application repository.
+- Beta auth was enabled for automatic RAW sync.
 
 ## Data pipeline retained from conversations
 - MotoLab stores RAW locally first.
@@ -52,6 +71,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Keep raw candidate sets and region-specific behavior so later models can learn 0.5x / 1x / 2x branch preference by RPM region if reference data supports it.
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
 - Existing RAW history should remain usable for later replay/reprocessing.
+- Field validation is still required for adaptive candidate tracking, 500 rpm band learning, Auto Gear Learn interaction and iOS sensor/microphone stability.
 
 ## Deferred work explicitly parked for later
 - Automatic knock/ignition autotune.
