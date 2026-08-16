@@ -1,0 +1,52 @@
+{
+  "schema": "motolab_vehicle_catalog_finland_staging_v1",
+  "updated": "2026-08-16",
+  "purpose": "Staging only. Common road-legal 50 cc geared mopeds and 125 cc A1 motorcycles seen in Finland. Do not merge to production until approved.",
+  "rules": {
+    "roadLegalPriority": true,
+    "gearRatiosPriority": true,
+    "uncertainRatiosAllowedAsCandidates": true,
+    "uncertainValuesMustNotOverrideLearnedData": true,
+    "userProfileOverridesCatalog": true
+  },
+  "entries": [
+    {"id":"derbi-senda-50-family","class":"50cc_geared_moped","make":"Derbi","model":"Senda 50","variants":["X-Treme","DRD","Racer","SM","R"],"engineFamily":"EBS/EBE/D50B0 by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"gearRatioConfidence":"probable","primaryRatio":3.5,"primaryConfidence":"probable","status":"researching","finlandPriority":"very_high"},
+    {"id":"rieju-mrt-50-family","class":"50cc_geared_moped","make":"Rieju","model":"MRT 50","variants":["SM","Pro","Racing","Enduro"],"engineFamily":"Minarelli AM6 / later variants verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"aprilia-sx-rx-50-family","class":"50cc_geared_moped","make":"Aprilia","model":"SX/RX 50","variants":["SX 50","RX 50"],"engineFamily":"Derbi D50B0 family on many later models; verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"beta-rr-50-family","class":"50cc_geared_moped","make":"Beta","model":"RR 50","variants":["Motard","Track","Racing","Enduro"],"engineFamily":"Minarelli AM6 family on common Finnish models; verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"yamaha-dt50-family","class":"50cc_geared_moped","make":"Yamaha","model":"DT50","variants":["DT50R","DT50X"],"engineFamily":"Minarelli AM6 family on common models; verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"gilera-smt-rcr-50-family","class":"50cc_geared_moped","make":"Gilera","model":"SMT/RCR 50","variants":["SMT 50","RCR 50"],"engineFamily":"Derbi EBS/D50B0 family by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"sherco-50-family","class":"50cc_geared_moped","make":"Sherco","model":"50","variants":["SM","SE-R","Factory"],"engineFamily":"Minarelli AM6 family on common models; verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"fantic-caballero-50-family","class":"50cc_geared_moped","make":"Fantic Motor","model":"Caballero 50","variants":["Motard","Performance","Competition"],"engineFamily":"Minarelli AM6 family on many models; verify by year","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"motorhispania-ryz-50-family","class":"50cc_geared_moped","make":"Motorhispania","model":"RYZ 50","variants":["SM","Enduro"],"engineFamily":"Minarelli AM6 family","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+    {"id":"peugeot-xps-50-family","class":"50cc_geared_moped","make":"Peugeot","model":"XPS 50","variants":["SM","Enduro"],"engineFamily":"Minarelli AM6 family on common models","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+    {"id":"mbk-xlimit-50-family","class":"50cc_geared_moped","make":"MBK","model":"X-Limit 50","variants":["SM","Enduro"],"engineFamily":"Minarelli AM6 family","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+    {"id":"malaguti-xsm-xtm-50-family","class":"50cc_geared_moped","make":"Malaguti","model":"XSM/XTM 50","variants":["XSM","XTM"],"engineFamily":"Minarelli AM6 family on common older models","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+    {"id":"generic-trigger-50-family","class":"50cc_geared_moped","make":"Generic","model":"Trigger 50","variants":["SM","X"],"engineFamily":"AM6-type / verify exact engine","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+    {"id":"cpi-sm-sx-50-family","class":"50cc_geared_moped","make":"CPI","model":"SM/SX 50","variants":["SM","SX"],"engineFamily":"AM6-type / CPI derivative; verify exact ratios","engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"},
+
+    {"id":"yamaha-yzf-r125-family","class":"125cc_a1","make":"Yamaha","model":"YZF-R125","variants":["R125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"yamaha-mt125-family","class":"125cc_a1","make":"Yamaha","model":"MT-125","variants":["MT-125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"yamaha-wr125-family","class":"125cc_a1","make":"Yamaha","model":"WR125","variants":["WR125X","WR125R"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"yamaha-dt125r-family","class":"125cc_a1","make":"Yamaha","model":"DT125R","variants":["DT125R","DT125X"],"engineType":"2T","gearboxSpeeds":6,"gearRatios":[2.833,1.875,1.412,1.143,0.957,0.818],"gearRatioConfidence":"verified","primaryRatio":3.227,"primaryConfidence":"verified","status":"researched","finlandPriority":"very_high"},
+    {"id":"ktm-duke-125-family","class":"125cc_a1","make":"KTM","model":"125 Duke","variants":["Duke 125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"ktm-rc125-family","class":"125cc_a1","make":"KTM","model":"RC 125","variants":["RC 125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"ktm-exc125-family","class":"125cc_a1","make":"KTM","model":"125 EXC","variants":["EXC 125"],"engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"husqvarna-sm125-family","class":"125cc_a1","make":"Husqvarna","model":"SM 125","variants":["SM","SMS"],"engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"husqvarna-wre125-family","class":"125cc_a1","make":"Husqvarna","model":"WRE 125","variants":["WRE"],"engineType":"2T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"honda-cbr125r-family","class":"125cc_a1","make":"Honda","model":"CBR125R","variants":["CBR125R"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"honda-cb125r-family","class":"125cc_a1","make":"Honda","model":"CB125R","variants":["CB125R"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"aprilia-rs125-family","class":"125cc_a1","make":"Aprilia","model":"RS 125","variants":["RS 125 2T","RS 125 4T"],"engineType":"mixed_by_generation","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"very_high"},
+    {"id":"aprilia-sx-rx125-family","class":"125cc_a1","make":"Aprilia","model":"SX/RX 125","variants":["SX 125","RX 125"],"engineType":"mixed_by_generation","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"beta-rr125-family","class":"125cc_a1","make":"Beta","model":"RR 125","variants":["RR 125 4T","RR 125 LC","Motard"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"kawasaki-ninja125-family","class":"125cc_a1","make":"Kawasaki","model":"Ninja 125","variants":["Ninja 125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"kawasaki-z125-family","class":"125cc_a1","make":"Kawasaki","model":"Z125","variants":["Z125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"suzuki-gsx-r125-family","class":"125cc_a1","make":"Suzuki","model":"GSX-R125","variants":["GSX-R125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"suzuki-gsx-s125-family","class":"125cc_a1","make":"Suzuki","model":"GSX-S125","variants":["GSX-S125"],"engineType":"4T","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"high"},
+    {"id":"derbi-gpr125-family","class":"125cc_a1","make":"Derbi","model":"GPR 125","variants":["GPR 125 2T","GPR 125 4T"],"engineType":"mixed_by_generation","gearboxSpeeds":6,"gearRatios":null,"gearRatioConfidence":"pending","status":"researching","finlandPriority":"medium"}
+  ],
+  "marketEvidence": [
+    {"source":"Nettimoto","note":"Current used-moped listings visibly include Derbi Senda, Yamaha DT50, Gilera SMT, Beta RR and Rieju MRT in Finland."},
+    {"source":"Nettimoto","note":"Current A1 listings visibly include Yamaha YZF-R125 and Husqvarna SM 125; broader A1 catalog research continues."}
+  ]
+}
