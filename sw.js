@@ -1,11 +1,12 @@
-const CACHE="vana-motolab-v32-maintenance";
-const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js"];
+const CACHE="vana-motolab-v32-gps-master-mic-learn";
+const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js"];
 
 function injectModules(html){
  const scripts=[];
  if(!html.includes("vehicle_lookup.js"))scripts.push('<script src="./vehicle_lookup.js?v=32.2"></script>');
  if(!html.includes("technical_specs.js"))scripts.push('<script src="./technical_specs.js?v=32.1"></script>');
  if(!html.includes("maintenance.js"))scripts.push('<script src="./maintenance.js?v=32.1"></script>');
+ if(!html.includes("gps_master_learning.js"))scripts.push('<script src="./gps_master_learning.js?v=32.1"></script>');
  return scripts.length?html.replace("</body>",scripts.join("")+"</body>"):html;
 }
 async function cacheInjectedIndex(cache){const r=await fetch("./index.html",{cache:"no-store"});if(!r.ok)throw new Error("index "+r.status);const html=injectModules(await r.text());await cache.put("./index.html",new Response(html,{headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-cache"}}));}
