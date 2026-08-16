@@ -71,6 +71,7 @@ Updated: 2026-08-17
 - Settings panels remain collapsible with remembered open/closed state.
 - Third-gear research confirmation buttons are part of the current build.
 - Sensor state persistence / automatic restoration work exists, but iOS field stability still requires validation.
+- **Confirmed from new RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active. Treat iOS microphone reconnect as an open bug, not a completed feature.
 
 ## ARM AUTO / multi-pull capture
 - ARM AUTO remains a persistent session across multiple pulls.
@@ -97,7 +98,7 @@ Updated: 2026-08-17
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
-- Validate iOS sensor/microphone persistence and recovery without UI lockups.
+- Fix and then validate iOS microphone persistence/recovery: current RAW shows repeated `track_not_live` reconnect failures while mic is desired ON.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
 
 ## Deferred work
