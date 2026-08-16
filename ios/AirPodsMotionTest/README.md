@@ -15,6 +15,8 @@ This test does **not** change the MotoLab PWA or its measurement logic.
 
 GitHub Actions uses a hosted macOS runner, installs XcodeGen, generates the Xcode project and performs an unsigned iOS Simulator build. This proves the source compiles without requiring a local Mac.
 
+CI workflow: `.github/workflows/ios-airpods-motion-test.yml`.
+
 A simulator cannot answer whether a real AirPods pair supports headphone motion. The final `isDeviceMotionAvailable` test must run on a real iPhone with the headphones connected.
 
 ## Installing on an iPhone
