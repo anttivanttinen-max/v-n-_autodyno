@@ -1,6 +1,6 @@
-const CACHE="vana-motolab-v32-3-update-fix";
+const CACHE="vana-motolab-v32-3-raw-auto-sync";
 const VERSION="v32.3";
-const CORE=["./manifest.webmanifest?v=32.3","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js?v=32.3","./vehicle_catalog.json?v=32.3","./maintenance.js?v=32.3","./maintenance_catalog.json?v=32.3","./technical_specs.js?v=32.3","./gps_master_learning.js?v=32.3"];
+const CORE=["./manifest.webmanifest?v=32.3","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js?v=32.3","./vehicle_catalog.json?v=32.3","./maintenance.js?v=32.3","./maintenance_catalog.json?v=32.3","./technical_specs.js?v=32.3","./gps_master_learning.js?v=32.3","./raw_sync.js?v=32.3"];
 
 function injectModules(html){
  const scripts=[];
@@ -8,6 +8,7 @@ function injectModules(html){
  if(!html.includes("technical_specs.js"))scripts.push('<script src="./technical_specs.js?v=32.3"></script>');
  if(!html.includes("maintenance.js"))scripts.push('<script src="./maintenance.js?v=32.3"></script>');
  if(!html.includes("gps_master_learning.js"))scripts.push('<script src="./gps_master_learning.js?v=32.3"></script>');
+ if(!html.includes("raw_sync.js"))scripts.push('<script src="./raw_sync.js?v=32.3"></script>');
  const banner='<style>#motolabFullVersion{position:sticky;top:0;z-index:99999;text-align:center;padding:7px 9px;background:#110508;border-bottom:1px solid #ff263f;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;letter-spacing:.2px}</style><div id="motolabFullVersion">VÄNÄ MotoLab v32.3 • build 2026-08-16</div><script>document.addEventListener("DOMContentLoaded",function(){var b=document.querySelector(".ver");if(b)b.textContent="v32.3";document.title="VÄNÄ MOTOLAB v32.3"})</script>';
  html=html.replace(/<link rel="manifest" href="manifest\.webmanifest(?:\?[^\"]*)?">/,'<link rel="manifest" href="manifest.webmanifest?v=32.3">');
  html=html.replace(/navigator\.serviceWorker\.register\("\.\/sw\.js\?v=31"\)/g,'navigator.serviceWorker.register("./sw.js?v=32.3",{updateViaCache:"none"})');
