@@ -1,141 +1,15 @@
 (() => {
-  'use strict';
-  const MODULE_VERSION = 'v32-vehicle-lookup-1';
-  let catalog = null;
-  let matches = [];
-
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-  function findKnowledgePanel() {
-    return [...document.querySelectorAll('.panel')].find(p => /VEHICLE\s*\/\s*ENGINE KNOWLEDGE BASE/i.test(p.textContent || '')) || null;
-  }
-
-  function injectUi() {
-    if (document.getElementById('vehicleLookupPanel')) return;
-    const kbPanel = findKnowledgePanel();
-    if (!kbPanel) return;
-    const panel = document.createElement('div');
-    panel.className = 'panel';
-    panel.id = 'vehicleLookupPanel';
-    panel.innerHTML = `
-      <div class="phead"><div class="ptitle"><span class="r">🔎</span> AJONEUVOTIEDON HAKU</div><span class="tiny">${MODULE_VERSION}</span></div>
-      <div class="form">
-        <label class="full">Hae merkki / malli / versio<input id="vehicleLookupInput" value="Derbi Senda 50" placeholder="esim. Derbi Senda 50"></label>
-        <button id="vehicleLookupBtn" class="action full" type="button">HAE AJONEUVOTIEDOT</button>
-      </div>
-      <div id="vehicleLookupStatus" class="statusbox">Tietoja ei kirjoiteta profiiliin ennen kuin hyväksyt ehdotuksen.</div>
-      <div id="vehicleLookupResults" class="runlist"></div>`;
-    kbPanel.parentNode.insertBefore(panel, kbPanel);
-    document.getElementById('vehicleLookupBtn').addEventListener('click', search);
-    document.getElementById('vehicleLookupInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); search(); }
-    });
-  }
-
-  async function loadCatalog() {
-    if (catalog) return catalog;
-    const r = await fetch('./vehicle_catalog.json?v=32', { cache: 'no-store' });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (!j || !Array.isArray(j.entries)) throw new Error('Virheellinen ajoneuvotietokanta');
-    catalog = j;
-    return j;
-  }
-
-  function score(e, q) {
-    const hay = [e.make, e.model, e.variant, e.engineCode, ...(e.aliases || [])].filter(Boolean).join(' ').toLowerCase();
-    const parts = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return 0;
-    let hits = 0;
-    for (const p of parts) if (hay.includes(p)) hits++;
-    return hits / parts.length;
-  }
-
-  async function search() {
-    const q = (document.getElementById('vehicleLookupInput')?.value || '').trim();
-    const status = document.getElementById('vehicleLookupStatus');
-    if (!q) { status.textContent = 'Kirjoita merkki tai malli.'; return; }
-    status.textContent = 'Haetaan ajoneuvotietoja…';
-    try {
-      const db = await loadCatalog();
-      matches = db.entries.map(e => ({ e, s: score(e, q) }))
-        .filter(x => x.s >= 0.5)
-        .sort((a, b) => b.s - a.s)
-        .slice(0, 8)
-        .map(x => x.e);
-      render(q);
-    } catch (e) {
-      status.textContent = 'Ajoneuvotietokannan lataus epäonnistui: ' + e.message;
-    }
-  }
-
-  function render(q) {
-    const status = document.getElementById('vehicleLookupStatus');
-    const box = document.getElementById('vehicleLookupResults');
-    if (!matches.length) {
-      box.innerHTML = '';
-      status.textContent = `Ei osumaa haulle “${q}”. Tietokantaa kasvatetaan jatkuvasti.`;
-      return;
-    }
-    status.textContent = `Löytyi ${matches.length} ehdotusta. Vahvista oikea versio ennen tallennusta.`;
-    box.innerHTML = matches.map(e => {
-      const y = e.yearFrom ? (e.yearTo && e.yearTo !== e.yearFrom ? `${e.yearFrom}–${e.yearTo}` : `${e.yearFrom}`) : 'vuosimalli vahvistettava';
-      const eng = e.engine || {};
-      const d = e.drivetrain || {};
-      const src = e.source || {};
-      const wheels = d.frontWheelIn ? `etu ${d.frontWheelIn}\" • taka ${d.rearWheelIn}\" • ` : '';
-      return `<div class="runCard good">
-        <h4>${esc(e.make)} ${esc(e.model)} ${esc(e.variant || '')}</h4>
-        <p>${esc(y)} • ${esc(e.engineType || '–')} • ${eng.displacementCc ?? '–'} cc • ${eng.cooling === 'liquid' ? 'nestejäähdytys' : esc(eng.cooling || '')}</p>
-        <p>${wheels}${src.verified ? '✓ virallinen lähde' : 'lähde vahvistettava'}</p>
-        <button class="action" type="button" data-vehicle-id="${esc(e.id)}" style="margin-top:7px;width:100%">KÄYTÄ EHDOTUSTA</button>
-      </div>`;
-    }).join('');
-    box.querySelectorAll('[data-vehicle-id]').forEach(b => b.addEventListener('click', () => apply(b.dataset.vehicleId)));
-  }
-
-  function apply(id) {
-    const e = matches.find(x => x.id === id);
-    if (!e) return;
-    if (typeof getCurrentProfile !== 'function' || typeof saveCurrentProfile !== 'function') {
-      document.getElementById('vehicleLookupStatus').textContent = 'MotoLab-profiilirajapinta ei ole käytettävissä.';
-      return;
-    }
-    const cur = getCurrentProfile();
-    const kb = JSON.parse(JSON.stringify(cur.knowledge || {}));
-    kb.engine = { ...(kb.engine || {}) };
-    kb.drivetrain = { ...(kb.drivetrain || {}) };
-    const eng = e.engine || {};
-    const d = e.drivetrain || {};
-    if (eng.displacementCc != null) kb.engine.displacementCc = eng.displacementCc;
-    if (eng.cylinders != null) kb.engine.cylinders = eng.cylinders;
-    if (eng.cooling) kb.engine.cooling = eng.cooling;
-    if (d.frontWheelIn != null) kb.drivetrain.frontWheelIn = d.frontWheelIn;
-    if (d.rearWheelIn != null) kb.drivetrain.rearWheelIn = d.rearWheelIn;
-    const src = e.source || {};
-    const identity = [e.make, e.model, e.variant].filter(Boolean).join(' ');
-    const lookupNote = [
-      `Ajoneuvohaku: ${identity}`,
-      e.yearFrom ? `vuosimalli ${e.yearFrom}${e.yearTo && e.yearTo !== e.yearFrom ? '–' + e.yearTo : ''}` : '',
-      src.verified ? 'lähde: virallinen' : 'lähde: vahvistettava',
-      src.url || '',
-      e.notes || ''
-    ].filter(Boolean).join(' | ');
-    const oldNotes = String(kb.notes || '').trim();
-    if (!oldNotes.includes(`Ajoneuvohaku: ${identity}`)) kb.notes = [oldNotes, lookupNote].filter(Boolean).join(' | ');
-    saveCurrentProfile({ name: identity || cur.name, engineType: e.engineType || cur.engineType, knowledge: kb });
-    if (typeof renderProfiles === 'function') renderProfiles();
-    const status = document.getElementById('vehicleLookupStatus');
-    status.textContent = `Hyväksytty: ${identity}. Tarkista vuosimalli ja puuttuvat tiedot Knowledge Basesta.`;
-    const kbStatus = document.getElementById('kbStatus');
-    if (kbStatus) kbStatus.textContent = `Ajoneuvotieto lisätty: ${identity}. Epävarmoja arvoja ei täytetty.`;
-    if (typeof addLearningEvent === 'function') addLearningEvent('vehicle_lookup_applied', { vehicleId: e.id, sourceVerified: !!src.verified });
-  }
-
-  function boot() {
-    injectUi();
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+'use strict';
+const MODULE_VERSION='v32-vehicle-lookup-2'; let catalog=null,matches=[];
+const $=id=>document.getElementById(id); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function kbPanel(){return [...document.querySelectorAll('.panel')].find(p=>/VEHICLE\s*\/\s*ENGINE KNOWLEDGE BASE/i.test(p.textContent||''))||null}
+function injectUi(){if($('vehicleLookupPanel'))return;const kb=kbPanel();if(!kb)return;const p=document.createElement('div');p.className='panel';p.id='vehicleLookupPanel';p.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🔎</span> AJONEUVOTIEDON HAKU</div><span class="tiny">${MODULE_VERSION}</span></div><div class="form"><label class="full">Hae merkki / malli / versio<input id="vehicleLookupInput" value="Yamaha DT125R" placeholder="esim. Yamaha DT125R tai Derbi Senda 50"></label><button id="vehicleLookupBtn" class="action full" type="button">HAE AJONEUVOTIEDOT</button></div><div id="vehicleLookupStatus" class="statusbox">Valitse tehdaslähtökohta. Profiili muuttuu vasta hyväksynnän jälkeen.</div><div id="vehicleLookupResults" class="runlist"></div>`;kb.parentNode.insertBefore(p,kb);const g=document.createElement('div');g.className='panel';g.id='drivetrainEditor';g.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">⚙️</span> VÄLITYKSET</div><span class="tiny">muokattava</span></div><div class="form"><label>Primääri<input id="dtPrimary" type="number" step="0.001"></label><label>Eturatas<input id="dtFront" type="number" step="1"></label><label>Takaratas<input id="dtRear" type="number" step="1"></label><label>1. vaihde<input id="dtG1" type="number" step="0.001"></label><label>2. vaihde<input id="dtG2" type="number" step="0.001"></label><label>3. vaihde<input id="dtG3" type="number" step="0.001"></label><label>4. vaihde<input id="dtG4" type="number" step="0.001"></label><label>5. vaihde<input id="dtG5" type="number" step="0.001"></label><label>6. vaihde<input id="dtG6" type="number" step="0.001"></label><button id="dtSave" class="action full" type="button">TALLENNA VÄLITYKSET</button></div><div id="dtStatus" class="statusbox">Välitykset ovat profiilikohtaisia. Rataskoot voi vaihtaa koska tahansa.</div>`;kb.parentNode.insertBefore(g,kb);$('vehicleLookupBtn').onclick=search;$('vehicleLookupInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();search()}};$('dtSave').onclick=saveDrivetrain;loadDrivetrain()}
+async function loadCatalog(){if(catalog)return catalog;const r=await fetch('./vehicle_catalog.json?v=32.2',{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);catalog=await r.json();return catalog}
+function score(e,q){const hay=[e.make,e.model,e.variant,e.engineCode,...(e.aliases||[])].filter(Boolean).join(' ').toLowerCase();const ps=q.toLowerCase().trim().split(/\s+/).filter(Boolean);return ps.length?ps.filter(p=>hay.includes(p)).length/ps.length:0}
+async function search(){const q=($('vehicleLookupInput')?.value||'').trim();if(!q)return; $('vehicleLookupStatus').textContent='Haetaan ajoneuvotietoja…';try{const db=await loadCatalog();matches=db.entries.map(e=>({e,s:score(e,q)})).filter(x=>x.s>=.5).sort((a,b)=>b.s-a.s).slice(0,10).map(x=>x.e);render(q)}catch(e){$('vehicleLookupStatus').textContent='Ajoneuvotietokannan lataus epäonnistui: '+e.message}}
+function render(q){const box=$('vehicleLookupResults');if(!matches.length){box.innerHTML='';$('vehicleLookupStatus').textContent=`Ei osumaa haulle “${q}”.`;return}$('vehicleLookupStatus').textContent=`Löytyi ${matches.length} ehdotusta. Valitse oikea tehdaslähtökohta.`;box.innerHTML=matches.map(e=>{const en=e.engine||{},d=e.drivetrain||{},yr=e.yearFrom?(e.yearTo&&e.yearTo!==e.yearFrom?`${e.yearFrom}–${e.yearTo}`:`${e.yearFrom}`):'vuosimalli tarkistettava';const gears=(d.gearRatios||[]).map((x,i)=>`${i+1}:${x}`).join(' • ');return `<div class="runCard good"><h4>${esc(e.make)} ${esc(e.model)} ${esc(e.variant||'')}</h4><p>${esc(yr)} • ${esc(e.engineType||'–')} • ${en.displacementCc??'–'} cc • ${en.boreMm??'–'} × ${en.strokeMm??'–'} mm</p><p>${esc(e.engineCode||'')} ${en.carburetor?`• ${esc(en.carburetor)}`:''}</p><p>Primääri ${d.primaryRatio??'–'} • rattaat ${d.frontSprocket??'–'}/${d.rearSprocket??'–'} ${gears?'• '+gears:''}</p><button class="action" data-vehicle-id="${esc(e.id)}" style="margin-top:7px;width:100%">KÄYTÄ EHDOTUSTA</button></div>`}).join('');box.querySelectorAll('[data-vehicle-id]').forEach(b=>b.onclick=()=>apply(b.dataset.vehicleId))}
+function apply(id){const e=matches.find(x=>x.id===id);if(!e||typeof getCurrentProfile!=='function'||typeof saveCurrentProfile!=='function')return;const cur=getCurrentProfile(),kb=JSON.parse(JSON.stringify(cur.knowledge||{}));kb.engine={...(kb.engine||{}),...(e.engine||{})};kb.drivetrain={...(kb.drivetrain||{}),...(e.drivetrain||{})};kb.vehicle={make:e.make,model:e.model,variant:e.variant||'',yearFrom:e.yearFrom||null,yearTo:e.yearTo||null,engineCode:e.engineCode||''};kb.reference={catalogVersion:catalog?.version||'',vehicleId:e.id,source:e.source||{}};if(e.chassis)kb.chassis={...(kb.chassis||{}),...e.chassis};if(e.fluids)kb.fluids={...(kb.fluids||{}),...e.fluids};const note=`Ajoneuvohaku: ${[e.make,e.model,e.variant].filter(Boolean).join(' ')} | ${e.notes||''}`;if(!String(kb.notes||'').includes(`Ajoneuvohaku: ${e.make} ${e.model}`))kb.notes=[kb.notes,note].filter(Boolean).join(' | ');saveCurrentProfile({name:[e.make,e.model,e.variant].filter(Boolean).join(' '),engineType:e.engineType||cur.engineType,knowledge:kb});if(typeof renderProfiles==='function')renderProfiles();loadDrivetrain();$('vehicleLookupStatus').textContent='Tehdaslähtökohta tallennettu. Muokkaa todelliset rattaat ja muut muutokset profiiliin.';if(typeof addLearningEvent==='function')addLearningEvent('vehicle_lookup_applied',{vehicleId:e.id,catalogVersion:catalog?.version})}
+function loadDrivetrain(){if(typeof getCurrentProfile!=='function')return;const d=getCurrentProfile()?.knowledge?.drivetrain||{};$('dtPrimary')&&($('dtPrimary').value=d.primaryRatio??'');$('dtFront')&&($('dtFront').value=d.frontSprocket??'');$('dtRear')&&($('dtRear').value=d.rearSprocket??'');const gs=d.gearRatios||[];for(let i=1;i<=6;i++)if($('dtG'+i))$('dtG'+i).value=gs[i-1]??''}
+function saveDrivetrain(){if(typeof getCurrentProfile!=='function'||typeof saveCurrentProfile!=='function')return;const cur=getCurrentProfile(),kb=JSON.parse(JSON.stringify(cur.knowledge||{})),d={...(kb.drivetrain||{})};const n=id=>{const v=parseFloat($(id)?.value);return Number.isFinite(v)?v:null};d.primaryRatio=n('dtPrimary');d.frontSprocket=n('dtFront');d.rearSprocket=n('dtRear');d.finalRatio=d.frontSprocket&&d.rearSprocket?d.rearSprocket/d.frontSprocket:null;d.gearRatios=[1,2,3,4,5,6].map(i=>n('dtG'+i));kb.drivetrain=d;saveCurrentProfile({knowledge:kb});$('dtStatus').textContent=`Tallennettu: ${d.frontSprocket||'–'}/${d.rearSprocket||'–'} • loppuvälitys ${d.finalRatio?d.finalRatio.toFixed(3):'–'}`;if(typeof addLearningEvent==='function')addLearningEvent('drivetrain_changed',{primaryRatio:d.primaryRatio,front:d.frontSprocket,rear:d.rearSprocket,gearRatios:d.gearRatios})}
+function boot(){injectUi()} if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
