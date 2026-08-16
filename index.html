@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VÄNÄ MOTOLAB v31 CORE SPRINT</title>
+<title>VÄNÄ MOTOLAB v32.3</title>
 <style>
 :root{
  --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
@@ -88,7 +88,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
 
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=32.3">
 <meta name="theme-color" content="#0b0b0e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -96,6 +96,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
 <link rel="apple-touch-icon" href="icon-192.png">
 
+<script src="./version.js?build=2026-08-16b"></script>
 </head>
 <body>
 <div class="app">
@@ -105,7 +106,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
      <button class="spill clickable" id="gpsChip"><span id="gpsDot" class="dot"></span>GPS</button>
      <button class="spill clickable" id="imuChip"><span id="imuDot" class="dot"></span>IMU</button>
      <button class="spill clickable" id="extChip"><span id="extDot" class="dot"></span>BT MIC</button>
-     <div class="ver">v31</div>
+     <div class="ver" id="appVersionBadge">v32.3</div>
    </div>
  </div>
 
@@ -314,7 +315,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
   </div>
   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧪</span> JÄRJESTELMÄTESTI</div></div>
     <div class="grid2"><div class="card"><span>Secure context</span><b id="diagSecure">–</b></div><div class="card"><span>Worker</span><b id="diagWorker">–</b></div><div class="card"><span>GPS API</span><b id="diagGps">–</b></div><div class="card"><span>Media API</span><b id="diagMedia">–</b></div><div class="card"><span>AudioWorklet</span><b id="diagAudio">–</b></div><div class="card"><span>Wake Lock</span><b id="diagWake">–</b></div></div>
-    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">V31 core sprint • mittaus + knowledge base + oppiva datapankki.</div>
+    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">MotoLab käynnistyy • mittaus + knowledge base + oppiva datapankki.</div>
   </div>
  </section>
 
@@ -352,7 +353,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="31.0-core-sprint";
+const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";
 const ALGORITHM_VERSION={rpm:"rpm-v31-candidate-gap",fusion:"fusion-v31-integrity",learning:"learning-raw-v2"};
 const DEV_MODE_KEY="motolab_dev_mode";
 const RAW_AUDIO_FINGERPRINT={"name":"VÄNÄ MotoLab raw reference fingerprint","source":"VANA_MotoLab_test_1786803700939.json","project":"DT testimoottori","created_from":"2026-08-15T14:21:40.939Z","reference_note":"rpm_reference labels are used as truth; measured rpm estimates are not used as labels","points":[{"rpm":1800,"f0_hz":41.0,"f0_p20":40.0,"f0_p80":41.5,"conf_median":30.0,"harm_rel_db":[-38.68,-35.49,-28.87,-17.62,0.0,-8.49],"samples":894,"places":["Paisarin loppu / stingerin alku"]},{"rpm":3000,"f0_hz":64.0,"f0_p20":54.5,"f0_p80":75.0,"conf_median":34.0,"harm_rel_db":[-35.96,-23.14,-8.84,-4.82,-5.43,-1.11],"samples":7122,"places":["Mikrofoni suoraan pinnapulttiin","Paisarin loppu / stingerin alku","Pinnapultti + lyhyt jäykkä letku","Tulpan metalliosa","Vapaa mikrofoni 0,5 m moottorista","Vapaa mikrofoni 0,5 m pakoputkesta"]},{"rpm":5000,"f0_hz":89.333,"f0_p20":45.833,"f0_p80":99.833,"conf_median":30.0,"harm_rel_db":[-25.22,-2.66,-5.66,0.0,-6.21,-10.05],"samples":1782,"places":["Paisarin loppu / stingerin alku","Vapaa mikrofoni 0,5 m pakoputkesta"]}]};
@@ -934,7 +935,7 @@ function loadSettings(){
 }
 function saveSettings(){
  const d={mass:+$("mass").value||190,manualGear:+$("manualGear").value||3,calSpeed:+$("calSpeed").value||60,calRpm:+$("calRpm").value||6000,calGear:+$("calGear").value||3,calTargetRpm:+$("calTargetRpm").value||3000,calStableSec:+$("calStableSec").value||3,calToleranceKmh:+$("calToleranceKmh").value||1,calMode:$("calMode").value,rpmSourceMode:$("rpmSourceMode").value,micMin:+$("micMin").value||3000,micMax:+$("micMax").value||12500,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,gearLearn:$("gearLearnToggle").classList.contains("on"),gridOn:$("gridToggle").classList.contains("on"),infoButtons:$("infoToggle").classList.contains("on"),wakeOn:$("wakeToggle").classList.contains("on")};
- localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value,knowledge:knowledgeFromUi()});$("settingsStatus").textContent="V31 asetukset + Knowledge Base tallennettu.";updateSourceModeUI();pushConfig()
+ localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value,knowledge:knowledgeFromUi()});$("settingsStatus").textContent=APP_VERSION+" asetukset + Knowledge Base tallennettu.";updateSourceModeUI();pushConfig()
 }
 let gpsCalTimer=null,gpsCalStarted=0,gpsCalSamples=[];
 function updateSourceModeUI(){
@@ -1245,7 +1246,7 @@ function switchScreen(n){document.querySelectorAll(".screen").forEach(x=>x.class
 function updateDiag(){$("diagSecure").textContent=window.isSecureContext?"OK":"EI";$("diagWorker").textContent=typeof Worker!=="undefined"?"OK":"EI";$("diagGps").textContent=navigator.geolocation?"OK":"EI";$("diagMedia").textContent=navigator.mediaDevices?.getUserMedia?"OK":"EI";$("diagAudio").textContent=(window.AudioWorkletNode&&window.AudioContext)?"OK":"EI";$("diagWake").textContent=("wakeLock" in navigator)?"OK":"EI"}
 async function selfTests(){
  const ids=[...document.querySelectorAll("[id]")].map(x=>x.id),dupes=ids.filter((id,i)=>ids.indexOf(id)!==i);const required=["recordFrom","stopRpm","autoSensitivity","autoStopDelay","audioDevice","learningDataToggle","kbDisplacement"];
- const checks=[];checks.push(["Worker",typeof Worker!=="undefined"]);checks.push(["Canvas",!!$("heroChart")?.getContext]);checks.push(["GPS API",!!navigator.geolocation]);checks.push(["Media API",!!navigator.mediaDevices?.getUserMedia]);checks.push(["Run storage",Array.isArray(runs)]);checks.push(["5 näkymää",document.querySelectorAll(".screen").length===5]);checks.push(["Uniikit ID:t",dupes.length===0]);checks.push(["Pakolliset kontrollit",required.every(id=>!!$(id))]);checks.push(["Knowledge Base",!!getCurrentProfile()?.knowledge]);$("diagLog").textContent=`VÄNÄ MOTOLAB ${APP_VERSION}\n`+checks.map(([n,o])=>(o?"✓ ":"✗ ")+n).join("\n")+(dupes.length?"\nDuplikaatit: "+[...new Set(dupes)].join(", "):"");$("settingsStatus").textContent=checks.every(x=>x[1])?"Sisäiset V31-testit OK.":"Sisäinen testi löysi tarkistettavaa. Katso Järjestelmätesti."
+ const checks=[];checks.push(["Worker",typeof Worker!=="undefined"]);checks.push(["Canvas",!!$("heroChart")?.getContext]);checks.push(["GPS API",!!navigator.geolocation]);checks.push(["Media API",!!navigator.mediaDevices?.getUserMedia]);checks.push(["Run storage",Array.isArray(runs)]);checks.push(["5 näkymää",document.querySelectorAll(".screen").length===5]);checks.push(["Uniikit ID:t",dupes.length===0]);checks.push(["Pakolliset kontrollit",required.every(id=>!!$(id))]);checks.push(["Knowledge Base",!!getCurrentProfile()?.knowledge]);$("diagLog").textContent=`VÄNÄ MOTOLAB ${APP_VERSION}\n`+checks.map(([n,o])=>(o?"✓ ":"✗ ")+n).join("\n")+(dupes.length?"\nDuplikaatit: "+[...new Set(dupes)].join(", "):"");$("settingsStatus").textContent=checks.every(x=>x[1])?`Sisäiset ${APP_VERSION}-testit OK.`:"Sisäinen testi löysi tarkistettavaa. Katso Järjestelmätesti."
 }
 function startDemo(){
  if(demoTimer){clearInterval(demoTimer);demoTimer=null;$("settingsStatus").textContent="Demo pysäytetty.";return}
@@ -1341,9 +1342,26 @@ function setupAppInstall(){
  updateInstallStatus();
 }
 
+let swReloading=false;
+function showUpdatePrompt(reg){
+ if(document.getElementById("motolabUpdateBar"))return;
+ const bar=document.createElement("div");bar.id="motolabUpdateBar";
+ bar.style.cssText="position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:999999;padding:10px;border:1px solid #ff263f;border-radius:12px;background:#12070a;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.55)";
+ bar.innerHTML='<div style="margin-bottom:7px">UUSI MOTOLAB-VERSIO SAATAVILLA</div><button id="motolabUpdateNow" style="width:100%;padding:10px;border-radius:9px;border:1px solid #ff263f;background:#5f101b;color:#fff;font-weight:900">PÄIVITÄ NYT</button>';
+ document.body.appendChild(bar);
+ document.getElementById("motolabUpdateNow").onclick=()=>{if(reg.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"});else reg.update().catch(()=>{})};
+}
 async function registerServiceWorker(){
  if(!("serviceWorker" in navigator)||!window.isSecureContext)return false;
- try{const reg=await navigator.serviceWorker.register("./sw.js?v=31");log("SW OK • "+(reg.scope||""));return true}catch(e){log("SW: "+(e?.message||e));return false}
+ try{
+  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16b";
+  const reg=await navigator.serviceWorker.register("./sw.js?build="+encodeURIComponent(build),{updateViaCache:"none"});
+  if(reg.waiting)showUpdatePrompt(reg);
+  reg.addEventListener("updatefound",()=>{const w=reg.installing;if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdatePrompt(reg)})});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(swReloading)return;swReloading=true;location.reload()});
+  setInterval(()=>reg.update().catch(()=>{}),60000);
+  log("SW OK • "+(reg.scope||"")+" • "+APP_VERSION);return true
+ }catch(e){log("SW: "+(e?.message||e));return false}
 }
 
 (async function boot(){
