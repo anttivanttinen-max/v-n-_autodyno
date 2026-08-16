@@ -1,7 +1,7 @@
-importScripts("./version.js?build=2026-08-16b");
+importScripts("./version.js?build=2026-08-16c");
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16b";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16c";
 const V=encodeURIComponent(VERSION);
 const CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
 const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js","./raw_sync.js","./version.js"].map(u=>/\.(?:js|json|webmanifest)$/.test(u)?u+"?v="+V:u);
