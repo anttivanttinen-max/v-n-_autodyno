@@ -1,0 +1,31 @@
+name: Build AirPods Motion Test
+
+on:
+  push:
+    branches: [main, agent/airpods-motion-test]
+    paths:
+      - 'ios/AirPodsMotionTest/**'
+      - '.github/workflows/ios-airpods-motion-test.yml'
+  pull_request:
+    paths:
+      - 'ios/AirPodsMotionTest/**'
+      - '.github/workflows/ios-airpods-motion-test.yml'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios/AirPodsMotionTest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Build unsigned iOS Simulator app
+        run: |
+          set -o pipefail
+          xcodebuild -project MotoLabMotionTest.xcodeproj -scheme MotoLabMotionTest -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
