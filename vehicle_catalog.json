@@ -1,6 +1,6 @@
 {
   "schema": "motolab_vehicle_catalog_v2",
-  "version": "2026-08-16.4",
+  "version": "2026-08-16.5",
   "entries": [
     {
       "id": "yamaha-dt125r-vana-athena-170-current",
@@ -27,7 +27,7 @@
         "deckProtrusionMm": 0.15,
         "cylinderRaiseMm": 0,
         "headMachiningMm": 0.4,
-        "headModification": "Kansi muokattu: kannesta koneistettu 0.4 mm ja sorvattu uusi squish-alue",
+        "headModification": "Kansi muokattu",
         "sparkPlug": "NGK BR9ES factory-reference; fitted plug verify",
         "sparkPlugGapMm": "0.7–0.8",
         "ignition": "Zeeltronic CDI / YPVS",
@@ -68,7 +68,7 @@
         "title": "VÄNÄ MotoLab current DT build – user-confirmed setup + Yamaha DT125R 2000 factory baseline",
         "url": "https://www.dt125.cz/download/Owners_Manual-DT125R.pdf"
       },
-      "notes": "NYKYINEN RAKENNETTU KOKOONPANO: Athena 170 cc, 65.0 x 50.7 mm, sylinteriä EI ole nostettu (0 mm), mäntä 0.15 mm yli dekin, squish 0.8 mm, laskennallinen palotila 12.7 cc (vahvistetaan nestemittauksella), kansi muokattu: kannesta koneistettu 0.4 mm ja sorvattu uusi squish-alue, VForce 4, 34 mm kaasutin, Athena-pakoputki, Zeeltronic CDI/YPVS. 16/57 ratastus, rengaskoot, paino ja nestemäärät ovat DT125R 2000 tehdasreferenssejä kunnes juuri tämän pyörän nykyiset arvot mitataan/tarkistetaan. Palotilan 12.7 cc on laskennallinen arvio, ei vielä nestemittauksella vahvistettu."
+      "notes": "NYKYINEN RAKENNETTU KOKOONPANO: Athena 170 cc, 65.0 x 50.7 mm, sylinteriä EI ole nostettu (0 mm), mäntä 0.15 mm yli dekin, squish 0.8 mm, laskennallinen palotila 12.7 cc (vahvistetaan nestemittauksella), kansi muokattu, VForce 4, 34 mm kaasutin, Athena-pakoputki, Zeeltronic CDI/YPVS. 16/57 ratastus, rengaskoot, paino ja nestemäärät ovat DT125R 2000 tehdasreferenssejä kunnes juuri tämän pyörän nykyiset arvot mitataan/tarkistetaan. Palotilan 12.7 cc on laskennallinen arvio, ei vielä nestemittauksella vahvistettu."
     },
     {
       "id": "yamaha-dt125r-2000",
