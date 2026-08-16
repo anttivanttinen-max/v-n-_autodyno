@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const MODULE='trip-phone-raw-v1';
+const MODULE='trip-phone-raw-v2';
 const DB_NAME='VanaMotoLabResearch',DB_VERSION=1;
 const STORE='timelineChunks';
 const SAMPLE_MS=200;
@@ -10,7 +10,7 @@ const BATCH=25;
 const $r=id=>document.getElementById(id);
 let db=null,active=false,sessionId=null,seq=0,chunkSeq=0,pending=[];
 let ctx=null,src=null,an=null,freq=null,time=null,timer=null,lastPhone=null,lastGpsRpm=0,lastGpsT=0;
-let flushBusy=false,total=0,lastStatus=0;
+let flushBusy=false,total=0,lastStatus=0,pausedByGear=false;
 
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function reqP(req){return new Promise((res,rej)=>{req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error)})}
@@ -19,6 +19,7 @@ function openDb(){if(db)return Promise.resolve(db);return new Promise((res,rej)=
 async function latestSession(){const d=await openDb(),tx=d.transaction('sessions','readonly'),a=await reqP(tx.objectStore('sessions').getAll());await txDone(tx);return (a||[]).sort((x,y)=>(y.startedAtMs||0)-(x.startedAtMs||0))[0]||null}
 function ui(){try{return typeof lastUi!=='undefined'&&lastUi?lastUi:{}}catch{return {}}}
 function researchRunning(){return $r('tripResearchState')?.textContent?.trim()==='TALLENTAA'}
+function micDataAllowed(){const g=globalThis.MOTOLAB_TRIP_GEAR_GUARD;return g?g.micDataAllowed===true:true}
 function b64(bytes){let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s)}
 function dbAt(hz){if(!an||!ctx||hz<=0||hz>=ctx.sampleRate/2)return -120;const b=Math.round(hz*an.fftSize/ctx.sampleRate);let m=-120;for(let i=Math.max(1,b-2);i<=Math.min(freq.length-1,b+2);i++)m=Math.max(m,freq[i]);return m}
 function median(a){if(!a.length)return -120;const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]}
@@ -44,13 +45,22 @@ function buildFrame(){
  const gpsRpm=Number.isFinite(+u.speedRpm)?+u.speedRpm:0,drive=driveState(gpsRpm,t),f0=+p.observedF0||(+p.rawRpm>0?+p.rawRpm/60:0),spec=spectrumSnapshot(),sig=signalStats();
  return {t,kind:'phone_raw_research',module:MODULE,seq:seq++,gear:3,gpsKmh:Number.isFinite(+u.kmh)?+u.kmh:null,gpsReferenceRpm:gpsRpm||null,gpsReferenceConf:Number.isFinite(+u.speedConf)?+u.speedConf:null,gpsAccuracyM:Number.isFinite(+u.gpsAcc)?+u.gpsAcc:null,accelMps2:Number.isFinite(+u.a)?+u.a:null,accelG:Number.isFinite(+u.g)?+u.g:null,...drive,phone:{rpm:+p.rpm||0,rawRpm:+p.rawRpm||0,correctedCandidateRpm:+p.correctedCandidateRpm||0,predictedRpm:+p.predictedRpm||0,velocity:+p.velocity||0,chosenRatio:Number.isFinite(+p.chosenRatio)?+p.chosenRatio:null,conf:+p.conf||0,candidateGap:+p.candidateGap||0,runnerRpm:+p.runnerRpm||0,f0,level:+p.level||0,rmsDb:Number.isFinite(+p.rmsDb)?+p.rmsDb:null,harmonics:+p.harmonics||0,harmonicH1H6:Array.isArray(p.harmonicData)?p.harmonicData:null,harmonicH1H10:harmonic10(f0),topCandidates:Array.isArray(p.topCandidates)?p.topCandidates:null,trackLabel:p.trackLabel||''},adaptive:{rpm:+ad.rpm||0,rawRpm:+ad.rawRpm||0,correction:Number.isFinite(+ad.adaptiveCorrection)?+ad.adaptiveCorrection:null,modelVersion:ad.adaptiveModelVersion||null,gpsRef:+ad.adaptiveGpsRef||0},spectralTop20:spectralTop20(),spectrum:spec,signal:sig,audio:{sampleRate:ctx.sampleRate,fftSize:an.fftSize}}
 }
-async function sample(){if(!active)return;try{const f=buildFrame();if(!f)return;pending.push(f);total++;if(pending.length>=BATCH)flush();if(Date.now()-lastStatus>900){lastStatus=Date.now();paint(`PHONE RAW ${total} • FFT 5 Hz • H1–H10 • top20`)}}catch(e){paint('PHONE RAW virhe: '+(e.message||e))}}
-async function begin(){if(active)return;const meta=await latestSession();if(!meta||meta.endedAt)return;sessionId=meta.id;seq=0;chunkSeq=0;pending=[];total=0;lastGpsRpm=0;lastGpsT=0;if(!await setupAnalyser()){paint('PHONE RAW odottaa mikrofonivirtaa');return}active=true;clearInterval(timer);timer=setInterval(sample,SAMPLE_MS);paint('PHONE RAW KÄYNNISSÄ • kaikki opetusdata talteen')}
+async function sample(){
+ if(!active)return;
+ if(!micDataAllowed()){
+   if(!pausedByGear){pausedByGear=true;paint('PHONE RAW TAUOLLA • vaihde ei ole 3.')}
+   return;
+ }
+ if(pausedByGear){pausedByGear=false;paint('PHONE RAW JATKUU • 3. vaihde')}
+ try{const f=buildFrame();if(!f)return;pending.push(f);total++;if(pending.length>=BATCH)flush();if(Date.now()-lastStatus>900){lastStatus=Date.now();paint(`PHONE RAW ${total} • FFT 5 Hz • H1–H10 • top20`)}}catch(e){paint('PHONE RAW virhe: '+(e.message||e))}
+}
+async function begin(){if(active)return;const meta=await latestSession();if(!meta||meta.endedAt)return;sessionId=meta.id;seq=0;chunkSeq=0;pending=[];total=0;pausedByGear=false;lastGpsRpm=0;lastGpsT=0;if(!await setupAnalyser()){paint('PHONE RAW odottaa mikrofonivirtaa');return}active=true;clearInterval(timer);timer=setInterval(sample,SAMPLE_MS);paint('PHONE RAW KÄYNNISSÄ')}
 async function end(){if(!active)return;active=false;clearInterval(timer);timer=null;await flush();let tries=0;while((flushBusy||pending.length)&&tries++<30){await new Promise(r=>setTimeout(r,50));await flush()}try{src?.disconnect()}catch{};try{await ctx?.close()}catch{}ctx=src=an=freq=time=null;paint(`PHONE RAW TALLENNETTU • ${total} kehystä`);sessionId=null}
 function paint(s){let e=$r('tripPhoneRawState');if(!e){const panel=$r('tripResearchPanel');if(panel){e=document.createElement('div');e.id='tripPhoneRawState';e.className='statusbox';panel.appendChild(e)}}if(e)e.textContent=s}
 function watch(){const running=researchRunning();if(running&&!active)begin().catch(e=>paint('PHONE RAW aloitusvirhe: '+(e.message||e)));if(!running&&active)end().catch(e=>paint('PHONE RAW lopetusvirhe: '+(e.message||e)))}
 window.addEventListener('motolab-phone-rpm',e=>{lastPhone=e.detail||null});
+window.addEventListener('motolab-trip-gear-guard',()=>{if(active&&!micDataAllowed())paint('PHONE RAW TAUOLLA • vaihde ei ole 3.')});
 setInterval(watch,250);
 window.addEventListener('beforeunload',()=>{if(active)flush().catch(()=>{})});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>paint('PHONE RAW valmis • odottaa 3. vaihteen tutkimusajoa'),{once:true});else paint('PHONE RAW valmis • odottaa 3. vaihteen tutkimusajoa');
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>paint('PHONE RAW valmis • odottaa tutkimusajoa'),{once:true});else paint('PHONE RAW valmis • odottaa tutkimusajoa');
 })();
