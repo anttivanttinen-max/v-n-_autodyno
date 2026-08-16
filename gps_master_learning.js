@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const MODE='gpslearn';
-const MODULE_VERSION='v32-gps-master-mic-learn-2';
+const MODULE_VERSION='v32-gps-master-mic-learn-3';
 const $m=id=>document.getElementById(id);
 
 function drivetrainReference(){
@@ -32,6 +32,23 @@ function gpsReferenceMeta(){
     if(c)return {gear,ratio:+c.ratio,source:'gps_calibration'};
   }catch{}
   return {gear,ratio:null,source:'missing_reference'};
+}
+
+function micLearningState(s,refMeta,gpsRef){
+  const mic=Number.isFinite(s?.audioRpm)?s.audioRpm:null;
+  const raw=Number.isFinite(s?.audioRawRpm)?s.audioRawRpm:null;
+  const level=Number.isFinite(s?.audioLevel)?s.audioLevel:null;
+  const micSignalPresent=(mic!=null&&mic>0)||(raw!=null&&raw>0)||(level!=null&&level>0);
+  const gpsReferenceAvailable=Number.isFinite(refMeta?.ratio)&&refMeta.ratio>0;
+  const gpsMotionReferenceAvailable=Number.isFinite(gpsRef)&&gpsRef>0;
+  const state=!gpsReferenceAvailable?'GPS_NO_REFERENCE':(micSignalPresent?'MIC_SIGNAL':'MIC_ZERO');
+  return {
+    state,
+    micSignalPresent,
+    gpsReferenceAvailable,
+    gpsMotionReferenceAvailable,
+    learningEligible:gpsReferenceAvailable&&gpsMotionReferenceAvailable&&micSignalPresent
+  };
 }
 
 function installModeOption(){
@@ -130,12 +147,16 @@ function patchCore(){
       const delta=(gpsRef&&mic!=null)?mic-gpsRef:null;
       const errPct=(gpsRef&&mic!=null)?Math.abs(delta)/Math.max(1,gpsRef)*100:null;
       const ratio=(gpsRef&&mic!=null)?mic/gpsRef:null;
+      const micState=micLearningState(s,refMeta,gpsRef);
       const row={
         t:s.t||Date.now(),profileId:getCurrentProfile?.()?.id||null,rpmSourceMode:mode,
         selectedGear:+$m('manualGear')?.value||null,
         learningPhase:mode===MODE?'gps_master_mic_learn':'normal',
         rpmControlAuthority:mode===MODE?'gps':(s.source||null),
         micInfluencesDisplayedRpm:mode===MODE?false:null,micInfluencesRunAcceptance:mode===MODE?false:null,micInfluencesGearLearning:mode===MODE?false:null,
+        micLearningState:mode===MODE?micState.state:null,micSignalPresent:mode===MODE?micState.micSignalPresent:null,
+        gpsReferenceAvailable:mode===MODE?micState.gpsReferenceAvailable:null,gpsMotionReferenceAvailable:mode===MODE?micState.gpsMotionReferenceAvailable:null,
+        micLearningEligible:mode===MODE?micState.learningEligible:null,
         gpsReferenceSource:mode===MODE?refMeta.source:null,gpsReferenceRpmPerKmh:mode===MODE?refMeta.ratio:null,
         gpsReferenceRpm:gpsRef,gpsReferenceConf:gpsRefConf,gpsReferenceKmh:Number.isFinite(s.kmh)?s.kmh:null,gpsReferenceGear:+$m('manualGear')?.value||s.gear||null,
         micShadowRpm:mic,micShadowRawRpm:raw,micShadowDeltaRpm:delta,micShadowErrorPct:errPct,micShadowRatioToGps:ratio,
