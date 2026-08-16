@@ -1,0 +1,43 @@
+{
+  "schema": "motolab_vehicle_catalog_staging_v1",
+  "region": "FI",
+  "focus": "registered 50cc geared mopeds and A1 125cc motorcycles",
+  "generatedAt": "2026-08-16",
+  "notes": "Round 2 candidates. Market relevance is based on current/recent Finnish Nettimoto listings. Gearbox ratios marked probable are family-level candidates and must not force Gear Learn; they are intended as weak priors until ride data or a stronger model-specific source confirms them.",
+  "gearRatioPolicy": {
+    "verified": "may seed Gear Learn strongly but still yields to measured ride data",
+    "probable": "weak prior only; may help identify a matching gear",
+    "pending": "model exists in catalog but ratios are not yet populated"
+  },
+  "sources": [
+    {"title":"Nettimoto used mopeds","url":"https://www.nettimoto.com/pikalinkit/mopot","purpose":"Finnish market relevance"},
+    {"title":"Nettimoto A1 motorcycles","url":"https://www.nettimoto.com/pikalinkit/kevarit","purpose":"Finnish market relevance"},
+    {"title":"Aprilia RS50 workshop manual, 2001","url":"https://www.scribd.com/document/977733043/APRILIA-RS-50-Workshop-Manual","purpose":"AM6-family gearbox candidate ratios"}
+  ],
+  "entries": [
+    {"id":"yamaha-tzr50-am6","make":"Yamaha","model":"TZR 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"probable","drivetrain":{"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"probable","gearRatioBasis":"AM6/RS50 family candidate; verify TZR-specific year"}},
+    {"id":"aprilia-rs50-am6","make":"Aprilia","model":"RS 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"verified","drivetrain":{"primaryRatio":3.550,"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"verified","gearRatioSource":"Aprilia RS50 workshop manual 2001"}},
+    {"id":"mbk-xlimit-50-am6","make":"MBK","model":"X-Limit 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"probable","drivetrain":{"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"probable","gearRatioBasis":"AM6 family candidate"}},
+    {"id":"peugeot-xp6-50-am6","make":"Peugeot","model":"XP6 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"probable","drivetrain":{"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"probable","gearRatioBasis":"AM6 family candidate"}},
+    {"id":"rieju-rr-50-am6","make":"Rieju","model":"RR 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"probable","drivetrain":{"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"probable","gearRatioBasis":"AM6 family candidate"}},
+    {"id":"rieju-smx-50-am6","make":"Rieju","model":"SMX 50","category":"50cc-geared-moped","engineFamily":"Minarelli AM6","confidence":"probable","drivetrain":{"gearRatios":[3.000,2.062,1.526,1.227,1.042,0.960],"gearRatioConfidence":"probable","gearRatioBasis":"AM6 family candidate"}},
+    {"id":"cpi-sm50","make":"CPI","model":"SM 50","category":"50cc-geared-moped","engineFamily":"AM6-derived/verify","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"cpi-sx50","make":"CPI","model":"SX 50","category":"50cc-geared-moped","engineFamily":"AM6-derived/verify","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"generic-trigger-sm50","make":"Generic","model":"Trigger SM 50","category":"50cc-geared-moped","engineFamily":"verify","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"keeway-tx50-sm","make":"Keeway","model":"TX 50 / TX 50 SM","category":"50cc-geared-moped","engineFamily":"verify","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"derbi-gpr50","make":"Derbi","model":"GPR 50","category":"50cc-geared-moped","engineFamily":"Derbi EBS/D50B0 depending year","confidence":"probable","drivetrain":{"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"gearRatioConfidence":"probable","gearRatioBasis":"Derbi 6-speed family candidate; verify generation"}},
+    {"id":"aprilia-rs4-50","make":"Aprilia","model":"RS4 50","category":"50cc-geared-moped","engineFamily":"Derbi D50B0-family/verify year","confidence":"probable","drivetrain":{"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"gearRatioConfidence":"probable","gearRatioBasis":"Derbi 6-speed family candidate"}},
+
+    {"id":"honda-xl125v-varadero","make":"Honda","model":"XL125V Varadero","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"honda-nsr125r","make":"Honda","model":"NSR125R","category":"A1-125","engineType":"2T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"yamaha-tzr125","make":"Yamaha","model":"TZR125","category":"A1-125","engineType":"2T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"yamaha-tdr125","make":"Yamaha","model":"TDR125","category":"A1-125","engineType":"2T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"cagiva-mito125","make":"Cagiva","model":"Mito 125","category":"A1-125","engineType":"2T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"hyosung-gt125r","make":"Hyosung","model":"GT125R","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"suzuki-dr125sm","make":"Suzuki","model":"DR125SM","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"aprilia-tuono125","make":"Aprilia","model":"Tuono 125","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"husqvarna-svartpilen125","make":"Husqvarna","model":"Svartpilen 125","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"benelli-bn125","make":"Benelli","model":"BN 125","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}},
+    {"id":"ktm-125-smc-r","make":"KTM","model":"125 SMC R","category":"A1-125","engineType":"4T","confidence":"pending","drivetrain":{"gearRatios":[],"gearRatioConfidence":"pending"}}
+  ]
+}
