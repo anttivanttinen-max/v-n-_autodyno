@@ -1,0 +1,2 @@
+{"truth":3000,"estimated":3000,"errorPct":0,"conf":0.678,"fp":0.955,"gap":0.091,"runner":5952,"f0":64}
+{"truth":5000,"estimated":4965,"errorPct":0.7,"conf":0.484,"fp":0.801,"gap":0.006,"runner":4167,"f0":88.89}
