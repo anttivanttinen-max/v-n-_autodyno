@@ -22,6 +22,15 @@ Updated: 2026-08-16
 - Strong reference: approximately 6600 rpm truth, 6591 rpm audio average, 92.2% confidence, f0 ~109–112 Hz, harmonics ~220/330/440/550/660 Hz.
 - Keep older tests without the extension nut in a separate calibration set.
 
+## Native iOS / AirPods motion research
+- `ios/AirPodsMotionTest/` now contains a native SwiftUI test app for `CMHeadphoneMotionManager`.
+- The test reports `isDeviceMotionAvailable`, Core Motion authorization, active state, and live user acceleration, gravity, rotation rate and attitude values when supported.
+- `NSMotionUsageDescription` is included as required by iOS.
+- GitHub Actions macOS CI generates the Xcode project with XcodeGen and successfully builds an unsigned iOS Simulator app, so source/build validation does not require the user to own a Mac.
+- A real iPhone is still required to determine whether the connected AirPods 2 actually exposes headphone motion.
+- Real-device installation requires Apple code signing; no signing certificates, private keys or provisioning profiles are stored in the public repository.
+- This native test is separate from the current PWA measurement logic; AirPods motion is not treated as a validated MotoLab RPM source until real-device testing succeeds.
+
 ## RAW / learning data
 - Preserve raw/source-specific data separately from derived/fused values so old runs can be reprocessed with future algorithms.
 - GPS MASTER learning rows include synchronized GPS reference and MIC shadow data.
@@ -42,4 +51,4 @@ Updated: 2026-08-16
 - Vehicle lookup / technical-spec refresh fixes from v32.3 must be preserved in all subsequent branches.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, source-native release identity, version validation, and PWA update behavior.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, source-native release identity, version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
