@@ -96,7 +96,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<script src="./version.js?build=2026-08-16i"></script>
+<script src="./version.js?build=2026-08-16k"></script>
 </head>
 <body>
 <div class="app">
@@ -630,31 +630,31 @@ function estimate(arr,sr,source){
      const fp=spectralScore(x,fs,rr);
      const continuity=prev?clamp(1-Math.abs(rr-prev)/Math.max(prev,1),0,1):.65;
      const score=c.q*.48+fp*.37+continuity*.15;
-     scored.push({rpm:rr,rawRpm:f*60,q:c.q,fp,score,f});
+     scored.push({rpm:rr,rawRpm:f*60,q:c.q,fp,score,f,mult});
    }
  }
  if(!scored.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
- scored.sort((a,b)=>b.score-a.score);const b=scored[0];
+ scored.sort((a,b)=>b.score-a.score);const allCandidates=scored.map(x=>[Math.round(x.rpm*10)/10,Math.round(x.f*100)/100,Math.round(x.rawRpm*10)/10,Math.round(x.q*10000)/10000,Math.round(x.fp*10000)/10000,Math.round(x.score*10000)/10000,x.mult]);const b=scored[0];
  const runner=scored.find(x=>Math.abs(x.rpm-b.rpm)/Math.max(1,b.rpm)>.06)||null;
  const candidateGap=runner?clamp((b.score-runner.score)/Math.max(.01,Math.abs(b.score)),0,1):1;
  let conf=clamp((b.q-.10)/.55,0,1)*.50+b.fp*.35+candidateGap*.15;
  if(b.fp<.22)conf*=.55;
  if(candidateGap<.08)conf*=.62;else if(candidateGap<.15)conf*=.80;
- if(conf<.14)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0};
+ if(conf<.14)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
  last[source]=prev?prev*.68+b.rpm*.32:b.rpm;
- return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0};
+ return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
 }
 onmessage=e=>{
  const m=e.data;
  if(m.type==="config"){minR=m.min||3000;maxR=m.max||12500;fingerprint=m.fingerprint||fingerprint}
  if(m.type==="pcm"){
    const a=new Float32Array(m.buffer),r=estimate(a,m.sampleRate||48000,m.source);
-   postMessage({type:"rpm",source:"ext",rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,level:r.level||0,candidateGap:r.candidateGap||0,runnerRpm:r.runnerRpm||0,t:Date.now()})
+   postMessage({type:"rpm",source:"ext",rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,level:r.level||0,candidateGap:r.candidateGap||0,runnerRpm:r.runnerRpm||0,candidates:r.candidates||[],t:Date.now()})
  }
 };
 `;
 const rpmWorker=new Worker(URL.createObjectURL(new Blob([rpmWorkerSource],{type:"text/javascript"})));
-rpmWorker.onmessage=e=>{if(e.data.type==="rpm")measurementWorker.postMessage(e.data)};
+rpmWorker.onmessage=e=>{if(e.data.type==="rpm"){globalThis.MOTOLAB_AUDIO_LAST=e.data;window.dispatchEvent(new CustomEvent("motolab-audio-candidates",{detail:e.data}));const {candidates,...core}=e.data;measurementWorker.postMessage(core)}};
 
 const workletSource=`
 class MotoTap extends AudioWorkletProcessor{
