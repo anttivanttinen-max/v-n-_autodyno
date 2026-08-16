@@ -3,11 +3,11 @@
 Updated: 2026-08-16
 
 ## Current application line
-- Active published line: **v32.3** on `main`.
+- Active published line: **v32.4** on `main`.
 - v31 remains the historical core baseline; v32.x modules are now integrated into the published PWA shell.
-- Release identity is now **source-native**: `version.js` is the shared release source for the app shell and Service Worker, and `index.html` itself identifies as v32.3 rather than relying on Service Worker banner rewriting.
+- Release identity is **source-native**: `version.js` is the shared release source for the app shell and Service Worker, and `index.html` itself identifies as v32.4 rather than relying on Service Worker banner rewriting.
 - The app has an explicit **UUSI MOTOLAB-VERSIO SAATAVILLA → PÄIVITÄ NYT** flow. A newly installed Service Worker waits until the user accepts the update, then the app reloads on `controllerchange`.
-- Permanent GitHub Actions validation checks the release identity, old v31 runtime/SW identifiers, Service Worker syntax, and inline application JavaScript syntax.
+- Permanent GitHub Actions validation is version-agnostic and checks the release identity, old v31 runtime/SW identifiers, Service Worker syntax, and inline application JavaScript syntax.
 
 ## Measurement strategy
 - First road-test phase uses **GPS MASTER + MIC LEARN**.
@@ -16,6 +16,14 @@ Updated: 2026-08-16
 - GPS reference RPM can come from saved gear calibration or calculated drivetrain data when primary ratio, gear ratio, final drive, and wheel circumference are available.
 - Camera RPM remains disabled.
 - Phone internal microphone remains unvalidated as an RPM source.
+
+## ARM AUTO / multi-pull capture
+- **v32.4 fixes ARM AUTO as a persistent session.** One ARM AUTO press must remain active across multiple pulls.
+- Every detected pull is completed and saved as its own run; no new ARM press is required between pulls.
+- After an automatic stop, the worker keeps the auto session armed but blocks retriggering through a short re-arm hysteresis/reset phase.
+- Re-arm becomes ready after the cooldown and when acceleration has settled or RPM has dropped sufficiently, and the pre-buffer is cleared so the previous pull tail is not merged into the next pull.
+- **STOP explicitly ends/disarms the continuous ARM AUTO session.** Manual run mode and cancel also reset the auto session.
+- Auto-run mode labeling is based on the actual completed mode, so a stopped auto pull is not mislabeled as a manual run.
 
 ## Contact RPM reference
 - Preferred reference mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
@@ -51,4 +59,4 @@ Updated: 2026-08-16
 - Vehicle lookup / technical-spec refresh fixes from v32.3 must be preserved in all subsequent branches.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, source-native release identity, version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, source-native release identity, version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
