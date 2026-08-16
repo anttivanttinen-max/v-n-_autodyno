@@ -3,6 +3,7 @@ const http=require('http');
 const fs=require('fs');
 const path=require('path');
 const crypto=require('crypto');
+const {createGitHubMirror}=require('./github_mirror');
 
 const PORT=Number(process.env.PORT||3000);
 const DATA_DIR=process.env.DATA_DIR||path.join(__dirname,'data');
@@ -11,6 +12,7 @@ const READ_KEY=String(process.env.READ_KEY||'');
 const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||'https://anttivanttinen-max.github.io';
 const MAX_BODY=Number(process.env.MAX_BODY_BYTES||8*1024*1024);
 fs.mkdirSync(DATA_DIR,{recursive:true});
+const mirror=createGitHubMirror({dataDir:DATA_DIR});
 
 function corsHeaders(origin){const allow=origin===ALLOWED_ORIGIN?origin:'';return {...(allow?{'Access-Control-Allow-Origin':allow}:{}),'Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,HEAD,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Ingest-Key,X-MotoLab-Read-Key','Access-Control-Max-Age':'86400'}}
 function json(res,status,obj,origin,headOnly=false){const body=Buffer.from(JSON.stringify(obj));res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store',...(origin?corsHeaders(origin):{})});res.end(headOnly?undefined:body)}
@@ -21,7 +23,7 @@ function authIngest(req){return INGEST_KEY&&eq(req.headers['x-motolab-ingest-key
 function authRead(req,u){return READ_KEY&&eq(req.headers['x-motolab-read-key']||u.searchParams.get('readKey')||'',READ_KEY)}
 function readBody(req){return new Promise((resolve,reject)=>{let size=0,chunks=[];req.on('data',c=>{size+=c.length;if(size>MAX_BODY){reject(Object.assign(new Error('Payload too large'),{status:413}));req.destroy();return}chunks.push(c)});req.on('end',()=>resolve(Buffer.concat(chunks)));req.on('error',reject)})}
 function parseJson(buf){return JSON.parse(buf.toString('utf8'))}
-function atomicWrite(file,data){fs.mkdirSync(path.dirname(file),{recursive:true});const tmp=file+'.tmp-'+process.pid+'-'+Date.now();fs.writeFileSync(tmp,data);fs.renameSync(tmp,file)}
+function atomicWrite(file,data){fs.mkdirSync(path.dirname(file),{recursive:true});const tmp=file+'.tmp-'+process.pid+'-'+Date.now();fs.writeFileSync(tmp,data);fs.renameSync(tmp,file);mirror.queueLocal(file).catch(e=>console.error('MotoLab mirror queue:',e))}
 function readJson(file){try{return JSON.parse(fs.readFileSync(file,'utf8'))}catch{return null}}
 function walkJson(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())walkJson(p,out);else if(e.isFile()&&e.name.endsWith('.json'))out.push(p)}return out}
 function researchDir(deviceId,sessionId){return path.join(DATA_DIR,'research',safe(deviceId),safe(sessionId))}
@@ -73,7 +75,7 @@ async function handleResearchPost(req,res,u,origin){
 function listResearch(){const root=path.join(DATA_DIR,'research'),items=[];if(!fs.existsSync(root))return items;for(const device of fs.readdirSync(root)){const dd=path.join(root,device);if(!fs.statSync(dd).isDirectory())continue;for(const session of fs.readdirSync(dd)){const sd=path.join(dd,session);if(!fs.statSync(sd).isDirectory())continue;const manifest=readJson(path.join(sd,'manifest.json')),complete=readJson(path.join(sd,'complete.json'));if(!manifest)continue;const files=fs.readdirSync(sd),audio=files.filter(x=>/^audio-\d+\.(m4a|webm)$/.test(x)),timeline=files.filter(x=>/^timeline-\d+\.json$/.test(x));items.push({deviceId:manifest.deviceId||device,driver:manifest.driver||'',phone:manifest.phone||'',sessionId:manifest.session?.id||session,startedAt:manifest.session?.startedAt||null,endedAt:complete?.endedAt||manifest.finish?.endedAt||null,status:complete?'COMPLETE':(manifest.status||'UPLOADING'),profile:manifest.session?.profile||null,audioChunks:audio.length,timelineChunks:timeline.length,frameCount:complete?.frameCount||manifest.session?.frameCount||null,candidateFrameCount:complete?.candidateFrameCount||manifest.session?.candidateFrameCount||null,path:`${device}/${session}`})}}return items.sort((a,b)=>Date.parse(b.startedAt||0)-Date.parse(a.startedAt||0))}
 function readResearchSession(deviceId,sessionId,includeTimeline){const dir=researchDir(deviceId,sessionId),manifest=readJson(path.join(dir,'manifest.json'));if(!manifest)return null;const files=fs.readdirSync(dir),audioMeta=files.filter(x=>/^audio-\d+\.json$/.test(x)).sort().map(x=>readJson(path.join(dir,x))).filter(Boolean),timelineFiles=files.filter(x=>/^timeline-\d+\.json$/.test(x)).sort(),finish=readJson(path.join(dir,'complete.json'));const out={manifest,finish,audio:audioMeta,timelineFiles};if(includeTimeline)out.timeline=timelineFiles.flatMap(x=>readJson(path.join(dir,x))?.frames||[]);return out}
 function handleRead(req,res,u,origin,headOnly=false){
- if(u.pathname==='/health')return json(res,200,{ok:true,service:'vana-motolab-raw-sync',researchSync:true,time:new Date().toISOString()},origin,headOnly);
+ if(u.pathname==='/health')return json(res,200,{ok:true,service:'vana-motolab-raw-sync',researchSync:true,githubMirror:mirror.status(),time:new Date().toISOString()},origin,headOnly);
  if(headOnly)return json(res,404,{ok:false,error:'Not found'},origin,true);
  if(u.pathname==='/api/raw/v1/chunks'){
   if(!authRead(req,u))return json(res,401,{ok:false,error:'Invalid read key'},origin);const limit=Math.max(1,Math.min(100,Number(u.searchParams.get('limit')||25))),after=Date.parse(u.searchParams.get('after')||'')||0,root=path.join(DATA_DIR,'raw');const files=walkJson(root).map(f=>({f,mtime:fs.statSync(f).mtimeMs})).filter(x=>x.mtime>after).sort((a,b)=>a.mtime-b.mtime).slice(0,limit),items=[];for(const x of files){const j=readJson(x.f);if(j)items.push(j)}return json(res,200,{ok:true,count:items.length,serverTime:new Date().toISOString(),nextAfter:files.length?new Date(files[files.length-1].mtime).toISOString():null,items},origin)
@@ -88,4 +90,5 @@ function handleRead(req,res,u,origin,headOnly=false){
 }
 
 const server=http.createServer(async(req,res)=>{const origin=String(req.headers.origin||'');if(req.method==='OPTIONS'){if(origin&&origin!==ALLOWED_ORIGIN){res.writeHead(403);return res.end()}res.writeHead(204,corsHeaders(origin));return res.end()}const u=parseUrl(req);try{if(req.method==='POST'&&u.pathname==='/api/raw/v1/chunk')return await handleRawPost(req,res,u,origin);if(req.method==='POST'&&u.pathname.startsWith('/api/research/v1/'))return await handleResearchPost(req,res,u,origin);if(req.method==='GET'||req.method==='HEAD')return handleRead(req,res,u,origin,req.method==='HEAD');return json(res,405,{ok:false,error:'Method not allowed'},origin)}catch(e){console.error(e);return json(res,500,{ok:false,error:'Internal server error'},origin)}});
-server.listen(PORT,'0.0.0.0',()=>console.log(`MotoLab sync listening on :${PORT}, data=${DATA_DIR}`));
+server.listen(PORT,'0.0.0.0',()=>{console.log(`MotoLab sync listening on :${PORT}, data=${DATA_DIR}`);mirror.backfill().then(x=>{if(x.enabled)console.log(`MotoLab GitHub mirror backfill queued ${x.queued} files`);else console.log('MotoLab GitHub mirror disabled')}).catch(e=>console.error('MotoLab mirror backfill:',e))});
+setInterval(()=>mirror.run().catch(e=>console.error('MotoLab mirror:',e)),30000).unref();
