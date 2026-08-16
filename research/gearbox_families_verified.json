@@ -1,0 +1,48 @@
+{
+  "schema": "motolab_gearbox_family_research_v1",
+  "preparedFor": "vehicle-search-prep",
+  "updatedAt": "2026-08-16",
+  "policy": {
+    "useUncertainAsCandidate": true,
+    "uncertainMustNotForceGear": true,
+    "gpsRpmAgreementMayRaiseConfidence": true
+  },
+  "families": [
+    {
+      "id": "minarelli-am6-stock-v1",
+      "engineFamily": "Minarelli AM6",
+      "confidence": "probable",
+      "gearRatios": [3.0, 2.0625, 1.5263, 1.2273, 1.0417, 0.96],
+      "teeth": ["36/12","33/16","29/19","27/22","25/24","24/25"],
+      "appliesToCandidateModels": [
+        "Rieju MRT 50","Rieju RR 50","Rieju MRX 50","Rieju RRX 50","Rieju RS2 50","Rieju RS3 50","Rieju SMX 50","Rieju Tango 50",
+        "Beta RR 50","Sherco SE 50R","Sherco SM 50R","Yamaha TZR50","Aprilia RS50 1999-2005","Aprilia MX50","Aprilia RX50","Aprilia Tuono 50"
+      ],
+      "notes": "Use as gearbox-family candidate until exact model/year engine mapping is confirmed. Two AM6 gearbox shaft versions exist; stock ratio set is widely listed for first-series direct replacement.",
+      "sources": [
+        {"url":"https://www.pedparts.co.uk/product/9128/standard-gearbox-minarelli-am6","kind":"technical retailer","support":"stock replacement ratios and model fitment"},
+        {"url":"https://www.heavy-tuned.de/en/gearbox-manual-6-speed-standard-for-minarelli-am6-1st-series_915310_225622","kind":"technical retailer","support":"original-ratio replacement set"},
+        {"url":"https://www.billaricambi.it/en/products/mf60-18861-ingranaggi-am6","kind":"technical retailer","support":"AM6 stock tooth counts"}
+      ]
+    },
+    {
+      "id": "derbi-ebe-ebs-d50b-stock",
+      "engineFamily": "Derbi EBE/EBS/D50B",
+      "confidence": "verified",
+      "primaryRatio": 3.5,
+      "primaryTeeth": "77/22",
+      "gearRatios": [3.09, 2.0, 1.5, 1.2, 1.04, 0.956],
+      "teeth": ["34/11","30/15","27/18","24/20","23/22","22/23"],
+      "appliesToCandidateModels": [
+        "Derbi Senda 50","Derbi Senda X-Treme 50","Derbi Senda DRD 50","Derbi GPR50",
+        "Aprilia RS50 2006+ D50B","Gilera SMT 50","Gilera RCR 50"
+      ],
+      "notes": "Strong family-level gearbox reference. Exact final sprockets remain model/version specific and are not required for the gearbox candidate.",
+      "sources": [
+        {"url":"https://www.emanualonline.com/engines/derbi/derbi-50cc6-speed-service-repair-manual-emo-441276","kind":"workshop manual copy","support":"primary and all six ratios"},
+        {"url":"https://fliphtml5.com/xoczc/kchv/Derbi_50cc_Manual/","kind":"workshop manual copy","support":"Racer/Xtreme/GPR ratios"},
+        {"url":"https://www.pedparts.co.uk/product/4038/jasil-standard-gearbox--derbi-ebeebs-d50b","kind":"technical retailer","support":"EBE/EBS/D50B stock replacement ratios"}
+      ]
+    }
+  ]
+}
