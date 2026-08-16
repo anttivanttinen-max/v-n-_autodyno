@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const V='v32-tech-specs-1',$=id=>document.getElementById(id),clone=v=>JSON.parse(JSON.stringify(v||{}));
+const V='v32-tech-specs-1.1',$=id=>document.getElementById(id),clone=v=>JSON.parse(JSON.stringify(v||{}));
 function profile(){return typeof getCurrentProfile==='function'?getCurrentProfile():null}
 function kbPanel(){return [...document.querySelectorAll('.panel')].find(e=>/VEHICLE\s*\/\s*ENGINE KNOWLEDGE BASE/i.test(e.textContent||''))}
 const fields=[
@@ -8,8 +8,8 @@ const fields=[
 ];
 function inject(){if($('technicalSpecsPanel'))return;const k=kbPanel();if(!k)return;const e=document.createElement('div');e.className='panel';e.id='technicalSpecsPanel';e.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🔧</span> TEKNISET TIEDOT</div><span class="tiny">${V}</span></div><div class="form">${fields.map(([id,label])=>`<label class="${id==='techNotes'?'full':''}">${label}<input id="${id}"></label>`).join('')}<button id="techSave" class="action full" type="button">TALLENNA TEKNISET TIEDOT</button></div><div id="techStatus" class="statusbox">Ajoneuvohaun tehdasarvot näkyvät täällä. Kaikki arvot voi muuttaa pyörän todellisen kokoonpanon mukaan.</div>`;k.parentNode.insertBefore(e,k);$('techSave').onclick=save;load()}
 function getPath(kb,group,key){return kb?.[group]?.[key]??''}
-function load(){const kb=profile()?.knowledge||{};for(const [id,,g,k] of fields)if($(id))$(id).value=getPath(kb,g,k)}
+function load(){const kb=profile()?.knowledge||{};for(const [id,,g,k] of fields)if($(id))$(id).value=getPath(kb,g,k);if($('techStatus'))$('techStatus').textContent='Tekniset tiedot päivitetty aktiivisesta profiilista.'}
 function parse(v){const s=String(v??'').trim();if(!s)return'';const n=Number(s.replace(',','.'));return Number.isFinite(n)&&/^[-+]?\d+(?:[.,]\d+)?$/.test(s)?n:s}
 function save(){if(typeof saveCurrentProfile!=='function')return;const p=profile(),kb=clone(p?.knowledge||{});for(const [id,,g,k] of fields){kb[g]=kb[g]||{};kb[g][k]=parse($(id)?.value)}saveCurrentProfile({knowledge:kb});$('techStatus').textContent='Tekniset tiedot tallennettu profiiliin.';if(typeof addLearningEvent==='function')addLearningEvent('technical_specs_changed',{})}
-function boot(){inject()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+function boot(){inject();window.addEventListener('motolab:vehicle-applied',()=>setTimeout(load,0));document.addEventListener('change',e=>{if(e.target&&e.target.id==='profileSelect')setTimeout(load,0)})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
