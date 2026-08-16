@@ -1,0 +1,102 @@
+{
+  "schema": "motolab_vehicle_gearing_research_v1",
+  "updated": "2026-08-16",
+  "purpose": "Staging-only verified/probable internal gearbox data for common Finland 125 cc road-legal motorcycles. Do not merge to production before approval.",
+  "rules": {
+    "internalGearRatiosPriority": true,
+    "uncertainValuesMayAssistGearLearn": true,
+    "uncertainValuesMustNotForceGear": true,
+    "learnedGpsRpmDataOverridesCatalogCandidate": true,
+    "generationSpecificDataMustNotBeAppliedAcrossUnverifiedGenerations": true
+  },
+  "gearboxes": [
+    {
+      "id": "yamaha-yzf-r125-2008-2017-gearbox",
+      "appliesTo": ["Yamaha YZF-R125 2008-2017"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+      "gearTeeth": ["34/12", "30/16", "30/22", "24/21", "22/23", "21/25"],
+      "primaryRatio": 3.042,
+      "primaryTeeth": "73/24",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"service_manual_copy","title":"Yamaha YZF-R125 Service Manual","url":"https://studylib.net/doc/25886000/yamaha-yzf-r125-service-manual--1-"},
+        {"kind":"owners_manual_copy","title":"Yamaha YZF-R125 2017 Owners Manual","url":"https://www.carmanualsonline.info/yamaha-yzf-r125-2017-owners-manual/?srch=transmission"}
+      ],
+      "notes": "Same six internal ratios are shown in 2008, 2009/2010, 2016 and 2017 manual copies. Treat later VVA generations separately until verified."
+    },
+    {
+      "id": "yamaha-mt125-2014-2016-gearbox",
+      "appliesTo": ["Yamaha MT-125 2014-2016"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+      "gearTeeth": ["34/12", "30/16", "30/22", "24/21", "22/23", "21/25"],
+      "primaryRatio": 3.042,
+      "primaryTeeth": "73/24",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"owners_manual_copy","title":"Yamaha MT-125 2015 Owners Manual","url":"https://www.carmanualsonline.info/yamaha-mt-125-2015-owners-manual/9"},
+        {"kind":"owners_manual_copy","title":"Yamaha MT-125 2016 Owners Manual","url":"https://www.carmanualsonline.info/yamaha-mt-125-2016-owners-manual/?srch=transmission"}
+      ],
+      "notes": "Do not automatically apply to newer VVA MT-125 generations without separate verification."
+    },
+    {
+      "id": "yamaha-wr125r-x-2009-2011-gearbox",
+      "appliesTo": ["Yamaha WR125R", "Yamaha WR125X"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+      "gearTeeth": ["34/12", "30/16", "30/22", "24/21", "22/23", "21/25"],
+      "primaryRatio": 3.042,
+      "primaryTeeth": "73/24",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"owners_manual_copy","title":"Yamaha WR125R/WR125X Owner's Manual","url":"https://manualzz.com/doc/23691170/yamaha-wr-125r--wr-125x-motorcycle-owner%E2%80%99s-manual"},
+        {"kind":"owners_manual_copy","title":"Yamaha WR125R 2009 Owners Manual","url":"https://www.carmanualsonline.info/yamaha-wr-125r-2009-owners-manual/8"}
+      ],
+      "notes": "Internal gearbox matches early YZF-R125/MT-125 family; final drive differs and is intentionally not used as gearbox identity."
+    },
+    {
+      "id": "kawasaki-ninja125-current-gearbox",
+      "appliesTo": ["Kawasaki Ninja 125 2023-2026"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [2.833, 1.875, 1.444, 1.208, 1.056, 0.962],
+      "gearTeeth": ["34/12", "30/16", "26/18", "29/24", "19/18", "25/26"],
+      "primaryRatio": 2.966,
+      "primaryTeeth": "86/29",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"manufacturer","title":"Kawasaki Ninja 125 2026 Technical Specifications","url":"https://www.kawasaki.co.uk/en/Motorcycles/A2_Bikes/Ninja_125_2026.html"},
+        {"kind":"manufacturer","title":"Kawasaki Ninja 125 2023 Technical Specifications","url":"https://www.kawasaki.ro/en/Motorcycles/A2_Bikes/Ninja125_2023.html/BX125BPFAN/BX125BPFANSP"}
+      ]
+    },
+    {
+      "id": "kawasaki-z125-current-gearbox",
+      "appliesTo": ["Kawasaki Z125 2026"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [2.833, 1.875, 1.444, 1.208, 1.056, 0.962],
+      "gearTeeth": ["34/12", "30/16", "26/18", "29/24", "19/18", "25/26"],
+      "primaryRatio": 2.966,
+      "primaryTeeth": "86/29",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"manufacturer","title":"Kawasaki Z125 2026 Technical Specifications","url":"https://www.kawasaki.co.uk/en/Motorcycles/A2_Bikes/Z125_2026.html"},
+        {"kind":"manufacturer","title":"Kawasaki Z125 2026 Europe Technical Specifications","url":"https://www.kawasaki.eu/en/Motorcycles/A2_Bikes/Z125_2026.html/BR125MTFNN/BR125MTFNNPE"}
+      ]
+    },
+    {
+      "id": "aprilia-rs125-rotax-2t-gearbox",
+      "appliesTo": ["Aprilia RS 125 2T / Rotax-era"],
+      "gearboxSpeeds": 6,
+      "gearRatios": [3.000, 2.071, 1.588, 1.316, 1.143, 1.045],
+      "gearTeeth": ["30/10", "29/14", "27/17", "25/19", "24/21", "23/22"],
+      "primaryRatio": 3.316,
+      "primaryTeeth": "63/19",
+      "confidence": "verified",
+      "sources": [
+        {"kind":"owners_manual_copy","title":"Aprilia RS 125 1995 Manual, Technical Data","url":"https://www.manualslib.com/manual/363567/Aprilia-Rs-125-1995.html"},
+        {"kind":"owners_manual_copy","title":"Aprilia RS 125 2006 Manual, Transmission","url":"https://www.manualslib.com/manual/363574/Aprilia-Rs-125-2006.html"}
+      ],
+      "notes": "Verified for 2T RS125 Rotax-era manuals. Must not be applied to modern 4T RS125."
+    }
+  ]
+}
