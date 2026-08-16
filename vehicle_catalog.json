@@ -1,6 +1,6 @@
 {
   "schema": "motolab_vehicle_catalog_v2",
-  "version": "2026-08-16.8",
+  "version": "2026-08-16.9",
   "entries": [
     {
       "id": "yamaha-dt125r-vana-athena-170-current",
@@ -90,8 +90,8 @@
       "id": "derbi-senda-77-brother-e3-current",
       "make": "Derbi",
       "model": "Senda",
-      "variant": "VELJEN 77 / Rabasa E3 – nykyinen kokoonpano",
-      "aliases": ["veljen 77", "VELJEN 77", "Derbi 77", "Senda 77", "E3 77", "Rabasa E3 77", "77cc Derbi"],
+      "variant": "77br",
+      "aliases": ["Derbi 77br", "77br", "Derbi 77", "Senda 77", "E3 77", "Rabasa E3 77", "77cc Derbi", "veljen 77"],
       "engineType": "2T",
       "engineCode": "Derbi Rabasa E3",
       "engine": {
@@ -107,84 +107,21 @@
         "crankshaft": "Stock crankshaft",
         "flywheel": "Lifan 140 cc small flywheel / pickup ignition setup"
       },
-      "exhaust": {
-        "system": "Voca 90 cc"
-      },
-      "drivetrain": {
-        "primaryRatio": 3.5,
-        "primaryTeeth": "77/22",
-        "gearRatios": [3.09, 2.00, 1.50, 1.20, 1.04, 0.95]
-      },
-      "fluids": {
-        "transmissionOilL": 0.65,
-        "transmissionOil": "SAE 10W40"
-      },
-      "source": {
-        "verified": false,
-        "type": "user_current_build_plus_derbi_factory_baseline",
-        "title": "User-confirmed brother's Derbi 77 build + Derbi EBS/E3-family workshop baseline"
-      },
-      "notes": "VELJEN NYKYINEN 77-KOKOONPANO: Derbi Rabasa E3, 77 cc sylinterisarja, PWK 24 mm, Voca 90 cc putki, vakio kampiakseli, Ducati CDI kiinteä 17° ennakko ja Lifan 140 cc pieni vauhtipyörä/pickup-sytytysjärjestely. Vaihteistoöljy 0.65 L SAE 10W40 on Derbi 6-vaihteisen tehdas-/huoltomanuaalireferenssi; tarkista juuri tämän moottorin öljymäärä ennen huoltoa."
+      "exhaust": {"system": "Voca 90 cc"},
+      "drivetrain": {"primaryRatio": 3.5,"primaryTeeth": "77/22","gearRatios": [3.09, 2.00, 1.50, 1.20, 1.04, 0.95]},
+      "fluids": {"transmissionOilL": 0.65,"transmissionOil": "SAE 10W40"},
+      "source": {"verified": false,"type": "user_current_build_plus_derbi_factory_baseline","title": "User-confirmed brother's Derbi 77 build + Derbi EBS/E3-family workshop baseline"},
+      "notes": "DERBI 77br: Derbi Rabasa E3, 77 cc sylinterisarja, PWK 24 mm, Voca 90 cc putki, vakio kampiakseli, Ducati CDI kiinteä 17° ennakko ja Lifan 140 cc pieni vauhtipyörä/pickup-sytytysjärjestely. Vaihteistoöljy 0.65 L SAE 10W40 on Derbi 6-vaihteisen tehdas-/huoltomanuaalireferenssi; tarkista juuri tämän moottorin öljymäärä ennen huoltoa."
     },
     {
-      "id": "derbi-senda-50-ebs-racer",
-      "make": "Derbi",
-      "model": "Senda 50",
-      "variant": "Racer / EBS-era",
-      "aliases": ["Senda", "Senda 50", "Derbi Senda", "Racer", "EBS", "EBS050"],
-      "engineType": "2T",
-      "engineCode": "EBS/EBE family — verify exact bike",
-      "engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","carburetor":"Dell'Orto PHVA","carburetorMm":14,"ignition":"CDI","ignitionTiming":"1.2 mm BTDC","sparkPlug":"NGK B10ES / Champion N1C","sparkPlugGapMm":0.6},
-      "drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":12,"rearSprocket":53,"finalRatio":4.41},
-      "fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
-      "source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},
-      "notes":"Workshop-manual Racer baseline. Final drive differs by R/SM/version; sprockets are editable in MotoLab. Exact EBS/EBE code and model year must be verified from the bike."
-    },
+      "id": "derbi-senda-50-ebs-racer","make": "Derbi","model": "Senda 50","variant": "Racer / EBS-era","aliases": ["Senda", "Senda 50", "Derbi Senda", "Racer", "EBS", "EBS050"],"engineType": "2T","engineCode": "EBS/EBE family — verify exact bike","engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","carburetor":"Dell'Orto PHVA","carburetorMm":14,"ignition":"CDI","ignitionTiming":"1.2 mm BTDC","sparkPlug":"NGK B10ES / Champion N1C","sparkPlugGapMm":0.6},"drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":12,"rearSprocket":53,"finalRatio":4.41},"fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},"source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},"notes":"Workshop-manual Racer baseline. Final drive differs by R/SM/version; sprockets are editable in MotoLab. Exact EBS/EBE code and model year must be verified from the bike."},
     {
-      "id": "derbi-senda-50-xtreme",
-      "make": "Derbi",
-      "model": "Senda 50",
-      "variant": "X-Treme",
-      "aliases": ["Senda X-Treme", "Xtreme", "Derbi Senda Xtreme"],
-      "engineType": "2T",
-      "engineCode": "Derbi 6-speed family — verify EBS/D50B0 by year",
-      "engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","carburetor":"Dell'Orto PHVA","carburetorMm":14,"ignition":"CDI","ignitionTiming":"1.2 mm BTDC","sparkPlug":"NGK B10ES / Champion N1C","sparkPlugGapMm":0.6},
-      "drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":13,"rearSprocket":53,"finalRatio":4.07},
-      "fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
-      "source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},
-      "notes":"X-Treme workshop-manual baseline. Manual also lists an SM final-drive alternative 53/14 (3.78); choose actual sprockets fitted to the bike."
-    },
+      "id": "derbi-senda-50-xtreme","make": "Derbi","model": "Senda 50","variant": "X-Treme","aliases": ["Senda X-Treme", "Xtreme", "Derbi Senda Xtreme"],"engineType": "2T","engineCode": "Derbi 6-speed family — verify EBS/D50B0 by year","engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","carburetor":"Dell'Orto PHVA","carburetorMm":14,"ignition":"CDI","ignitionTiming":"1.2 mm BTDC","sparkPlug":"NGK B10ES / Champion N1C","sparkPlugGapMm":0.6},"drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":13,"rearSprocket":53,"finalRatio":4.07},"fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},"source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},"notes":"X-Treme workshop-manual baseline. Manual also lists an SM final-drive alternative 53/14 (3.78); choose actual sprockets fitted to the bike."},
     {
-      "id": "derbi-senda-50-drd",
-      "make": "Derbi",
-      "model": "Senda 50",
-      "variant": "DRD",
-      "aliases": ["Senda DRD", "DRD Racing", "Derbi DRD", "D50B0"],
-      "engineType": "2T",
-      "engineCode": "D50B0 on many later DRD models — verify model/year",
-      "engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","ignition":"CDI","ignitionTiming":"1.2 mm BTDC"},
-      "drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":13,"rearSprocket":53,"finalRatio":4.07},
-      "fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
-      "source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},
-      "notes":"DRD workshop-manual transmission baseline; SM alternative 53/14 (3.78) is also listed. Engine-code mapping varies by year, so verify before treating D50B0 as confirmed."
-    },
+      "id": "derbi-senda-50-drd","make": "Derbi","model": "Senda 50","variant": "DRD","aliases": ["Senda DRD", "DRD Racing", "Derbi DRD", "D50B0"],"engineType": "2T","engineCode": "D50B0 on many later DRD models — verify model/year","engine": {"displacementCc":49.9,"boreMm":39.86,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve","ignition":"CDI","ignitionTiming":"1.2 mm BTDC"},"drivetrain": {"primaryRatio":3.5,"primaryTeeth":"77/22","gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":13,"rearSprocket":53,"finalRatio":4.07},"fluids": {"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},"source": {"verified":true,"title":"Derbi 50 cc 6-speed service/workshop manual","url":"https://www.scribd.com/document/442626056/Derbi-Senda-Revue-technique-Anglais-pdf"},"notes":"DRD workshop-manual transmission baseline; SM alternative 53/14 (3.78) is also listed. Engine-code mapping varies by year, so verify before treating D50B0 as confirmed."},
     {
-      "id": "derbi-senda-xtreme-50-r-2018",
-      "make":"Derbi","model":"Senda 50","variant":"X-Treme R 2018","aliases":["Senda X-Treme 50 R","Xtreme R","enduro"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike",
-      "engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},
-      "drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontWheelIn":21,"rearWheelIn":18},
-      "fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
-      "source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},
-      "notes":"2018 chassis/wheel data plus Derbi 6-speed family baseline. Confirm fitted sprockets and exact engine code from the bike."
-    },
+      "id": "derbi-senda-xtreme-50-r-2018","make":"Derbi","model":"Senda 50","variant":"X-Treme R 2018","aliases":["Senda X-Treme 50 R","Xtreme R","enduro"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike","engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},"drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontWheelIn":21,"rearWheelIn":18},"fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},"source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},"notes":"2018 chassis/wheel data plus Derbi 6-speed family baseline. Confirm fitted sprockets and exact engine code from the bike."},
     {
-      "id": "derbi-senda-xtreme-50-sm-2018",
-      "make":"Derbi","model":"Senda 50","variant":"X-Treme SM 2018","aliases":["Senda X-Treme 50 SM","Xtreme SM","supermotard","motard"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike",
-      "engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},
-      "drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":14,"rearSprocket":53,"finalRatio":3.78,"frontWheelIn":17,"rearWheelIn":17},
-      "fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
-      "source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},
-      "notes":"17-inch SM wheels. 53/14 is the workshop-manual X-Treme SM alternative; confirm actual fitted sprockets."
-    }
+      "id": "derbi-senda-xtreme-50-sm-2018","make":"Derbi","model":"Senda 50","variant":"X-Treme SM 2018","aliases":["Senda X-Treme 50 SM","Xtreme SM","supermotard","motard"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike","engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},"drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":14,"rearSprocket":53,"finalRatio":3.78,"frontWheelIn":17,"rearWheelIn":17},"fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},"source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},"notes":"17-inch SM wheels. 53/14 is the workshop-manual X-Treme SM alternative; confirm actual fitted sprockets."}
   ]
 }
