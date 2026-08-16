@@ -1,0 +1,31 @@
+name: Validate RAW Sync
+
+on:
+  push:
+    branches: ["agent/v32-raw-auto-sync", "main"]
+    paths:
+      - "raw_sync.js"
+      - "raw_sync_server/**"
+      - "sw.js"
+      - ".github/workflows/validate-raw-sync.yml"
+  pull_request:
+    paths:
+      - "raw_sync.js"
+      - "raw_sync_server/**"
+      - "sw.js"
+      - ".github/workflows/validate-raw-sync.yml"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check browser module syntax
+        run: node --check raw_sync.js
+      - name: Check receiver syntax
+        run: node --check raw_sync_server/server.js
+      - name: Validate package JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('raw_sync_server/package.json','utf8')); console.log('package.json OK')"
