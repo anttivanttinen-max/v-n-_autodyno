@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VÄNÄ MOTOLAB v32.3</title>
+<title>VÄNÄ MOTOLAB v32.4</title>
 <style>
 :root{
  --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
@@ -353,7 +353,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";
+const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.4";
 const ALGORITHM_VERSION={rpm:"rpm-v31-candidate-gap",fusion:"fusion-v31-integrity",learning:"learning-raw-v2"};
 const DEV_MODE_KEY="motolab_dev_mode";
 const RAW_AUDIO_FINGERPRINT={"name":"VÄNÄ MotoLab raw reference fingerprint","source":"VANA_MotoLab_test_1786803700939.json","project":"DT testimoottori","created_from":"2026-08-15T14:21:40.939Z","reference_note":"rpm_reference labels are used as truth; measured rpm estimates are not used as labels","points":[{"rpm":1800,"f0_hz":41.0,"f0_p20":40.0,"f0_p80":41.5,"conf_median":30.0,"harm_rel_db":[-38.68,-35.49,-28.87,-17.62,0.0,-8.49],"samples":894,"places":["Paisarin loppu / stingerin alku"]},{"rpm":3000,"f0_hz":64.0,"f0_p20":54.5,"f0_p80":75.0,"conf_median":34.0,"harm_rel_db":[-35.96,-23.14,-8.84,-4.82,-5.43,-1.11],"samples":7122,"places":["Mikrofoni suoraan pinnapulttiin","Paisarin loppu / stingerin alku","Pinnapultti + lyhyt jäykkä letku","Tulpan metalliosa","Vapaa mikrofoni 0,5 m moottorista","Vapaa mikrofoni 0,5 m pakoputkesta"]},{"rpm":5000,"f0_hz":89.333,"f0_p20":45.833,"f0_p80":99.833,"conf_median":30.0,"harm_rel_db":[-25.22,-2.66,-5.66,0.0,-6.21,-10.05],"samples":1782,"places":["Paisarin loppu / stingerin alku","Vapaa mikrofoni 0,5 m pakoputkesta"]}]};
@@ -385,7 +385,7 @@ const measurementWorkerSource=`
 "use strict";
 let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[],rpmSourceMode:"fusion",selectedGear:3,gpsCalibrations:[],audioMaxRpm:12500};
 let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={ext:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,level:0,conf:0,candidateGap:0,runnerRpm:0,t:0}};
-let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[];
+let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[],autoSession=false,rearmPending=false,rearmReadyAt=0;
 let lastGear=null,lastGearConf=0,lastFusionRpm=0;
 function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
 function nearestGearFromRatio(ratio){
@@ -492,7 +492,8 @@ function sample(){
    audioRpm:f.audioRpm,audioRawRpm:f.audioRawRpm,audioFpScore:f.audioFpScore,audioObservedF0:f.audioObservedF0,audioLevel:f.audioLevel,audioConf:f.audioConf,audioCandidateGap:f.audioCandidateGap,audioRunnerRpm:f.audioRunnerRpm,speedRpm:f.speedRpm,speedConf:f.speedConf,fusionRpm:f.rpm,fusionMode:f.fusionMode,slip:f.slip,agreement:f.agreement,motionMag:motion.mag||0,motionAgeMs:motion.t?Math.max(0,Date.now()-motion.t):null};
  pre.push(s);while(pre.length&&s.t-pre[0].t>5000)pre.shift();
  learnGear(f);
- if(armed&&!recording&&f.rpm>=cfg.recordFrom&&g>=cfg.autoSensitivity){recording=true;mode="auto";run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})}
+ if(armed&&!recording&&rearmPending&&Date.now()>=rearmReadyAt&&(g<.03||f.rpm<cfg.stopRpm*.92)){rearmPending=false;pre=[];postMessage({type:"state",state:"ARMED"})}
+ if(armed&&!recording&&!rearmPending&&f.rpm>=cfg.recordFrom&&g>=cfg.autoSensitivity){recording=true;mode="auto";run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})}
  if(recording){
    run.push(s);
    if(mode==="auto"){
@@ -504,14 +505,16 @@ function sample(){
 }
 function finish(reason){
  if(!recording){postMessage({type:"state",state:"NO RUN"});return}
- const data=run.slice();recording=false;armed=false;mode="none";run=[];accelEnd=0;
+ const completedMode=mode,keepAuto=completedMode==="auto"&&autoSession&&reason!=="STOP";
+ const data=run.slice();recording=false;mode="none";run=[];accelEnd=0;
+ if(keepAuto){armed=true;rearmPending=true;rearmReadyAt=Date.now()+450}else{armed=false;rearmPending=false;rearmReadyAt=0}
  if(data.length<12){postMessage({type:"state",state:"TOO SHORT"});return}
  const maxHp=Math.max(...data.map(x=>x.hp||0)),maxNm=Math.max(...data.map(x=>x.nm||0)),maxRpm=Math.max(...data.map(x=>x.rpm||0));
  const quality=Math.round(data.reduce((a,b)=>a+(b.quality||0),0)/data.length);
  const ratios=data.map(x=>x.ratio).filter(x=>x>0),gearRatioMedian=ratios.length?ratios.sort((a,b)=>a-b)[Math.floor(ratios.length/2)]:0;
  const gears=data.map(x=>x.gear).filter(Boolean),gear=gears.length?gears.sort((a,b)=>gears.filter(v=>v===a).length-gears.filter(v=>v===b).length).pop():null;
  const slipPct=Math.round(100*data.filter(x=>x.slip).length/Math.max(1,data.length));
- postMessage({type:"runComplete",reason,run:{id:Date.now()+"-"+Math.random().toString(16).slice(2),date:new Date().toISOString(),mode:reason==="STOP"?"manual":"AUTO RIDE",quality,status:quality>=78?"good":quality>=55?"warn":"bad",maxHp,maxNm,maxRpm,gear,gearRatioMedian,slipPct,data}});postMessage({type:"state",state:"READY"});
+ postMessage({type:"runComplete",reason,run:{id:Date.now()+"-"+Math.random().toString(16).slice(2),date:new Date().toISOString(),mode:completedMode==="auto"?"AUTO RIDE":"MANUAL",quality,status:quality>=78?"good":quality>=55?"warn":"bad",maxHp,maxNm,maxRpm,gear,gearRatioMedian,slipPct,data}});postMessage({type:"state",state:keepAuto?"ARMED":"READY"});
 }
 onmessage=e=>{
  const m=e.data;
@@ -519,10 +522,10 @@ onmessage=e=>{
  if(m.type==="gps"){const now=m.t||Date.now(),v=m.kmh/3.6;if(lastGps&&now-lastGps.t>120){const raw=(v-lastGps.v)/((now-lastGps.t)/1000);if(Number.isFinite(raw))accel=accel*.76+raw*.24}lastGps={v,t:now};gps={kmh:m.kmh||0,acc:m.acc||999,t:now}}
  if(m.type==="motion")motion={mag:m.mag||0,t:m.t||Date.now()}
  if(m.type==="rpm")if(m.source==="ext")rpmSources.ext={rpm:m.rpm||0,rawRpm:m.rawRpm||0,fpScore:m.fpScore||0,observedF0:m.observedF0||0,level:m.level||0,conf:m.conf||0,candidateGap:m.candidateGap||0,runnerRpm:m.runnerRpm||0,t:m.t||Date.now()}
- if(m.type==="arm"){armed=true;recording=false;mode="none";run=[];pre=[];postMessage({type:"state",state:"ARMED"})}
- if(m.type==="manual"){armed=false;recording=true;mode="manual";run=[];pre=[];postMessage({type:"state",state:"MANUAL RUN"})}
- if(m.type==="stop")finish("STOP")
- if(m.type==="cancel"){armed=false;recording=false;mode="none";run=[];postMessage({type:"state",state:"CANCELLED"})}
+ if(m.type==="arm"){autoSession=true;armed=true;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];pre=[];postMessage({type:"state",state:"ARMED"})}
+ if(m.type==="manual"){autoSession=false;armed=false;rearmPending=false;rearmReadyAt=0;recording=true;mode="manual";run=[];pre=[];postMessage({type:"state",state:"MANUAL RUN"})}
+ if(m.type==="stop"){autoSession=false;rearmPending=false;rearmReadyAt=0;if(recording)finish("STOP");else{armed=false;mode="none";run=[];postMessage({type:"state",state:"STOPPED"})}}
+ if(m.type==="cancel"){autoSession=false;armed=false;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];postMessage({type:"state",state:"CANCELLED"})}
 };
 setInterval(sample,50);
 `
@@ -1354,7 +1357,7 @@ function showUpdatePrompt(reg){
 async function registerServiceWorker(){
  if(!("serviceWorker" in navigator)||!window.isSecureContext)return false;
  try{
-  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16b";
+  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16f";
   const reg=await navigator.serviceWorker.register("./sw.js?build="+encodeURIComponent(build),{updateViaCache:"none"});
   if(reg.waiting)showUpdatePrompt(reg);
   reg.addEventListener("updatefound",()=>{const w=reg.installing;if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdatePrompt(reg)})});

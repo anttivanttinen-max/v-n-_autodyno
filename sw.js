@@ -1,5 +1,5 @@
 importScripts("./version.js?build=2026-08-16e");
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.4";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
 const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16e";
 const V=encodeURIComponent(VERSION);
