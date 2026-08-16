@@ -1,7 +1,75 @@
 {
   "schema": "motolab_vehicle_catalog_v2",
-  "version": "2026-08-16.2",
+  "version": "2026-08-16.3",
   "entries": [
+    {
+      "id": "yamaha-dt125r-vana-athena-170-current",
+      "make": "Yamaha",
+      "model": "DT125R",
+      "variant": "OMA DT / VÄNÄ Athena 170 – nykyinen kokoonpano",
+      "aliases": ["oma DT", "OMA DT", "VÄNÄ DT", "Vana DT", "Athena 170", "DT170", "Yamaha DT125R Athena 170"],
+      "yearFrom": 2000,
+      "yearTo": 2000,
+      "engineType": "2T",
+      "engineCode": "DT125R / 3MB-family base",
+      "engine": {
+        "displacementCc": 170,
+        "boreMm": 65.0,
+        "strokeMm": 50.7,
+        "cylinders": 1,
+        "cooling": "liquid",
+        "induction": "VForce 4 reed valve",
+        "cylinderKit": "Athena 170 cc",
+        "carburetor": "34 mm carburetor",
+        "carburetorMm": 34,
+        "squishMm": 0.8,
+        "chamberCc": 12.7,
+        "deckProtrusionMm": 0.15,
+        "cylinderRaiseMm": 0,
+        "headMachiningMm": 0.4,
+        "headModification": "Palotilaa madallettu 0.4 mm ja sorvattu uusi squish-alue",
+        "sparkPlug": "NGK BR9ES factory-reference; fitted plug verify",
+        "sparkPlugGapMm": "0.7–0.8",
+        "ignition": "Zeeltronic CDI / YPVS",
+        "lubrication": "2T / current setup verify",
+        "starting": "kick"
+      },
+      "drivetrain": {
+        "primaryRatio": 3.227,
+        "primaryTeeth": "71/22",
+        "gearRatios": [2.833, 1.875, 1.412, 1.143, 0.957, 0.818],
+        "frontSprocket": 16,
+        "rearSprocket": 57,
+        "finalRatio": 3.563,
+        "frontTire": "2.75-21 45P factory-reference",
+        "rearTire": "4.10-18 59P factory-reference",
+        "frontWheelIn": 21,
+        "rearWheelIn": 18,
+        "chain": "428 factory-reference",
+        "chainLinks": 134
+      },
+      "chassis": {
+        "wetWeightKg": 127,
+        "wheelbaseMm": 1415,
+        "seatHeightMm": 885,
+        "groundClearanceMm": 315,
+        "fuelTankL": 10,
+        "reserveL": 1.8
+      },
+      "fluids": {
+        "transmissionOilChangeL": 0.75,
+        "transmissionOilTotalL": 0.8,
+        "coolantL": 0.92,
+        "twoStrokeOilTankL": 1.2
+      },
+      "source": {
+        "verified": true,
+        "type": "user_current_build_plus_factory_baseline",
+        "title": "VÄNÄ MotoLab current DT build – user-confirmed setup + Yamaha DT125R 2000 factory baseline",
+        "url": "https://www.dt125.cz/download/Owners_Manual-DT125R.pdf"
+      },
+      "notes": "NYKYINEN RAKENNETTU KOKOONPANO: Athena 170 cc, 65.0 x 50.7 mm, sylinteriä EI ole nostettu (0 mm), mäntä 0.15 mm yli dekin, squish 0.8 mm, laskennallinen palotila 12.7 cc (vahvistetaan nestemittauksella), kantta/palotilaa madallettu vielä 0.4 mm ja sorvattu uusi squish-alue, VForce 4, 34 mm kaasutin, Athena-pakoputki, Zeeltronic CDI/YPVS. 16/57 ratastus, rengaskoot, paino ja nestemäärät ovat DT125R 2000 tehdasreferenssejä kunnes juuri tämän pyörän nykyiset arvot mitataan/tarkistetaan. Palotilan 12.7 cc on laskennallinen arvio, ei vielä nestemittauksella vahvistettu."
+    },
     {
       "id": "yamaha-dt125r-2000",
       "make": "Yamaha",
