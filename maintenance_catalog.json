@@ -1,0 +1,74 @@
+{
+  "schema": "motolab_maintenance_catalog_v1",
+  "version": "2026-08-16.1",
+  "profiles": [
+    {
+      "id": "yamaha-dt125r",
+      "match": ["yamaha dt125r", "dt125r", "dt 125 r", "dt125"],
+      "title": "Yamaha DT125R",
+      "manufacturerCadence": {
+        "firstServiceKm": 1000,
+        "recurringServiceKm": 6000,
+        "note": "Yamaha Europe lists 125 cc motorcycle service points at 1,000 km and then 6,000 km increments. Exact operation list remains model/manual dependent.",
+        "source": "https://www.yamaha-motor.eu/fr/fr/service-support/maintenance-repair/forfaits-d-entretien/forfaits-d-entretien-motos/"
+      },
+      "tasks": [
+        {"id":"scheduled-service","name":"Määräaikaishuolto / yleinen tarkastus","category":"YLEINEN","intervalKm":6000,"intervalMonths":12,"sourceType":"manufacturer-cadence"},
+        {"id":"gearbox-oil","name":"Vaihteistoöljy","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"spark-plug","name":"Sytytystulppa: tarkastus / vaihto","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"air-filter","name":"Ilmansuodatin: puhdistus / öljyäminen","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"coolant","name":"Jäähdytysneste / järjestelmä","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"ypvs","name":"YPVS: venttiili, vaijerit ja liike","category":"2T / YPVS","intervalKm":0,"intervalMonths":0},
+        {"id":"oil-pump","name":"2T-öljypumppu ja vaijerisäätö","category":"2T / YPVS","intervalKm":0,"intervalMonths":0},
+        {"id":"reed-valve","name":"Läppäventtiilit / imupuoli","category":"2T / YPVS","intervalKm":0,"intervalMonths":0},
+        {"id":"exhaust-decarbon","name":"Pakoaukko / putki: karstan tarkastus","category":"2T / YPVS","intervalKm":0,"intervalMonths":0},
+        {"id":"chain","name":"Ketju: puhdistus, voitelu ja kireys","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"sprockets","name":"Eturatas / takaratas: kuluminen","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"clutch","name":"Kytkin ja vaijerin vapaaliike","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"front-brake","name":"Etujarru: palat, levy, neste, toiminta","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"rear-brake","name":"Takajarru: palat, levy, neste, toiminta","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"tyres","name":"Renkaat: paine, kunto ja kuluminen","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"wheel-bearings","name":"Pyöränlaakerit","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"steering","name":"Ohjauslaakerit","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"swingarm-linkage","name":"Takapään linkusto / swingin laakerointi","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"fork","name":"Etuhaarukka: vuodot ja toiminta","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"controls","name":"Kaasu-, kytkin- ja muut vaijerit","category":"YLEINEN","intervalKm":0,"intervalMonths":0},
+        {"id":"fasteners","name":"Pultit, kiinnitykset ja runko","category":"YLEINEN","intervalKm":0,"intervalMonths":0},
+        {"id":"battery-electrics","name":"Akku, lataus ja sähköt","category":"SÄHKÖ","intervalKm":0,"intervalMonths":0}
+      ]
+    },
+    {
+      "id": "derbi-senda-50",
+      "match": ["derbi senda", "senda 50", "senda", "xtreme", "racing sm"],
+      "title": "Derbi Senda 50",
+      "manufacturerCadence": {
+        "firstServiceKm": 0,
+        "recurringServiceKm": 0,
+        "note": "Piaggio Group RMI confirms that Senda owner documentation contains maintenance schedules and recommended products, but the detailed schedule requires document access. Intervals are therefore user-editable until model-year-specific values are verified.",
+        "source": "https://rmiportal.piaggiogroup.com/portal/web/pageLarge.do?id=344"
+      },
+      "tasks": [
+        {"id":"scheduled-service","name":"Määräaikaishuolto / yleinen tarkastus","category":"YLEINEN","intervalKm":0,"intervalMonths":0},
+        {"id":"gearbox-oil","name":"Vaihteistoöljy","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"spark-plug","name":"Sytytystulppa: tarkastus / vaihto","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"air-filter","name":"Ilmansuodatin: puhdistus / öljyäminen","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"coolant","name":"Jäähdytysneste / järjestelmä","category":"MOOTTORI","intervalKm":0,"intervalMonths":0},
+        {"id":"oil-pump","name":"2T-öljypumppu ja letkut","category":"2T","intervalKm":0,"intervalMonths":0},
+        {"id":"reed-valve","name":"Läppäventtiilit / imupuoli","category":"2T","intervalKm":0,"intervalMonths":0},
+        {"id":"exhaust-decarbon","name":"Pakoaukko / putki: karstan tarkastus","category":"2T","intervalKm":0,"intervalMonths":0},
+        {"id":"chain","name":"Ketju: puhdistus, voitelu ja kireys","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"sprockets","name":"Eturatas / takaratas: kuluminen","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"clutch","name":"Kytkin ja vaijerin vapaaliike","category":"VOIMANSIIRTO","intervalKm":0,"intervalMonths":0},
+        {"id":"brakes","name":"Jarrut: palat, levyt, neste, toiminta","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"tyres","name":"Renkaat: paine, kunto ja kuluminen","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"wheel-bearings","name":"Pyöränlaakerit","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"steering","name":"Ohjauslaakerit","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"swingarm-linkage","name":"Takapään linkusto / swingin laakerointi","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"fork","name":"Etuhaarukka: vuodot ja toiminta","category":"ALUSTA","intervalKm":0,"intervalMonths":0},
+        {"id":"controls","name":"Kaasu-, kytkin- ja muut vaijerit","category":"YLEINEN","intervalKm":0,"intervalMonths":0},
+        {"id":"fasteners","name":"Pultit, kiinnitykset ja runko","category":"YLEINEN","intervalKm":0,"intervalMonths":0},
+        {"id":"battery-electrics","name":"Akku, lataus ja sähköt","category":"SÄHKÖ","intervalKm":0,"intervalMonths":0}
+      ]
+    }
+  ]
+}
