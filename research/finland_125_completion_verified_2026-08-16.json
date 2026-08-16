@@ -1,0 +1,85 @@
+{
+  "schema":"motolab_finland_125_completion_research_v1",
+  "generated":"2026-08-16",
+  "production":false,
+  "rules":{
+    "doNotMergeWithoutExplicitApproval":true,
+    "internalGearRatiosPriority":true,
+    "probableRatiosMayAssistButMustNotForceGear":true,
+    "gpsRpmLearnedDataOverridesCatalogPrior":true,
+    "generationSpecific":true,
+    "unknownFieldsStayUnknown":true
+  },
+  "verified": [
+    {
+      "id":"kawasaki-ninja125-2026",
+      "make":"Kawasaki","model":"Ninja 125","yearFrom":2026,"yearTo":2026,
+      "engine":{"displacementCc":125,"engineType":"4T","cylinders":1,"cooling":"liquid","boreMm":58.0,"strokeMm":47.2,"compressionRatio":"11.7:1","fuelSystem":"fuel injection 28 mm","powerKw":10.4,"powerRpm":10000,"torqueNm":11.7,"torqueRpm":7700},
+      "drivetrain":{"gearboxSpeeds":6,"primaryRatio":2.966,"primaryTeeth":"86/29","gearRatios":[2.833,1.875,1.444,1.208,1.056,0.962],"gearTeeth":["34/12","30/16","26/18","29/24","19/18","25/26"],"finalRatio":3.5,"frontSprocket":16,"rearSprocket":56},
+      "chassis":{"wetWeightKg":149,"wheelbaseMm":1330,"seatHeightMm":785,"fuelTankL":11.0,"frontTire":"100/80-17","rearTire":"130/70-17"},
+      "confidence":"verified-manufacturer",
+      "source":{"title":"Kawasaki Ninja 125 2026 technical specifications","url":"https://www.kawasaki.eu/en/Motorcycles/A2_Bikes/Ninja_125_2026.html/BX125CTFNN/BX125CTFNNPE/EbonyMetallicCarbonGray"}
+    },
+    {
+      "id":"kawasaki-z125-2026",
+      "make":"Kawasaki","model":"Z125","yearFrom":2026,"yearTo":2026,
+      "engine":{"displacementCc":125,"engineType":"4T","cylinders":1,"cooling":"liquid","boreMm":58.0,"strokeMm":47.2,"compressionRatio":"11.7:1","fuelSystem":"fuel injection 28 mm","powerKw":10.4,"powerRpm":10000,"torqueNm":11.7,"torqueRpm":7700},
+      "drivetrain":{"gearboxSpeeds":6,"primaryRatio":2.966,"primaryTeeth":"86/29","gearRatios":[2.833,1.875,1.444,1.208,1.056,0.962],"gearTeeth":["34/12","30/16","26/18","29/24","19/18","25/26"],"finalRatio":3.5,"frontSprocket":16,"rearSprocket":56},
+      "chassis":{"wetWeightKg":147,"wheelbaseMm":1320,"seatHeightMm":815,"fuelTankL":11.0,"frontTire":"100/80-17","rearTire":"130/70-17"},
+      "confidence":"verified-manufacturer",
+      "source":{"title":"Kawasaki Z125 2026 technical specifications","url":"https://www.kawasaki.eu/en/Motorcycles/Supernaked/Z125_2026.html/BR125MTFNN/BR125MTFNNSP/CandyLimeGreenMetallicSparkBlack"}
+    },
+    {
+      "id":"honda-cb125r-2026",
+      "make":"Honda","model":"CB125R","yearFrom":2026,"yearTo":2026,
+      "engine":{"displacementCc":124.9,"engineType":"4T","cylinders":1,"cooling":"liquid","valvetrain":"DOHC 4-valve","boreMm":57.3,"strokeMm":48.4,"compressionRatio":"11.3:1","fuelSystem":"PGM-FI","powerKw":11.0,"powerRpm":10000,"torqueNm":11.6,"torqueRpm":8000,"oilCapacityL":1.5},
+      "drivetrain":{"gearboxSpeeds":6,"gearRatios":null,"primaryRatio":null,"finalDrive":"O-ring sealed chain"},
+      "chassis":{"wetWeightKg":130,"wheelbaseMm":1345,"seatHeightMm":816,"fuelTankL":10.1,"frontTire":"110/70R17","rearTire":"150/60R17"},
+      "confidence":"verified-manufacturer-except-internal-ratios",
+      "source":{"title":"Honda CB125R 2026 specifications","url":"https://www.honda.co.uk/motorcycles/range/street/cb125r/specifications.html"}
+    },
+    {
+      "id":"yamaha-r125-2026",
+      "make":"Yamaha","model":"R125","aliases":["YZF-R125"],"yearFrom":2026,"yearTo":2026,
+      "engine":{"displacementCc":125,"engineType":"4T","cylinders":1,"cooling":"liquid","valvetrain":"OHC 4-valve","boreMm":52.0,"strokeMm":58.7,"compressionRatio":"11.2:1","fuelSystem":"fuel injection","powerKw":11.0,"powerRpm":10000,"torqueNm":11.5,"torqueRpm":8000},
+      "drivetrain":{"gearboxSpeeds":6,"gearRatios":null,"primaryRatio":null,"finalDrive":"chain"},
+      "confidence":"verified-manufacturer-except-internal-ratios",
+      "source":{"title":"Yamaha R125 2026 technical data","url":"https://www.yamaha-motor.eu/de/de/motorcycles/supersport/pdp/r125-2026/"}
+    },
+    {
+      "id":"ktm-125-duke-2026",
+      "make":"KTM","model":"125 Duke","yearFrom":2026,"yearTo":2026,
+      "engine":{"displacementCc":124.99,"engineType":"4T","cylinders":1,"cooling":"liquid","powerPs":15,"torqueNm":11.5,"ems":"Bosch EMS with RBW","engineOil":"Motorex Formula 4T 15W/50"},
+      "drivetrain":{"gearboxSpeeds":6,"gearRatios":null,"primaryRatio":null,"chain":"520 X-Ring"},
+      "chassis":{"wetWeightKg":154,"wheelbaseMm":1357,"seatHeightMm":800},
+      "confidence":"verified-manufacturer-except-internal-ratios",
+      "source":{"title":"KTM 125 Duke 2026 technical specifications","url":"https://www.ktm.com/en-fi/models/naked-bike/2026-ktm-125-duke/technical-specifications.html"}
+    },
+    {
+      "id":"husqvarna-svartpilen125-2025",
+      "make":"Husqvarna","model":"Svartpilen 125","yearFrom":2025,"yearTo":2025,
+      "engine":{"displacementCc":125,"engineType":"4T","cylinders":1,"cooling":"liquid","boreMm":58.0,"strokeMm":47.3,"compressionRatio":"12.3:1","powerKw":11,"ems":"Bosch EMS with RBW","fuelSystem":"Dell'Orto EFI 33 mm"},
+      "drivetrain":{"gearboxSpeeds":6,"primaryTeeth":"23:80","primaryRatio":3.4782608696,"frontSprocket":14,"rearSprocket":45,"finalRatio":3.2142857143,"gearRatios":null,"chain":"520 X-Ring"},
+      "chassis":{"dryWeightKg":151,"wheelbaseMm":1368,"seatHeightMm":820,"fuelTankL":13,"frontTire":"110/70-17","rearTire":"150/60-17"},
+      "confidence":"verified-manufacturer-except-internal-ratios",
+      "source":{"title":"Husqvarna Svartpilen 125 2025","url":"https://www.husqvarna-motorcycles.com/en-fi/models/naked/svartpilen/svartpilen-125-2025.html"}
+    },
+    {
+      "id":"aprilia-rs125-4t-2025",
+      "make":"Aprilia","model":"RS 125","generation":"Euro 5+ 4T","yearFrom":2025,"yearTo":2025,
+      "engine":{"displacementCc":125,"engineType":"4T","cylinders":1,"cooling":"liquid","valvetrain":"4-valve","powerHp":15},
+      "drivetrain":{"gearboxSpeeds":null,"gearRatios":null,"primaryRatio":null},
+      "chassis":{"fuelTankL":14.5},
+      "confidence":"verified-manufacturer-partial",
+      "source":{"title":"Aprilia RS 125 2025","url":"https://www.aprilia.com/en_EN/models/rs-125/rs-125-125-4s4v-2025/"}
+    }
+  ],
+  "existingVerifiedFamiliesToPreserve": [
+    {"family":"YAMAHA_DT125R","gearRatios":[2.833,1.875,1.412,1.143,0.957,0.818],"primaryRatio":3.227},
+    {"family":"YAMAHA_125_4T_EARLY","appliesTo":"early YZF-R125 / MT-125 / WR125R-X generations only","gearRatios":[2.833,1.875,1.364,1.143,0.957,0.840],"primaryRatio":3.042},
+    {"family":"APRILIA_RS125_ROTAX_2T","gearRatios":[3.000,2.071,1.588,1.316,1.143,1.045],"primaryRatio":3.316}
+  ],
+  "stillNeedsPrimarySourceInternalRatios": [
+    "Yamaha R125 later VVA","Yamaha MT-125 later VVA","KTM 125 Duke generations","KTM RC 125 generations","KTM 125 EXC generations","Husqvarna SM/SMS 125","Husqvarna WRE 125","Husqvarna WR 125","Husqvarna TE 125","Honda CB125R","Honda CBR125R generations","Honda XL125V Varadero","Honda NSR125R","Suzuki GSX-R125","Suzuki GSX-S125","Suzuki DR125SM","Aprilia RS125 4T","Aprilia SX125 4T","Aprilia RX125 4T","Aprilia Tuono125 4T","Beta RR125 generations","Derbi GPR125 generations","Yamaha TZR125","Yamaha TDR125","Yamaha YBR125","Yamaha YS125","Yamaha XT125R/X","Cagiva Mito 125","Hyosung GT125R","Benelli BN125"
+  ]
+}
