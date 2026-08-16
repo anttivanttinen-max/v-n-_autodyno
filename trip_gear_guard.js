@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const MODULE='trip-gear-guard-v4';
+const MODULE='trip-gear-guard-v5';
 const TARGET_GEAR=3;
 const ENTER_TOL=.12, EXIT_TOL=.18;
 const HOLD_MS=650;
@@ -69,7 +69,7 @@ function confirmGear(gear){
 }
 function ensureUi(){
  const panel=$g('tripResearchPanel');if(!panel||$g('tripGearGuardBox'))return !!panel;
- const box=document.createElement('div');box.id='tripGearGuardBox';box.className='statusbox';box.style.marginTop='8px';box.innerHTML=`<div style="font-weight:900;margin-bottom:7px">VAIHDE-EPÄILY</div><div id="tripGearButtons" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px"><button id="tripGear2" class="action" type="button" style="font-size:26px;padding:18px 4px">2</button><button id="tripGear3" class="action" type="button" style="font-size:26px;padding:18px 4px">3</button><button id="tripGear4" class="action" type="button" style="font-size:26px;padding:18px 4px">4</button></div><div id="tripGearGuardStatus">Vaihteen tunnistus odottaa tutkimusajoa.</div>`;
+ const box=document.createElement('div');box.id='tripGearGuardBox';box.className='statusbox';box.style.marginTop='8px';box.innerHTML=`<div style="font-weight:900;margin-bottom:7px">VAIHDE-EPÄILY</div><div id="tripGearButtons" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:8px"><button id="tripGear2" class="action" type="button" style="font-size:30px;padding:20px 4px">2</button><button id="tripGear3" class="action" type="button" style="font-size:30px;padding:20px 4px">3</button><button id="tripGear4" class="action" type="button" style="font-size:30px;padding:20px 4px">4</button></div><div id="tripGearGuardStatus">Vaihteen tunnistus odottaa tutkimusajoa.</div>`;
  const st=$g('tripResearchStatus');if(st)st.insertAdjacentElement('beforebegin',box);else panel.appendChild(box);
  $g('tripGear2').onclick=()=>confirmGear(2);$g('tripGear3').onclick=()=>confirmGear(3);$g('tripGear4').onclick=()=>confirmGear(4);
  return true
