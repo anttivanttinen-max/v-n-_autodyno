@@ -3,7 +3,7 @@
 Updated: 2026-08-16
 
 ## Current application line
-- Active published line: **v32.4 / build 2026-08-16k** on `main`.
+- Active published line: **v32.4 / build 2026-08-16l** on `main`.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Release identity is source-native through `version.js` and aligned with the Service Worker/app shell.
 - The app has an explicit **UUSI MOTOLAB-VERSIO SAATAVILLA → PÄIVITÄ NYT** flow.
@@ -28,8 +28,19 @@ Updated: 2026-08-16
 - Research timeline records GPS/speed-derived RPM reference, GPS confidence/accuracy, acceleration and timestamps at 5 Hz, plus timestamped candidate frames.
 - The complete selected BT MediaStream is also recorded continuously with `MediaRecorder` and persisted as **5-second audio chunks**.
 - Research data uses a separate `VanaMotoLabResearch` IndexedDB so normal runs and learning RAW storage are not disturbed.
-- **STOP & TALLENNA** closes the research session. **VIE VIIMEISIN • JSON + AUDIO** exports the full timeline/manifest plus a combined audio file for offline analysis.
+- **STOP & TALLENNA** closes the research session. **VIE VIIMEISIN • JSON + AUDIO** remains available as a manual fallback.
 - Goal: search the whole ride for continuous candidate/harmonic tracks that follow GPS RPM through acceleration, steady throttle and deceleration, including tracks the current selector did not choose as winner.
+
+## Automatic multi-phone research sync
+- Build **2026-08-16l** adds `research_sync.js` and **AUTO RESEARCH SYNC** in Settings.
+- Each phone has a persistent `deviceId` plus editable **Kuski** and **Puhelin** labels, so simultaneous tests from different users/devices remain separate.
+- Research sync is local-first: the phone keeps all research data in IndexedDB and retries automatically after network loss or later app reopening.
+- Session metadata, timeline/candidate chunks and 5-second audio chunks upload independently; completion is sent only after all currently stored chunks are uploaded.
+- The client can reuse RAW AUTO SYNC receiver URL / ingest key when available.
+- Receiver endpoints: `/api/research/v1/start`, `/api/research/v1/data`, `/api/research/v1/audio`, `/api/research/v1/finish`.
+- Read endpoints for analysis: `/api/research/v1/sessions` and `/api/research/v1/session`, protected by `READ_KEY`.
+- Receiver stores research data under `DATA_DIR/research/<deviceId>/<sessionId>/` and keeps existing RAW sync under `DATA_DIR/raw/`.
+- Railway still needs the receiver deployment/environment configuration and a persistent Volume before automatic cloud collection is operational.
 
 ## Next microphone algorithm line
 - Target: harmonic identification, RPM continuity tracking, and GPS-supervised microphone learning.
@@ -86,4 +97,4 @@ Updated: 2026-08-16
 - After implementation, update the shared repository/status so the other thread inherits the same decisions and code state.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, full-trip research capture, RAW auto sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, source-native release identity, version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, full-trip research capture, automatic research sync, RAW auto sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, source-native release identity, version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
