@@ -1,7 +1,7 @@
 (() => {
 'use strict';
-const MODULE_VERSION='v32-dyno-curve-2.1';
-const GPS_POWER_CALIBRATION=1.85;
+const MODULE_VERSION='v32-dyno-curve-2.2';
+const GPS_POWER_CALIBRATION=1.07;
 
 function finite(n){return Number.isFinite(+n)}
 function validPoint(p){return p&&finite(p.rpm)&&+p.rpm>0&&finite(p.hp)&&finite(p.nm)}
