@@ -1,0 +1,15 @@
+{
+  "schema": "motolab_rpm_learning_model_v1",
+  "version": "baseline-v32.4",
+  "createdAt": "2026-08-16T18:35:00+03:00",
+  "baseline": "v32.4",
+  "source": "baseline",
+  "sampleCount": 0,
+  "usablePairs": 0,
+  "bands": [],
+  "acceptance": {
+    "minSamplesPerBand": 20,
+    "maxMedianErrorPct": 12,
+    "maxP90ErrorPct": 24
+  }
+}
