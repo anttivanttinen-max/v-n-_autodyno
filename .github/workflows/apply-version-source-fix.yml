@@ -1,93 +1,61 @@
-name: Apply v32.3 source version fix
+name: Validate MotoLab release identity
 
 on:
   push:
-    branches: [agent/v32-3-version-source-fix]
+  pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch:
-    if: github.actor != 'github-actions[bot]'
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          ref: agent/v32-3-version-source-fix
-          fetch-depth: 0
-      - name: Patch index and service worker
+          node-version: 24
+      - name: Check release source and Service Worker syntax
+        run: |
+          node --check version.js
+          node --check sw.js
+      - name: Check inline application JavaScript syntax
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-
-          p=Path('index.html')
-          s=p.read_text()
-          exact={
-            '<title>VÄNÄ MOTOLAB v31 CORE SPRINT</title>':'<title>VÄNÄ MOTOLAB v32.3</title>',
-            '<link rel="manifest" href="manifest.webmanifest">':'<link rel="manifest" href="manifest.webmanifest?v=32.3">',
-            '<div class="ver">v31</div>':'<div class="ver" id="appVersionBadge">v32.3</div>',
-            'const APP_VERSION="31.0-core-sprint";':'const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";',
-            '$("settingsStatus").textContent="V31 asetukset + Knowledge Base tallennettu."':'$("settingsStatus").textContent=APP_VERSION+" asetukset + Knowledge Base tallennettu."',
-            '<div id="diagLog" class="statusbox">V31 core sprint • mittaus + knowledge base + oppiva datapankki.</div>':'<div id="diagLog" class="statusbox">MotoLab käynnistyy • mittaus + knowledge base + oppiva datapankki.</div>',
-            '?"Sisäiset V31-testit OK.":"Sisäinen testi löysi tarkistettavaa. Katso Järjestelmätesti."':'?`Sisäiset ${APP_VERSION}-testit OK.`:"Sisäinen testi löysi tarkistettavaa. Katso Järjestelmätesti."'
-          }
-          for old,new in exact.items():
-            if old not in s:
-              raise SystemExit('Missing expected index token: '+old[:80])
-            s=s.replace(old,new)
-          marker='</head>'
-          loader='<script src="./version.js?build=2026-08-16b"></script>\n'
-          if loader not in s:
-            s=s.replace(marker,loader+marker,1)
-
-          old='''async function registerServiceWorker(){\n if(!(\"serviceWorker\" in navigator)||!window.isSecureContext)return false;\n try{const reg=await navigator.serviceWorker.register(\"./sw.js?v=31\");log(\"SW OK • \"+(reg.scope||\"\"));return true}catch(e){log(\"SW: \"+(e?.message||e));return false}\n}'''
-          new='''let swReloading=false;\nfunction showUpdatePrompt(reg){\n if(document.getElementById(\"motolabUpdateBar\"))return;\n const bar=document.createElement(\"div\");bar.id=\"motolabUpdateBar\";\n bar.style.cssText=\"position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:999999;padding:10px;border:1px solid #ff263f;border-radius:12px;background:#12070a;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.55)\";\n bar.innerHTML='<div style=\"margin-bottom:7px\">UUSI MOTOLAB-VERSIO SAATAVILLA</div><button id=\"motolabUpdateNow\" style=\"width:100%;padding:10px;border-radius:9px;border:1px solid #ff263f;background:#5f101b;color:#fff;font-weight:900\">PÄIVITÄ NYT</button>';\n document.body.appendChild(bar);\n document.getElementById(\"motolabUpdateNow\").onclick=()=>{if(reg.waiting)reg.waiting.postMessage({type:\"SKIP_WAITING\"});else reg.update().catch(()=>{})};\n}\nasync function registerServiceWorker(){\n if(!(\"serviceWorker\" in navigator)||!window.isSecureContext)return false;\n try{\n  const build=globalThis.MOTOLAB_RELEASE?.build||\"2026-08-16b\";\n  const reg=await navigator.serviceWorker.register(\"./sw.js?build=\"+encodeURIComponent(build),{updateViaCache:\"none\"});\n  if(reg.waiting)showUpdatePrompt(reg);\n  reg.addEventListener(\"updatefound\",()=>{const w=reg.installing;if(w)w.addEventListener(\"statechange\",()=>{if(w.state===\"installed\"&&navigator.serviceWorker.controller)showUpdatePrompt(reg)})});\n  navigator.serviceWorker.addEventListener(\"controllerchange\",()=>{if(swReloading)return;swReloading=true;location.reload()});\n  setInterval(()=>reg.update().catch(()=>{}),60000);\n  log(\"SW OK • \"+(reg.scope||\"\")+\" • \"+APP_VERSION);return true\n }catch(e){log(\"SW: \"+(e?.message||e));return false}\n}'''
-          if old not in s:
-            raise SystemExit('Old registerServiceWorker block not found')
-          s=s.replace(old,new,1)
-          p.write_text(s)
-
-          p=Path('sw.js')
-          s=p.read_text()
-          s=re.sub(r'^const CACHE=.*?;\nconst VERSION=.*?;\n',
-                   'importScripts("./version.js?build=2026-08-16b");\nconst VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.3";\nconst VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);\nconst BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16b";\nconst V=encodeURIComponent(VERSION);\nconst CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");\n',s,count=1)
-          s=s.replace('const CORE=["./manifest.webmanifest?v=32.3","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js?v=32.3","./vehicle_catalog.json?v=32.3","./maintenance.js?v=32.3","./maintenance_catalog.json?v=32.3","./technical_specs.js?v=32.3","./gps_master_learning.js?v=32.3","./raw_sync.js?v=32.3"];',
-                      'const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js","./raw_sync.js","./version.js"].map(u=>/\\.(?:js|json|webmanifest)$/.test(u)?u+"?v="+V:u);')
-          for name in ['vehicle_lookup.js','technical_specs.js','maintenance.js','gps_master_learning.js','raw_sync.js']:
-            s=s.replace("scripts.push('<script src=\"./%s?v=32.3\"></script>');"%name,
-                        "scripts.push('<script src=\"./%s?v='+V+'\"></script>');"%name)
-          s=s.replace('const banner=\'<style>#motolabFullVersion{position:sticky;top:0;z-index:99999;text-align:center;padding:7px 9px;background:#110508;border-bottom:1px solid #ff263f;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;letter-spacing:.2px}</style><div id="motolabFullVersion">VÄNÄ MotoLab v32.3 • build 2026-08-16</div><script>document.addEventListener("DOMContentLoaded",function(){var b=document.querySelector(".ver");if(b)b.textContent="v32.3";document.title="VÄNÄ MOTOLAB v32.3"})</script>\';',
-                      'const banner=\'<style>#motolabFullVersion{position:sticky;top:0;z-index:99999;text-align:center;padding:7px 9px;background:#110508;border-bottom:1px solid #ff263f;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;letter-spacing:.2px}</style><div id="motolabFullVersion">VÄNÄ MotoLab \'+VERSION_LABEL+\' • build \'+BUILD+\'</div><script>document.addEventListener("DOMContentLoaded",function(){var b=document.querySelector(".ver");if(b)b.textContent="\'+VERSION_LABEL+\'";document.title="VÄNÄ MOTOLAB \'+VERSION_LABEL+\'"})</script>\';')
-          s=s.replace("'<link rel=\"manifest\" href=\"manifest.webmanifest?v=32.3\">'","'<link rel=\"manifest\" href=\"manifest.webmanifest?v='+V+'\">'")
-          s=s.replace("html=html.replace(/navigator\\.serviceWorker\\.register\\(\"\\.\\/sw\\.js\\?v=31\"\\)/g,'navigator.serviceWorker.register(\"./sw.js?v=32.3\",{updateViaCache:\"none\"})');",
-                      "html=html.replace(/navigator\\.serviceWorker\\.register\\(\"\\.\\/sw\\.js\\?[^\"]*\"(?:,\\{[^}]*\\})?\\)/g,'navigator.serviceWorker.register(\"./sw.js?build='+BUILD+'\",{updateViaCache:\"none\"})');")
-          s=s.replace('fetch("./index.html?v=32.3",{cache:"no-store"})','fetch("./index.html?v="+V,{cache:"no-store"})')
-          s=s.replace('cache.put("./index.html?v=32.3"','cache.put("./index.html?v="+V')
-          s=s.replace('c.put("./index.html?v=32.3"','c.put("./index.html?v="+V')
-          s=s.replace('caches.match("./index.html?v=32.3")','caches.match("./index.html?v="+V)')
-          s=s.replace('await cacheInjectedIndex(c);await self.skipWaiting()','await cacheInjectedIndex(c)')
-          p.write_text(s)
-
-          # Structural assertions: visible/runtime/repository release identity must no longer be v31.
-          idx=Path('index.html').read_text()
-          assert '<title>VÄNÄ MOTOLAB v32.3</title>' in idx
-          assert 'id="appVersionBadge">v32.3<' in idx
-          assert 'MOTOLAB_RELEASE?.version' in idx
-          assert 'sw.js?v=31' not in idx
-          assert '31.0-core-sprint' not in idx
-          sw=Path('sw.js').read_text()
-          assert 'importScripts("./version.js?build=2026-08-16b")' in sw
-          assert 'self.skipWaiting()' in sw  # message handler only; install must no longer force activation
-          assert 'await cacheInjectedIndex(c);await self.skipWaiting()' not in sw
-          print('Version source repair assertions OK')
+          import re, subprocess, tempfile
+          html=Path('index.html').read_text()
+          scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',html,re.S|re.I)
+          if not scripts:
+              raise SystemExit('No inline application scripts found')
+          for i,script in enumerate(scripts):
+              with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f:
+                  f.write(script)
+                  name=f.name
+              subprocess.run(['node','--check',name],check=True)
+          print(f'Checked {len(scripts)} inline script block(s)')
           PY
-      - name: Commit patched source
+      - name: Verify single release identity and update flow
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html sw.js
-          git diff --cached --check
-          git commit -m "MotoLab v32.3: make release identity source-native" || exit 0
-          git push origin HEAD:agent/v32-3-version-source-fix
+          python3 - <<'PY'
+          from pathlib import Path
+          idx=Path('index.html').read_text()
+          sw=Path('sw.js').read_text()
+          ver=Path('version.js').read_text()
+          checks={
+            'version source 32.3':'version:"32.3"' in ver,
+            'source title v32.3':'<title>VÄNÄ MOTOLAB v32.3</title>' in idx,
+            'visible badge v32.3':'id="appVersionBadge">v32.3<' in idx,
+            'runtime uses version.js':'MOTOLAB_RELEASE?.version' in idx,
+            'version.js loaded before app':'<script src="./version.js?build=2026-08-16b"></script>' in idx,
+            'old runtime identity gone':'31.0-core-sprint' not in idx,
+            'old SW registration gone':'sw.js?v=31' not in idx,
+            'update button exists':'UUSI MOTOLAB-VERSIO SAATAVILLA' in idx and 'PÄIVITÄ NYT' in idx,
+            'SW uses shared release source':'importScripts("./version.js?build=2026-08-16b")' in sw and 'MOTOLAB_RELEASE?.version' in sw,
+            'SW update waits for user':'await cacheInjectedIndex(c);await self.skipWaiting()' not in sw,
+            'SKIP_WAITING command retained':'event.data.type==="SKIP_WAITING"' in sw and 'self.skipWaiting()' in sw,
+          }
+          failed=[name for name,ok in checks.items() if not ok]
+          for name,ok in checks.items(): print(('OK  ' if ok else 'FAIL')+name)
+          if failed: raise SystemExit('Failed: '+', '.join(failed))
+          PY
