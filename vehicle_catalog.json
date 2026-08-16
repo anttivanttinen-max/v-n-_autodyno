@@ -1,6 +1,6 @@
 {
   "schema": "motolab_vehicle_catalog_v2",
-  "version": "2026-08-16.7",
+  "version": "2026-08-16.8",
   "entries": [
     {
       "id": "yamaha-dt125r-vana-athena-170-current",
@@ -87,6 +87,46 @@
       "notes":"DT125R 2000-era factory baseline. User modifications must override these stock values in the profile; stock data is retained as reference."
     },
     {
+      "id": "derbi-senda-77-brother-e3-current",
+      "make": "Derbi",
+      "model": "Senda",
+      "variant": "VELJEN 77 / Rabasa E3 – nykyinen kokoonpano",
+      "aliases": ["veljen 77", "VELJEN 77", "Derbi 77", "Senda 77", "E3 77", "Rabasa E3 77", "77cc Derbi"],
+      "engineType": "2T",
+      "engineCode": "Derbi Rabasa E3",
+      "engine": {
+        "displacementCc": 77,
+        "cylinders": 1,
+        "cooling": "liquid",
+        "induction": "reed valve",
+        "cylinderKit": "77 cc kit",
+        "carburetor": "PWK 24 mm",
+        "carburetorMm": 24,
+        "ignition": "Ducati CDI / fixed 17°",
+        "ignitionTiming": "17° BTDC fixed",
+        "crankshaft": "Stock crankshaft",
+        "flywheel": "Lifan 140 cc small flywheel / pickup ignition setup"
+      },
+      "exhaust": {
+        "system": "Voca 90 cc"
+      },
+      "drivetrain": {
+        "primaryRatio": 3.5,
+        "primaryTeeth": "77/22",
+        "gearRatios": [3.09, 2.00, 1.50, 1.20, 1.04, 0.95]
+      },
+      "fluids": {
+        "transmissionOilL": 0.65,
+        "transmissionOil": "SAE 10W40"
+      },
+      "source": {
+        "verified": false,
+        "type": "user_current_build_plus_derbi_factory_baseline",
+        "title": "User-confirmed brother's Derbi 77 build + Derbi EBS/E3-family workshop baseline"
+      },
+      "notes": "VELJEN NYKYINEN 77-KOKOONPANO: Derbi Rabasa E3, 77 cc sylinterisarja, PWK 24 mm, Voca 90 cc putki, vakio kampiakseli, Ducati CDI kiinteä 17° ennakko ja Lifan 140 cc pieni vauhtipyörä/pickup-sytytysjärjestely. Vaihteistoöljy 0.65 L SAE 10W40 on Derbi 6-vaihteisen tehdas-/huoltomanuaalireferenssi; tarkista juuri tämän moottorin öljymäärä ennen huoltoa."
+    },
+    {
       "id": "derbi-senda-50-ebs-racer",
       "make": "Derbi",
       "model": "Senda 50",
@@ -133,6 +173,7 @@
       "make":"Derbi","model":"Senda 50","variant":"X-Treme R 2018","aliases":["Senda X-Treme 50 R","Xtreme R","enduro"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike",
       "engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},
       "drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontWheelIn":21,"rearWheelIn":18},
+      "fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
       "source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},
       "notes":"2018 chassis/wheel data plus Derbi 6-speed family baseline. Confirm fitted sprockets and exact engine code from the bike."
     },
@@ -141,6 +182,7 @@
       "make":"Derbi","model":"Senda 50","variant":"X-Treme SM 2018","aliases":["Senda X-Treme 50 SM","Xtreme SM","supermotard","motard"],"yearFrom":2018,"yearTo":2018,"engineType":"2T","engineCode":"verify from bike",
       "engine":{"displacementCc":50,"boreMm":39.88,"strokeMm":40.0,"cylinders":1,"cooling":"liquid","induction":"reed valve"},
       "drivetrain":{"primaryRatio":3.5,"gearRatios":[3.09,2.00,1.50,1.20,1.04,0.95],"frontSprocket":14,"rearSprocket":53,"finalRatio":3.78,"frontWheelIn":17,"rearWheelIn":17},
+      "fluids":{"transmissionOilL":0.65,"transmissionOil":"SAE 10W40"},
       "source":{"verified":true,"title":"Piaggio Group / Derbi Senda 50 + Derbi workshop transmission data","url":"https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"},
       "notes":"17-inch SM wheels. 53/14 is the workshop-manual X-Treme SM alternative; confirm actual fitted sprockets."
     }
