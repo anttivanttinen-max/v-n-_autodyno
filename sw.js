@@ -1,11 +1,11 @@
-importScripts("./version.js?build=2026-08-16s-phone-rpm");
+importScripts("./version.js?build=2026-08-16t-adaptive-rpm");
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.5";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16s-phone-rpm";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16t-adaptive-rpm";
 const V=encodeURIComponent(VERSION);
 const B=encodeURIComponent(BUILD);
 const CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
-const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js","./raw_sync.js","./dyno_curve_v2.js","./ui_compact.js","./default_dt.js","./trip_research.js","./research_sync.js","./beta_release.js","./sensor_persistence.js","./sensor_autostart.js","./phone_rpm_smart.js","./version.js"].map(u=>/\.(?:js|json|webmanifest)$/.test(u)?u+"?v="+V+"&build="+B:u);
+const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js","./raw_sync.js","./dyno_curve_v2.js","./ui_compact.js","./default_dt.js","./trip_research.js","./research_sync.js","./beta_release.js","./sensor_persistence.js","./sensor_autostart.js","./phone_rpm_smart.js","./adaptive_rpm_learning.js","./rpm-learning-model.json","./version.js"].map(u=>/\.(?:js|json|webmanifest)$/.test(u)?u+"?v="+V+"&build="+B:u);
 
 function injectModules(html){
  const scripts=[];
@@ -23,10 +23,11 @@ function injectModules(html){
  if(!html.includes("sensor_persistence.js"))scripts.push('<script src="./sensor_persistence.js?v='+V+'&build='+B+'"></script>');
  if(!html.includes("sensor_autostart.js"))scripts.push('<script src="./sensor_autostart.js?v='+V+'&build='+B+'"></script>');
  if(!html.includes("phone_rpm_smart.js"))scripts.push('<script src="./phone_rpm_smart.js?v='+V+'&build='+B+'"></script>');
+ if(!html.includes("adaptive_rpm_learning.js"))scripts.push('<script src="./adaptive_rpm_learning.js?v='+V+'&build='+B+'"></script>');
  const banner='<style>#motolabFullVersion{position:sticky;top:0;z-index:99999;text-align:center;padding:7px 9px;background:#110508;border-bottom:1px solid #ff263f;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;letter-spacing:.2px}</style><div id="motolabFullVersion">VÄNÄ MotoLab '+VERSION_LABEL+' • build '+BUILD+'</div><script>document.addEventListener("DOMContentLoaded",function(){var b=document.querySelector(".ver");if(b)b.textContent="'+VERSION_LABEL+'";document.title="VÄNÄ MOTOLAB '+VERSION_LABEL+'"})</script>';
  html=html.replace(/<link rel="manifest" href="manifest\.webmanifest(?:\?[^\"]*)?">/,'<link rel="manifest" href="manifest.webmanifest?v='+V+'&build='+B+'">');
  html=html.replace(/navigator\.serviceWorker\.register\("\.\/sw\.js\?[^"]*"(?:,\{[^}]*\})?\)/g,'navigator.serviceWorker.register("./sw.js?build='+BUILD+'",{updateViaCache:"none"})');
- html=html.replace(/<script src="\.\/(vehicle_lookup|technical_specs|maintenance|gps_master_learning|raw_sync|dyno_curve_v2|ui_compact|default_dt|trip_research|research_sync|beta_release|sensor_persistence|sensor_autostart|phone_rpm_smart)\.js(?:\?[^\"]*)?"><\/script>/g,(m,n)=>'<script src="./'+n+'.js?v='+V+'&build='+B+'"></script>');
+ html=html.replace(/<script src="\.\/(vehicle_lookup|technical_specs|maintenance|gps_master_learning|raw_sync|dyno_curve_v2|ui_compact|default_dt|trip_research|research_sync|beta_release|sensor_persistence|sensor_autostart|phone_rpm_smart|adaptive_rpm_learning)\.js(?:\?[^\"]*)?"><\/script>/g,(m,n)=>'<script src="./'+n+'.js?v='+V+'&build='+B+'"></script>');
  if(!html.includes('motolabFullVersion'))html=html.replace('<body>','<body>'+banner);
  return scripts.length?html.replace("</body>",scripts.join("")+"</body>"):html;
 }
