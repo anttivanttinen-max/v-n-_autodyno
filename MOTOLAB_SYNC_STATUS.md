@@ -5,6 +5,9 @@ Updated: 2026-08-16
 ## Current application line
 - Active published line: **v32.3** on `main`.
 - v31 remains the historical core baseline; v32.x modules are now integrated into the published PWA shell.
+- Release identity is now **source-native**: `version.js` is the shared release source for the app shell and Service Worker, and `index.html` itself identifies as v32.3 rather than relying on Service Worker banner rewriting.
+- The app has an explicit **UUSI MOTOLAB-VERSIO SAATAVILLA → PÄIVITÄ NYT** flow. A newly installed Service Worker waits until the user accepts the update, then the app reloads on `controllerchange`.
+- Permanent GitHub Actions validation checks the release identity, old v31 runtime/SW identifiers, Service Worker syntax, and inline application JavaScript syntax.
 
 ## Measurement strategy
 - First road-test phase uses **GPS MASTER + MIC LEARN**.
@@ -39,4 +42,4 @@ Updated: 2026-08-16
 - Vehicle lookup / technical-spec refresh fixes from v32.3 must be preserved in all subsequent branches.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, and PWA update behavior.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, BT MIC, GPS ONLY, AUTO FUSION, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data, RAW auto sync, vehicle lookup, maintenance, source-native release identity, version validation, and PWA update behavior.
