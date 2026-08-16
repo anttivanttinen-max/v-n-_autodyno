@@ -1,0 +1,82 @@
+{
+  "schema": "motolab_vehicle_catalog_v1",
+  "version": "2026-08-16.1",
+  "entries": [
+    {
+      "id": "derbi-senda-50-2017-2018",
+      "make": "Derbi",
+      "model": "Senda 50",
+      "variant": "",
+      "aliases": ["Senda", "Senda 50", "Derbi Senda"],
+      "yearFrom": 2017,
+      "yearTo": 2018,
+      "engineType": "2T",
+      "engineCode": "",
+      "engine": {"displacementCc": 50, "cylinders": 1, "cooling": "liquid"},
+      "drivetrain": {},
+      "source": {
+        "verified": true,
+        "title": "Piaggio Group — Derbi Senda X-Treme and Senda Racing",
+        "url": "https://www.piaggiogroup.com/en/archive/press-releases/derbi-senda-x-treme-and-senda-racing"
+      },
+      "notes": "Virallinen lähde vahvistaa 50 cc 2T nestejäähdytteisen yksisylinterisen moottorin. Tarkka moottorikoodi, poraus/isku ja välitykset vahvistettava vuosimallikohtaisesti."
+    },
+    {
+      "id": "derbi-senda-xtreme-50-r-2018",
+      "make": "Derbi",
+      "model": "Senda 50",
+      "variant": "X-Treme R",
+      "aliases": ["Senda X-Treme 50 R", "Xtreme R", "enduro"],
+      "yearFrom": 2018,
+      "yearTo": 2018,
+      "engineType": "2T",
+      "engineCode": "",
+      "engine": {"displacementCc": 50, "cylinders": 1, "cooling": "liquid"},
+      "drivetrain": {"frontWheelIn": 21, "rearWheelIn": 18},
+      "source": {
+        "verified": true,
+        "title": "Piaggio Group Press — Derbi Senda 50",
+        "url": "https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"
+      },
+      "notes": "X-Treme R: virallinen lähde ilmoittaa 21 tuuman etu- ja 18 tuuman takapyörän. Moottori 50 cc 2T, nestejäähdytteinen, yksisylinterinen."
+    },
+    {
+      "id": "derbi-senda-xtreme-50-sm-2018",
+      "make": "Derbi",
+      "model": "Senda 50",
+      "variant": "X-Treme SM",
+      "aliases": ["Senda X-Treme 50 SM", "Xtreme SM", "supermotard", "motard"],
+      "yearFrom": 2018,
+      "yearTo": 2018,
+      "engineType": "2T",
+      "engineCode": "",
+      "engine": {"displacementCc": 50, "cylinders": 1, "cooling": "liquid"},
+      "drivetrain": {"frontWheelIn": 17, "rearWheelIn": 17},
+      "source": {
+        "verified": true,
+        "title": "Piaggio Group Press — Derbi Senda 50",
+        "url": "https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"
+      },
+      "notes": "X-Treme SM: virallinen lähde ilmoittaa 17 tuuman pyörät edessä ja takana. Moottori 50 cc 2T, nestejäähdytteinen, yksisylinterinen."
+    },
+    {
+      "id": "derbi-senda-racing-50-sm-2018",
+      "make": "Derbi",
+      "model": "Senda 50",
+      "variant": "Racing SM",
+      "aliases": ["Senda Racing 50", "Racing SM", "supermotard", "motard"],
+      "yearFrom": 2018,
+      "yearTo": 2018,
+      "engineType": "2T",
+      "engineCode": "",
+      "engine": {"displacementCc": 50, "cylinders": 1, "cooling": "liquid"},
+      "drivetrain": {"frontWheelIn": 17, "rearWheelIn": 17},
+      "source": {
+        "verified": true,
+        "title": "Piaggio Group Press — Derbi Senda 50",
+        "url": "https://press.piaggiogroup.com/en_EN/post/show/153652/derbi-senda-50.html"
+      },
+      "notes": "Senda Racing oli virallisen lähteen mukaan saatavana SM-versiona. 50 cc 2T nestejäähdytteinen yksisylinterinen moottori."
+    }
+  ]
+}
