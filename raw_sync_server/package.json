@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "start": "node -r ./beta_auth_server.js server.js"
+    "start": "node -r ./beta_auth_server.js -r ./user_features_server.js server.js"
   },
   "engines": {
     "node": ">=20"
