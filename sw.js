@@ -1,7 +1,7 @@
-importScripts("./version.js?build=2026-08-17q-startup-gate");
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||"34.2";
+importScripts("./version.js?build=2026-08-17r-production-server");
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||"34.3";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17q-startup-gate";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17r-production-server";
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE="vana-motorlab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
 const CORE=["./manifest.webmanifest","./bike.png","./icon-192.png","./icon-512.png","./assets/motorlab_splash_approved.webp","./diagnostics.js","./vehicle_lookup.js","./vehicle_catalog.json","./maintenance.js","./maintenance_catalog.json","./technical_specs.js","./gps_master_learning.js","./raw_sync.js","./dyno_curve_v2.js","./ui_compact.js","./default_dt.js","./trip_research.js","./research_sync.js","./user_identity.js","./user_features.js","./feedback.js","./community.js","./merit.js","./beta_menu.js","./beta_release.js","./mic_authority.js","./sensor_persistence.js","./sensor_autostart.js","./admin_test_tools.js","./phone_rpm_smart.js","./adaptive_rpm_learning.js","./trip_phone_raw.js","./trip_gear_guard.js","./trip_gear_marker.js","./live_status.js","./live_status_guard.js","./motorlab_branding.js","./simple_user_ui.js","./motorlab_i18n.js","./rpm-learning-model.json","./version.js"].map(u=>/\.(?:js|json|webmanifest)$/.test(u)?u+"?v="+V+"&build="+B:u+"?build="+B);
