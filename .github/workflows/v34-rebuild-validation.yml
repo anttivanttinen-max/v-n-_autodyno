@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +23,7 @@ jobs:
         run: |
           find raw_sync_server -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
           node --check scripts/validate_v34_rebuild.js
+          node --check scripts/browser_smoke.js
       - name: Static rebuild validation x3
         run: |
           node scripts/validate_v34_rebuild.js
@@ -40,3 +41,20 @@ jobs:
           grep -q "rpm-learning" adaptive_rpm_learning.js
           grep -q "phone" phone_rpm_smart.js
           ! grep -q "camera" v34_dashboard_ui.js
+      - name: Install Chromium smoke-test runtime
+        run: |
+          npm install --no-save --no-package-lock playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local app server
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/motolab-http.log 2>&1 &
+          echo $! > /tmp/motolab-http.pid
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8080/ >/dev/null && exit 0; sleep 0.2; done
+          cat /tmp/motolab-http.log
+          exit 1
+      - name: Browser + Service Worker smoke x2
+        env:
+          MOTOLAB_SMOKE_URL: http://127.0.0.1:8080/
+        run: |
+          node scripts/browser_smoke.js
+          node scripts/browser_smoke.js
