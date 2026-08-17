@@ -78,6 +78,15 @@ This is the locked handoff for the next server/app release. Do not deploy these 
    - Settings and maintenance stay compact/collapsible.
    - Do not re-add camera RPM.
 
+11. **Finnish / English language system**
+   - English pack specification: `LANGUAGE_PACK_EN_V1.md`.
+   - Settings gets LANGUAGE / KIELI selector: Suomi / English.
+   - Existing Finnish remains the safe fallback.
+   - Language preference persists locally and in per-user cloud state.
+   - Active visible UI strings are converted to translation keys, including measurement, runs, LIVE, analysis, settings, User/Beta, feedback/community, Tester Merit, sharing and third-gear teaching UI.
+   - Use established automotive/dyno terminology: RPM, POWER, TORQUE, RUN, GEAR, CONFIDENCE, AUDIO INPUT, RAW DATA.
+   - Language switching must not reset sensors, active run state, identity or stored data.
+
 ## Measurement invariants — must not regress
 
 - GPS MASTER remains authoritative in GPS + MIC learning.
@@ -86,7 +95,7 @@ This is the locked handoff for the next server/app release. Do not deploy these 
 - Preserve raw microphone candidate/harmonic/top-candidate data for replay/trainer evaluation.
 - Adaptive learning continues in 500-rpm regions with 0.5x / 1x / 2x branch evidence and continuity/prediction.
 - RAW/research remains local-first with retry after network loss/reopen.
-- Diagnostics/LIVE/community/identity/merit/admin tools remain observational or administrative and must not change dyno calculations.
+- Diagnostics/LIVE/community/identity/merit/admin/language tools remain observational, administrative or presentation-only and must not change dyno calculations.
 
 ## Validation gate before wider beta
 
@@ -98,11 +107,11 @@ This is the locked handoff for the next server/app release. Do not deploy these 
 - Owner/admin survives normal update/reload.
 - User/Beta menu destinations work on phone.
 - Identity approval/block, cloud state, private feedback, community anonymity, run sharing and Merit work end-to-end.
+- Finnish/English switching covers active screens, persists across reload/update and does not disturb measurement state.
 - LIVE/diagnostics/RAW replay show no measurement-performance regression.
 
 ## Not automatically included
 
-- FI/EN language package remains a separate unpromoted development line unless explicitly resumed for this release.
 - Automatic knock/ignition autotune remains parked.
 - Full Knowledge Base integration across all tuning calculators remains parked.
 - Camera RPM remains disabled.
