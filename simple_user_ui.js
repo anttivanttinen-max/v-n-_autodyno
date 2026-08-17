@@ -1,7 +1,8 @@
 (() => {
 'use strict';
-const VERSION='motorlab-simple-user-ui-v34';
+const VERSION='motorlab-simple-user-ui-v34.1';
 const TECH_SETTINGS=/KNOWLEDGE BASE|VAIHDE\s*\/\s*RPM\s*\/\s*GPS|BT RPM|OPPIVA DATA|RAW AUDIO|MIC CALIBRATION|JÄRJESTELMÄTESTI/i;
+const USER_VEHICLE=/AJONEUVOTIEDON HAKU|VÄLITYKSET|TEKNISET TIEDOT|HUOLTO\s*&\s*HISTORIA|VEHICLE LOOKUP|DRIVETRAIN|TECHNICAL SPECS|MAINTENANCE/i;
 let lastScreen='';
 const $=id=>document.getElementById(id);
 function user(){return globalThis.MotoLabUser?.user||null}
@@ -45,7 +46,7 @@ body.ml-basic-user .hero{background:linear-gradient(180deg,rgba(7,5,6,.62),rgba(
 body.ml-basic-user .heroChartBox{opacity:.5}
 `;
 document.head.appendChild(s)}
-function classify(panel){const t=originalTitle(panel);if(/SMART BIKE PROFILES/i.test(t))return 'profile';if(/MITTAUS\s*&\s*RPM/i.test(t))return 'measure';if(/AJONEUVO\s*&\s*DYNO/i.test(t))return 'vehicle';if(/SOVELLUS/i.test(t))return 'app';if(TECH_SETTINGS.test(t))return 'technical';return 'other'}
+function classify(panel){const t=originalTitle(panel);if(/SMART BIKE PROFILES/i.test(t))return 'profile';if(/MITTAUS\s*&\s*RPM/i.test(t))return 'measure';if(/AJONEUVO\s*&\s*DYNO/i.test(t)||USER_VEHICLE.test(t))return 'vehicle';if(/SOVELLUS|KIELI|LANGUAGE/i.test(t))return 'app';if(TECH_SETTINGS.test(t))return 'technical';return 'other'}
 function closeAll(except=null){document.querySelectorAll('#screen-settings .panel.ml-accordion.ml-open').forEach(p=>{if(p===except)return;p.classList.remove('ml-open');p.querySelector(':scope > .phead')?.setAttribute('aria-expanded','false')})}
 function makeAccordion(panel){if(panel.classList.contains('ml-accordion'))return;panel.classList.add('ml-accordion');const h=panel.querySelector(':scope > .phead');if(!h)return;h.setAttribute('role','button');h.setAttribute('tabindex','0');h.setAttribute('aria-expanded','false');const toggle=()=>{const open=!panel.classList.contains('ml-open');closeAll(panel);panel.classList.toggle('ml-open',open);h.setAttribute('aria-expanded',String(open))};h.addEventListener('click',e=>{if(!e.target.closest('button,input,select,a'))toggle()});h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})}
 function rename(panel,isAdmin){if(isAdmin)return;const t=panel.querySelector('.ptitle');if(!t)return;const x=originalTitle(panel);if(/SMART BIKE PROFILES/i.test(x))t.innerHTML='<span class="r">🏍️</span> PYÖRÄ';else if(/MITTAUS\s*&\s*RPM/i.test(x))t.innerHTML='<span class="r">🎛️</span> MITTAUS';else if(/AJONEUVO\s*&\s*DYNO/i.test(x))t.innerHTML='<span class="r">⚙️</span> AJONEUVON TIEDOT';else if(/SOVELLUS/i.test(x))t.innerHTML='<span class="r">📱</span> SOVELLUS'}
