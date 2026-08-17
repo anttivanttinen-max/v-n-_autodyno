@@ -39,9 +39,9 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The same RAW rows preserve the GPS MASTER safety rule correctly: `rpmControlAuthority=gps`, `micInfluencesDisplayedRpm=false`, `micInfluencesRunAcceptance=false`, and `micInfluencesGearLearning=false`.
 - This is now a confirmed field-data regression/unfinished item: microphone persistence/reconnect on iOS is not yet reliable even though GPS/IMU persistence remains active. Do not mark sensor recovery complete until a new RAW session shows the microphone returning live without repeated `track_not_live` failures.
 
-## v32.6 iOS microphone recovery implementation — code complete, field validation pending
-- Recovery implementation was prepared from `main` HEAD `c847317864fc7696b15295dd9d743a2e20ec553e` on branch `agent/v32.6-ios-mic-recovery`.
-- Release identity is **v32.6 / build `2026-08-17a-mic-recovery`** on that branch; Service Worker cache identity was aligned with it.
+## v32.6 iOS microphone recovery implementation — published, field validation pending
+- Recovery implementation started from `main` HEAD `c847317864fc7696b15295dd9d743a2e20ec553e` on branch `agent/v32.6-ios-mic-recovery` and was promoted to `main` by fast-forward after confirming no competing `main` commits had appeared.
+- Active release identity is now **v32.6 / build `2026-08-17a-mic-recovery`**; Service Worker cache identity is aligned with it.
 - `sensor_persistence.js` advances from `sensor-persistence-v3` to `sensor-persistence-v4`.
 - The recovery path now fully tears down the stale microphone pipeline through existing `stopAudio()` and then calls existing `startAudio()`, which requests a fresh exact-device `getUserMedia()` stream and rebuilds the AudioContext/worklet graph.
 - Automatic retries use bounded backoff of approximately **500 ms → 1 s → 2 s → 5 s**, with 5 s retained for continued failures instead of the old fixed reconnect loop.
@@ -62,8 +62,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Published `main` before v32.6 promotion is **v32.5 / build `2026-08-16x-gear-confirm`**.
-- Prepared recovery branch is **v32.6 / build `2026-08-17a-mic-recovery`**, pending branch validation/promotion and then real iOS field validation.
+- Active `main` is **v32.6 / build `2026-08-17a-mic-recovery`**.
 - Third-gear research now has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
