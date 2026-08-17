@@ -1,0 +1,35 @@
+name: Validate Fusion Shadow
+
+on:
+  push:
+    branches:
+      - dev/v34-fusion-shadow-v1
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check fusion and service worker
+        run: |
+          node --check sensor_fusion_shadow.js
+          node --check sw.js
+      - name: Verify service-worker integration
+        run: |
+          grep -q '"./sensor_fusion_shadow.js"' sw.js
+          grep -q '"sensor_fusion_shadow"' sw.js
+      - name: Verify shadow authority invariants
+        run: |
+          grep -q "shadowOnly:true" sensor_fusion_shadow.js
+          grep -q "authority:'observational_only'" sensor_fusion_shadow.js
+          ! grep -q 'measurementWorker.postMessage' sensor_fusion_shadow.js
+          ! grep -q 'saveRun' sensor_fusion_shadow.js
+          ! grep -q 'updateLearnedGears' sensor_fusion_shadow.js
+      - name: Verify pocket fallback exists
+        run: |
+          grep -q "pocket_suspected" sensor_fusion_shadow.js
+          grep -q "unstable_mount_imu_reduced" sensor_fusion_shadow.js
