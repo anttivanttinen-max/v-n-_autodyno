@@ -41,15 +41,39 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 
 ## v32.6 iOS microphone recovery implementation — published, field validation pending
 - Recovery implementation started from `main` HEAD `c847317864fc7696b15295dd9d743a2e20ec553e` on branch `agent/v32.6-ios-mic-recovery` and was promoted to `main` by fast-forward after confirming no competing `main` commits had appeared.
-- Active release identity is now **v32.6 / build `2026-08-17a-mic-recovery`**; Service Worker cache identity is aligned with it.
-- `sensor_persistence.js` advances from `sensor-persistence-v3` to `sensor-persistence-v4`.
-- The recovery path now fully tears down the stale microphone pipeline through existing `stopAudio()` and then calls existing `startAudio()`, which requests a fresh exact-device `getUserMedia()` stream and rebuilds the AudioContext/worklet graph.
+- Active release identity became **v32.6 / build `2026-08-17a-mic-recovery`**; Service Worker cache identity was aligned with it.
+- `sensor_persistence.js` advanced from `sensor-persistence-v3` to `sensor-persistence-v4`.
+- The recovery path fully tears down the stale microphone pipeline through existing `stopAudio()` and then calls existing `startAudio()`, which requests a fresh exact-device `getUserMedia()` stream and rebuilds the AudioContext/worklet graph.
 - Automatic retries use bounded backoff of approximately **500 ms → 1 s → 2 s → 5 s**, with 5 s retained for continued failures instead of the old fixed reconnect loop.
-- New recovery telemetry includes `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail, and `mic_recovery_user_gesture`.
+- Recovery telemetry includes `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail, and `mic_recovery_user_gesture`.
 - After three failed automatic recovery attempts, the UI exposes **MIC RECOVERY • PALAUTA MIKROFONI**. Its tap is used as an explicit iOS user gesture and forces another fresh-stream recovery attempt.
 - Manual microphone-off and explicit microphone reselection reset retry state and hide the recovery action.
 - GPS MASTER safety is intentionally untouched: no changes were made to displayed-RPM authority, run acceptance, gear learning, GPS reference logic, smart-phone RPM candidate selection or dyno calculations.
-- This must remain an **open bug pending field validation**. The fix is only considered confirmed after new RAW shows the track becoming live again, `mic_recovery_success`, and no continuing `track_not_live` reconnect storm.
+
+## New field regression after v32.6 — microphone OFF/ON reconnect storm
+- User field report after publishing v32.6: the microphone remains in a repeated OFF/ON cycle instead of staying live.
+- Code inspection found the v32.6 watchdog function `micFramesFresh()` reads `globalThis.MOTOLAB_AUDIO_LAST?.t`, but repository search found no producer for `MOTOLAB_AUDIO_LAST`.
+- As a result, `micFramesFresh()` can remain false even while the microphone track is genuinely live. The v32.6 health check can then call fresh-stream recovery with reason `audio_frames_stale`, tearing down and reopening a working microphone repeatedly.
+- This is a confirmed implementation regression in the v32.6 recovery logic, not evidence that iOS itself must toggle the microphone this way.
+- Planned correction: do not use the invalid frame-stale signal as a destructive recovery trigger. Fresh-stream teardown/recreation should be reserved for a genuinely non-live/ended track or another independently validated stall indicator.
+- Keep this fix separate from the full diagnostics work so measurement/recovery behavior is not accidentally changed by observability code.
+
+## v32.7 full persistent diagnostics — implementation prepared
+- User decision: MotoLab must have an always-on comprehensive error-detection/diagnostic mode, not only microphone-specific logging.
+- The system must retain not just crashes but other error states and all relevant event/queue state needed to prove application operation and reconstruct what happened before a failure.
+- New file `diagnostics.js` uses module id `motolab-diagnostics-v1` and is loaded early by the PWA shell.
+- Prepared release identity is **v32.7 / build `2026-08-17b-full-diagnostics`** on branch `agent/v32.7-full-diagnostics` before promotion.
+- Captured error classes include `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed `fetch()` calls and non-OK HTTP responses.
+- Captured state/lifecycle classes include network online/offline, visibility/page transitions, media-device changes, selected Service Worker messages and controller changes.
+- Central `addLearningEvent` traffic is mirrored into diagnostics without changing the original event call.
+- Diagnostic records include release/build identity, diagnostic session id and sensor state snapshots where available.
+- A persistent local ring keeps the last 500 diagnostic events in `localStorage`; a separate heartbeat and session marker support detection of an unfinished previous session after restart.
+- iOS `pagehide` is explicitly **not** considered proof of a clean shutdown because backgrounded PWAs may later be killed by the OS.
+- Queue diagnostics summarize all known persistent MotoLab queue keys and also scan other localStorage keys containing `queue`. Only safe count/status/error metadata is retained; authentication secrets and arbitrary payload contents are not copied.
+- Pending local diagnostics use `rawMirrored=false`. Once the normal `addLearningEvent` path becomes available, retained diagnostic records are replayed in bounded batches into RAW as `diagnostic_replay`, allowing pre-crash history to reach the normal RAW pipeline on a later boot.
+- A boot following an unfinished session can emit `previous_session_unclean` with the previous heartbeat, sensor snapshot and queue state.
+- Detailed architecture is recorded in `MOTOLAB_DIAGNOSTICS.md`.
+- Diagnostics is observational only and must never influence GPS MASTER authority, displayed RPM, run acceptance, gear learning, adaptive candidate choice, dyno calculations or sensor recovery decisions.
 
 ## Adaptive RPM-learning implementation retained from current development
 - `rpm-learning-model.json` exists in the application repository using schema `motolab_rpm_learning_model_v1`.
@@ -62,8 +86,9 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Active `main` is **v32.6 / build `2026-08-17a-mic-recovery`**.
-- Third-gear research now has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
+- Published `main` at the start of v32.7 diagnostics work is **v32.6 / build `2026-08-17a-mic-recovery`**.
+- Prepared next line is **v32.7 / build `2026-08-17b-full-diagnostics`** with persistent diagnostics only; the microphone OFF/ON stability correction remains a separate open fix.
+- Third-gear research has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
 - Finland vehicle database v2 files have been installed in the application repository.
@@ -86,7 +111,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should be collapsible to keep the interface compact.
 
 ## Current implementation direction
-- First field task is to validate v32.6 fresh-stream microphone recovery against the confirmed iOS `track_not_live` failure.
+- First microphone task remains fixing the v32.6 OFF/ON reconnect storm without weakening genuine dead-track recovery.
+- v32.7 diagnostics must then be validated on a real iPhone, including persistence across abrupt termination and RAW replay of retained diagnostic events.
 - GPS-supervised microphone learning should improve candidate/harmonic choice and RPM continuity without weakening GPS MASTER authority.
 - Keep raw candidate sets and region-specific behavior so later models can learn 0.5x / 1x / 2x branch preference by RPM region if reference data supports it.
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
