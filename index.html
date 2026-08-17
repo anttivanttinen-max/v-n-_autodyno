@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VÄNÄ MOTOLAB v32.4</title>
+<title>VÄNÄ MOTOLAB v34.0</title>
 <style>
 :root{
  --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
@@ -88,7 +88,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=32.3">
+<link rel="manifest" href="manifest.webmanifest?v=34.0&build=2026-08-17o-rebuild-ui-i18n">
 <meta name="theme-color" content="#0b0b0e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -96,7 +96,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<script src="./version.js?build=2026-08-16l"></script>
+<script src="./version.js?build=2026-08-17o-rebuild-ui-i18n"></script>
 </head>
 <body>
 <div class="app">
@@ -106,7 +106,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
      <button class="spill clickable" id="gpsChip"><span id="gpsDot" class="dot"></span>GPS</button>
      <button class="spill clickable" id="imuChip"><span id="imuDot" class="dot"></span>IMU</button>
      <button class="spill clickable" id="extChip"><span id="extDot" class="dot"></span>BT MIC</button>
-     <div class="ver" id="appVersionBadge">v32.4</div>
+     <div class="ver" id="appVersionBadge">v34.0</div>
    </div>
  </div>
 
@@ -353,7 +353,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.4";
+const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"34.0";
 const ALGORITHM_VERSION={rpm:"rpm-v31-candidate-gap",fusion:"fusion-v31-integrity",learning:"learning-raw-v2"};
 const DEV_MODE_KEY="motolab_dev_mode";
 const RAW_AUDIO_FINGERPRINT={"name":"VÄNÄ MotoLab raw reference fingerprint","source":"VANA_MotoLab_test_1786803700939.json","project":"DT testimoottori","created_from":"2026-08-15T14:21:40.939Z","reference_note":"rpm_reference labels are used as truth; measured rpm estimates are not used as labels","points":[{"rpm":1800,"f0_hz":41.0,"f0_p20":40.0,"f0_p80":41.5,"conf_median":30.0,"harm_rel_db":[-38.68,-35.49,-28.87,-17.62,0.0,-8.49],"samples":894,"places":["Paisarin loppu / stingerin alku"]},{"rpm":3000,"f0_hz":64.0,"f0_p20":54.5,"f0_p80":75.0,"conf_median":34.0,"harm_rel_db":[-35.96,-23.14,-8.84,-4.82,-5.43,-1.11],"samples":7122,"places":["Mikrofoni suoraan pinnapulttiin","Paisarin loppu / stingerin alku","Pinnapultti + lyhyt jäykkä letku","Tulpan metalliosa","Vapaa mikrofoni 0,5 m moottorista","Vapaa mikrofoni 0,5 m pakoputkesta"]},{"rpm":5000,"f0_hz":89.333,"f0_p20":45.833,"f0_p80":99.833,"conf_median":30.0,"harm_rel_db":[-25.22,-2.66,-5.66,0.0,-6.21,-10.05],"samples":1782,"places":["Paisarin loppu / stingerin alku","Vapaa mikrofoni 0,5 m pakoputkesta"]}]};
@@ -1357,7 +1357,7 @@ function showUpdatePrompt(reg){
 async function registerServiceWorker(){
  if(!("serviceWorker" in navigator)||!window.isSecureContext)return false;
  try{
-  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16f";
+  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17o-rebuild-ui-i18n";
   const reg=await navigator.serviceWorker.register("./sw.js?build="+encodeURIComponent(build),{updateViaCache:"none"});
   if(reg.waiting)showUpdatePrompt(reg);
   reg.addEventListener("updatefound",()=>{const w=reg.installing;if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdatePrompt(reg)})});
