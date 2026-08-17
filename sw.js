@@ -1,7 +1,7 @@
-importScripts("./version.js?build=2026-08-17m-admin-audio-gear-test");
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.8";
+importScripts("./version.js?build=2026-08-17n-owner-gear-beta");
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.9";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17m-admin-audio-gear-test";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17n-owner-gear-beta";
 const V=encodeURIComponent(VERSION);
 const B=encodeURIComponent(BUILD);
 const CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
