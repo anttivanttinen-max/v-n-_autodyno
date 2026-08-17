@@ -1,0 +1,48 @@
+name: Normalize v34 index identity
+
+on:
+  push:
+    branches: [v34-rebuild]
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v34-rebuild
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Normalize index from version.js
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ver=fs.readFileSync('version.js','utf8');
+          const m=ver.match(/version:"([^"]+)",label:"(v[^"]+)",build:"([^"]+)"/);
+          if(!m) throw new Error('Cannot parse version.js');
+          const [,version,label,build]=m;
+          let s=fs.readFileSync('index.html','utf8');
+          s=s.replace(/<title>VÄNÄ MOTOLAB v[^<]+<\/title>/,`<title>VÄNÄ MOTOLAB ${label}</title>`);
+          s=s.replace(/(<div class="ver" id="appVersionBadge">)v[^<]+(<\/div>)/,`$1${label}$2`);
+          s=s.replace(/<script src="\.\/version\.js\?build=[^"]+"><\/script>/,`<script src="./version.js?build=${build}"></script>`);
+          s=s.replace(/<link rel="manifest" href="manifest\.webmanifest(?:\?[^\"]*)?">/,`<link rel="manifest" href="manifest.webmanifest?v=${encodeURIComponent(version)}&build=${encodeURIComponent(build)}">`);
+          s=s.replace(/const APP_VERSION=globalThis\.MOTOLAB_RELEASE\?\.version\|\|"[^"]+";/,`const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"${version}";`);
+          s=s.replace(/const build=globalThis\.MOTOLAB_RELEASE\?\.build\|\|"[^"]+";/,`const build=globalThis.MOTOLAB_RELEASE?.build||"${build}";`);
+          fs.writeFileSync('index.html',s);
+          NODE
+      - name: Commit normalized source if needed
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index already normalized"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Normalize v34 index release identity"
+          git push origin HEAD:v34-rebuild
