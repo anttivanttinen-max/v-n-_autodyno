@@ -1,7 +1,7 @@
-importScripts("./version.js?build=2026-08-17g-beta-community");
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.2";
+importScripts("./version.js?build=2026-08-17h-private-feedback-chat");
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.3";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17g-beta-community";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17h-private-feedback-chat";
 const V=encodeURIComponent(VERSION);
 const B=encodeURIComponent(BUILD);
 const CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
