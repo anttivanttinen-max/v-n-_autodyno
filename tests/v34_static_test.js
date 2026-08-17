@@ -9,13 +9,13 @@ function ok(cond,msg){if(cond){passes++;console.log('PASS',msg)}else{fails++;con
 function has(file,s,msg){ok(read(file).includes(s),msg||`${file} contains ${s}`)}
 function notHas(file,s,msg){ok(!read(file).includes(s),msg||`${file} excludes ${s}`)}
 
-const browserFiles=['adaptive_rpm_learning.js','admin_test_tools.js','app_shell_v34.js','beta_menu.js','beta_release.js','community.js','diagnostics.js','dyno_curve_v2.js','feedback.js','gps_master_learning.js','i18n.js','i18n_safety.js','live_status.js','live_status_guard.js','maintenance.js','merit.js','mic_authority.js','phone_rpm_smart.js','raw_sync.js','research_sync.js','sensor_autostart.js','sensor_persistence.js','technical_specs.js','trip_gear_guard.js','trip_gear_marker.js','trip_phone_raw.js','trip_research.js','ui_compact.js','user_features.js','user_identity.js','vehicle_lookup.js','version.js','sw.js'];
+const browserFiles=['adaptive_rpm_learning.js','admin_test_tools.js','app_shell_v34.js','beta_menu.js','beta_release.js','community.js','diagnostics.js','dyno_curve_v2.js','feedback.js','gps_master_learning.js','i18n.js','i18n_safety.js','live_status.js','live_status_guard.js','maintenance.js','merit.js','mic_authority.js','phone_rpm_smart.js','raw_sync.js','research_sync.js','sensor_autostart.js','sensor_persistence.js','technical_specs.js','trip_gear_guard.js','trip_gear_marker.js','trip_phone_raw.js','trip_research.js','ui_cleanup_v34.js','ui_compact.js','user_features.js','user_identity.js','vehicle_lookup.js','version.js','sw.js'];
 for(const f of browserFiles){const r=cp.spawnSync(process.execPath,['--check',path.join(root,f)],{encoding:'utf8'});ok(r.status===0,`syntax ${f}`);if(r.status!==0)console.error(r.stderr)}
 for(const f of fs.readdirSync(path.join(root,'raw_sync_server')).filter(x=>x.endsWith('.js'))){const r=cp.spawnSync(process.execPath,['--check',path.join(root,'raw_sync_server',f)],{encoding:'utf8'});ok(r.status===0,`server syntax ${f}`);if(r.status!==0)console.error(r.stderr)}
 
 has('version.js','version:"34.0"','release is v34.0');
 has('version.js','2026-08-17o-rebuild-ui-i18n','release build identity matches');
-for(const m of ['diagnostics.js','user_identity.js','user_features.js','feedback.js','community.js','merit.js','beta_menu.js','mic_authority.js','sensor_persistence.js','sensor_autostart.js','admin_test_tools.js','trip_research.js','trip_gear_guard.js','live_status.js','app_shell_v34.js','i18n_safety.js','i18n.js'])has('sw.js',m,`SW loads ${m}`);
+for(const m of ['diagnostics.js','user_identity.js','user_features.js','feedback.js','community.js','merit.js','beta_menu.js','mic_authority.js','sensor_persistence.js','sensor_autostart.js','admin_test_tools.js','trip_research.js','trip_gear_guard.js','live_status.js','app_shell_v34.js','ui_cleanup_v34.js','i18n_safety.js','i18n.js'])has('sw.js',m,`SW loads ${m}`);
 has('sw.js','VERSION=globalThis.MOTOLAB_RELEASE?.version||"34.0"','SW fallback version is v34.0');
 has('sw.js','2026-08-17o-rebuild-ui-i18n','SW build matches v34 release');
 
@@ -24,7 +24,14 @@ for(const s of ['OMA TILI','PALAUTE & VIESTIT','BETA-KESKUSTELU','JAETUT VEDOT',
 for(const s of ['KÄYTTÄJIEN HYVÄKSYNNÄT','MERIT-ARVIOINTI','KÄYTTÖOIKEUDET','YHTEISÖ / DIAGNOSTIIKKA'])has('app_shell_v34.js',s,`admin menu supports ${s}`);
 has('app_shell_v34.js','${admin?','admin section is conditional, not universally rendered');
 has('app_shell_v34.js','u.role===\'admin\'&&u.status===\'active\'','admin requires resolved active admin role');
-has('app_shell_v34.js','#mlBetaMenuBtn,#motolabUserPill{display:none!important}','legacy floating user controls are removed from visible UI');
+for(const id of ['mlBetaMenuBtn','motolabUserPill','motolabFeedbackBtn','motolabAdminFeedbackBtn','mlCommunityPill'])has('ui_cleanup_v34.js',id,`legacy floating ${id} is hidden by integrated UI`);
+
+has('feedback.js','open:openFeedback,openAdmin:openAdminFeedback','feedback menu routes exist');
+has('community.js','MotoLabCommunity={version:VERSION,home','community menu route exists');
+has('merit.js','refresh,myPanel,adminPanel','merit user/admin routes exist');
+has('user_features.js','sharingHome','shared-runs route exists');
+has('user_features.js','adminPanel','feature-permission admin route exists');
+has('user_identity.js','createInvite','invite route exists');
 
 has('i18n.js','motolab_language','language preference has persistent key');
 has('i18n.js','motolab_v32_beta_consent','language preference is mirrored into cloud-synced beta state');
