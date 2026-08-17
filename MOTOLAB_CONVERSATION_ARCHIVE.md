@@ -26,126 +26,118 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - GPS-master behavior was correct: `rpmControlAuthority = gps`; microphone stayed out of displayed RPM, run acceptance and gear-learning authority.
 - BT/contact microphone contained genuine engine-RPM information but harmonic/candidate selection was not stable enough to trust alone.
 - Useful examples: GPS 5191 rpm vs mic 5512 rpm (~6.2% error); GPS 4261 rpm vs mic 3807 rpm (~10.6% error with lower confidence).
-- Harmonic jumping motivated retention of multiple candidates and continuity tracking.
 - Preferred historical contact mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
 - Strong contact reference: about 6600 rpm truth, 6591 rpm audio average, ~92.2% confidence, f0 ~109–112 Hz and harmonics around 220/330/440/550/660 Hz.
 
 ## iOS microphone recovery history
-- RAW from the earlier 32.5 session showed persisted wanted state `gps=true, imu=true, mic=true` while repeated checks reported mic inactive and recovery failures with `track_not_live`; GPS and IMU stayed active.
-- v32.6 added full fresh-stream recovery through existing `stopAudio()` + `startAudio()`, bounded retries (~0.5 s → 1 s → 2 s → 5 s), recovery telemetry and the visible **MIC RECOVERY • PALAUTA MIKROFONI** user-gesture action.
-- Field testing then found a repeated OFF/ON reconnect storm. Root cause was use of `globalThis.MOTOLAB_AUDIO_LAST?.t` as a destructive frame-stale trigger without a reliable producer-backed timestamp.
-- v32.8 / build `2026-08-17c-mic-stability` corrected this in `sensor-persistence-v5`: `audio_frames_stale` no longer causes destructive reconnect; a live enabled track on an active stream is authoritative. Genuine non-live/ended tracks still use recovery with existing backoff/manual recovery.
-- Real-device validation remains required to prove both: no false OFF/ON storm and genuine ended-track recovery still works. Details: `MIC_STABILITY_V32_8.md`.
+- Earlier RAW showed wanted state `gps=true, imu=true, mic=true` while mic remained inactive and recovery failed with `track_not_live`; GPS and IMU stayed active.
+- v32.6 added fresh-stream recovery, bounded retries and a visible user-gesture recovery action.
+- Field testing then found repeated OFF/ON reconnecting because `MOTOLAB_AUDIO_LAST?.t` was used as a destructive stale-frame signal without a reliable producer.
+- v32.8 / build `2026-08-17c-mic-stability` corrected this in `sensor-persistence-v5`: `audio_frames_stale` no longer causes destructive reconnect; a genuinely live enabled track is authoritative. Genuine ended/non-live tracks still recover.
+- Real-device validation remains required for both no-false-reconnect and genuine ended-track recovery.
 
 ## v32.7 persistent diagnostics
-- User decision: MotoLab needs always-on comprehensive diagnostics, not only microphone logging.
-- `diagnostics.js` / `motolab-diagnostics-v1` records global JS errors, unhandled rejections, console warnings/errors, failed fetch/non-OK HTTP, network/visibility/page lifecycle, media-device changes and selected Service Worker events.
-- Central `addLearningEvent` traffic is mirrored without changing the original event call.
-- Diagnostic records carry release/build identity, session id and sensor snapshots where available.
+- `diagnostics.js` / `motolab-diagnostics-v1` records global JS errors, rejected promises, console warnings/errors, fetch/HTTP failures, lifecycle/network/media-device events and selected Service Worker events.
+- Central `addLearningEvent` traffic is mirrored observationally.
 - A persistent 500-event local ring plus heartbeat/session marker survives restarts/crashes.
-- iOS `pagehide` is not proof of clean shutdown.
-- Known queue states and other localStorage keys containing `queue` are summarized without copying secrets/arbitrary payloads.
-- Pending diagnostics are replayed into RAW as `diagnostic_replay` once the normal learning/event path is available.
-- Diagnostics is observational only and must never influence GPS MASTER, displayed RPM, run acceptance, gear learning, adaptive candidate choice, dyno calculations or recovery decisions.
-- Details: `MOTOLAB_DIAGNOSTICS.md`.
+- iOS `pagehide` is not treated as proof of clean shutdown.
+- Queue metadata is summarized without copying secrets or arbitrary payload contents.
+- Pending diagnostics replay into RAW as `diagnostic_replay` when the normal event path becomes available.
+- Diagnostics never gains measurement or recovery authority.
 
-## v32.9 LIVE technical inspection — active and retained
-- User decision: deep operating state should not crowd the normal measurement/home view or Settings.
-- Normal visible navigation is effectively **MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET**; developer-only AUTOTUNE remains behind developer mode.
-- `live_status.js` / `motolab-live-status-v1` adds the dedicated LIVE page; `live_status_guard.js` keeps it compatible with the legacy self-test/navigation assumptions.
-- LIVE summary shows traffic-light state for **GPS / MIC / IMU / RAW / SYNC**.
-- Expandable cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/EVENT QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
-- MIC/RPM includes wanted state, track live/ended/enabled/muted/device, audio/raw RPM, confidence, f0, candidate gap and runner-up when available.
-- LIVE refreshes only while active, roughly every 750 ms.
-- LIVE is strictly observational; it must not control sensors, measurement authority, adaptive learning, recovery or sync decisions.
-- Details: `LIVE_STATUS_V32_9.md`.
+## v32.9 LIVE technical inspection
+- Normal visible navigation is effectively **MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET**; experimental AUTOTUNE remains developer-only.
+- `live_status.js` / `motolab-live-status-v1` adds LIVE; `live_status_guard.js` preserves legacy self-test/navigation compatibility.
+- LIVE summary shows GPS / MIC / IMU / RAW / SYNC traffic-light state.
+- Expandable cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
+- LIVE is strictly observational.
 
-## v33.0 user identity / approval / cloud state — active foundation
-- Release line began as **v33.0 / build `2026-08-17e-user-identity`** and remains the identity foundation under later v33.x builds.
-- `user_identity.js` / `motolab-user-identity-v1` creates/preserves a device identity, uses the existing beta token/server configuration and resolves a server-side user record.
-- `raw_sync_server/user_server.js` adds persistent user registry, invitation records and per-user cloud-state storage.
-- User states are `pending`, `active` and `blocked`; admin users can approve or block users. An admin cannot be blocked through the normal admin status endpoint.
-- New devices can register via invitation. Dynamic invitation values are stored hashed, one-use and expire after seven days.
-- Pending users see an approval lock screen and can set a nickname; active users get account UI and can create invite links.
-- Device tokens are HMAC-signed using `BETA_TOKEN_SECRET`; default lifetime is 365 days unless configured otherwise.
-- RAW/research requests carrying beta identity are tied to an active resolved user/device identity.
-- Per-user cloud state uses `/api/users/v1/state`; selected profiles/runs/learning/sync/consent/dev state is synchronized. Existing remote state is preferred on initial sync when present; otherwise local state is uploaded. Change checks occur about every 6 seconds after activation.
+## v33.0 identity / approval / cloud-state foundation
+- `user_identity.js` / `motolab-user-identity-v1` creates/preserves device identity and resolves a server-side user record.
+- `raw_sync_server/user_server.js` stores user registry, one-use invitations and per-user cloud state.
+- User states: `pending`, `active`, `blocked`; admins approve/block users.
+- Invitation values are hashed, one-use and expire after seven days.
+- Device tokens are HMAC-signed using `BETA_TOKEN_SECRET`; default lifetime 365 days unless configured otherwise.
+- RAW/research beta requests are tied to an active resolved user/device identity.
+- Per-user cloud state uses `/api/users/v1/state`; remote state is preferred on initial sync when available, otherwise local state is uploaded.
 
-## v33.1 in-app user feedback — retained foundation
-- v33.1 release identity was **`2026-08-17f-user-feedback`**.
-- `raw_sync_server/feedback_server.js` introduced authenticated feedback APIs and persistent feedback storage.
-- Active users could submit problem/update/development/other feedback with user/nickname/device, app version, page and workflow status.
-- `feedback.js` / `motolab-feedback-v1` added **PALAUTE** for users and **PALAUTTEET** for admin review.
-- v33.1 is superseded by v33.2/v33.3 but remains the base of the current private-feedback system.
+## v33.1-v33.3 feedback / community / run-sharing foundation
+- v33.1 introduced authenticated in-app feedback.
+- v33.2 added Beta community, private diagnostic packages, per-user feature permissions and reduced graphical run sharing. Shared runs contain no RAW payload and recipients have no edit rights.
+- v33.2 community supports issue threads, comments, `Minulla sama ongelma`, statuses, working solutions and private admin-only diagnostics with roughly 60 seconds of technical history.
+- Public issue data stays separate from device/contact/app/sensor/diagnostic metadata.
+- v33.3 converted feedback into two-way private conversations. Users see only their own threads; admin can reply and manage states.
+- Admin can publish a private feedback item anonymously into the public Beta community while retaining the private source thread separately.
 
-## v33.2 Beta community / private diagnostics / user rollout — retained under v33.3
-- v33.2 release build: **`2026-08-17g-beta-community`**.
-- The rollout combined the v33.0 identity/approval layer with per-user feature permissions and client version/build heartbeat.
-- Nickname-based run sharing is graphical/reduced only: recipients do not receive RAW data or edit rights.
-- Shared runs can be compared to a selected own run with run-quality/success percentage, and to the best comparable own run automatically.
-- New Beta community/issue bank supports user comments, peer troubleshooting, `Minulla sama ongelma`, issue states `open`, `working`, `resolved`, `fixed`, `not reproduced`, and admin-selected working solutions.
-- Invite flow includes normal share plus WhatsApp action. Users may optionally provide a private contact route such as WhatsApp, phone, email, Telegram or other.
-- Public community data is deliberately reduced to nickname/title/description/category/status/comments/same-problem count. Device IDs, contact details, app/device metadata, sensor state, diagnostics and technical history are private/admin-only.
-- Issue creation and `Minulla sama ongelma` attach a private diagnostic package containing release/build, platform metadata, sensor/queue snapshots, recent diagnostic events and roughly 60 seconds of rolling technical history.
-- The diagnostic package is not intended to capture listenable microphone audio; it contains technical sensor/app state for reproduction.
-- `BETA_COMMUNITY_V33_2.md` records the release and privacy rules.
-- PR #15 and the associated v33.2 community/Railway preload rollout were merged with explicit user approval. Railway success still needs field confirmation before server rollout is considered validated.
-- The community/user layer must not change GPS MASTER authority, RPM calculation, run acceptance, Auto Gear Learn or dyno computation.
+## v33.4 Tester Merit — retained under current release
+- v33.4 build: **`2026-08-17i-tester-merit`**.
+- `raw_sync_server/merit_server.js` adds quality-based tester merit using persistent `tester_merit.json` storage.
+- Merit categories: `data`, `reports`, `activity`, `community`, `reliability`, `ideas`.
+- Tester levels: 0–39 **Beta Tester**, 40–64 **Active Tester**, 65–84 **Advanced Tester**, 85–100 **Core Tester**.
+- Merit rewards useful participation, reproducible bug reports, good test data, working solutions, community help and strong development ideas; it is not based on message count.
+- Technical failure can be classified as `user`, `device`, `app`, `sensor`, `unknown` or `none`; device/app/sensor failures do not automatically penalize the user.
+- The same feedback/issue/comment can be reviewed only once. Admin can also award separate bonus merit.
+- Normal users see their tester level and general explanation, not the exact scoring formula/history. Admin sees exact score, category totals, event history and review candidates.
+- Tester Merit does **not** automatically grant experimental features. Admin keeps explicit per-user feature-permission authority.
+- `merit.js` / `motolab-tester-merit-v1` adds user Tester Level UI plus admin scoring/review UI.
+- Detailed policy is in `TESTER_MERIT_V33_4.md`.
 
-## v33.3 two-way private feedback conversations — current active release
-- Current `main` release identity: **v33.3 / build `2026-08-17h-private-feedback-chat`**.
-- `feedback.js` advanced to `motolab-feedback-v2` and the feedback server storage/API migrated toward `motolab_feedback_v2` conversation semantics.
-- A user can now see their own private feedback threads, open a new private feedback conversation and reply to the admin inside the same thread.
-- Admin can reply to the user in the same thread. Thread states now include `waiting_admin`, `waiting_user`, `working` and `resolved` in addition to migration handling for older statuses.
-- Private thread messages preserve role (`user` / `admin`) and timestamps. User-facing APIs only return that user's own threads; admin list returns the administrative metadata needed for handling.
-- Admin can publish a private feedback item into the Beta community as an **anonymous** public issue. The published community issue omits the user's identity and links internally back to the source feedback for administration.
-- Once anonymized to the community, the user is told that the issue was published without exposing their nickname/private conversation to other users.
-- The feedback server can write the anonymized issue to the community issue store while preserving the private original thread separately.
-- Service Worker/release bundling was aligned to v33.3 so the private feedback chat is included in the published PWA.
-- v33.3 supersedes v33.2 only as release/build identity; v33.2 community/private diagnostics and earlier identity/cloud foundations remain active.
+## v33.5 visible User / Beta navigation — retained under current release
+- v33.5 build: **`2026-08-17j-beta-navigation`**.
+- `beta_menu.js` / `motolab-beta-menu-v1` adds a clearly visible **KÄYTTÄJÄ / BETA** entry point instead of leaving identity/community/feedback/sharing functions scattered or hidden.
+- User menu groups: own account, private feedback/messages, Beta community, shared runs, tester level and invite tester.
+- Admin menu additionally exposes user approvals, private feedback admin, Merit scoring, feature permissions and community/diagnostics.
+- Account login remains automatic through the device MotoLab identity; no password flow was introduced.
+- Invitation action reuses existing invite creation and system share/clipboard behavior.
+
+## v33.6 user MIC OFF authority — current active release
+- Current `main` release identity: **v33.6 / build `2026-08-17k-mic-off-authority`**.
+- New `mic_authority.js` / `motolab-mic-authority-v1` makes explicit user MIC OFF state authoritative over automatic microphone opening/recovery.
+- MIC OFF interaction is captured early (`pointerdown`, `touchstart`, `click`) and persists `motolab_v32_sensor_prefs.mic=false`.
+- `startAudio()` is guarded: if desired mic state is OFF, automatic/manual code paths that call the wrapped `startAudio()` are blocked and logged as `mic_start_blocked_user_off`.
+- If a microphone stream is still live while desired state is OFF, the module calls the existing `stopAudio()` and records `mic_forced_stop_user_off`.
+- The guard rechecks periodically and after returning to visible state so background/recovery logic cannot silently reopen a microphone the user explicitly disabled.
+- User authority changes are logged with `mic_user_authority`; module load is logged with `mic_authority_loaded`.
+- This is separate from v32.8 dead-track recovery: OFF means stay OFF; ON may still use genuine recovery logic when a track actually ends.
+- Real iPhone validation is still required to confirm MIC OFF stays off across recovery/visibility transitions and MIC ON genuine recovery remains intact.
 
 ## Adaptive GPS-taught RPM learning
-- `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline has no learned bands and explicit acceptance limits.
-- Adaptive GPS-taught RPM learning and RAW replay were added on 2026-08-16 (`58c1feb`, `fd6cfe4`, `fe66331`).
+- `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline starts with no learned bands.
 - Learning works in 500-rpm regions and may prefer 0.5x / 1x / 2x harmonic branches when GPS-supervised evidence supports them.
 - Continuity/prediction is part of candidate selection; old local RAW can be replayed through newer logic.
 - Auto Gear Learn must never receive microphone authority while GPS MASTER + MIC LEARN is selected.
 - Trainer may publish only validated improving models; reject bad/non-improving models and retain rollback history in `Motolab-data`.
 
 ## Research / RAW pipeline
-- Third-gear GPS + MIC research uses GPS MASTER and a third-gear guard/confirmation flow; raw research capture pauses when the required gear condition is not confirmed.
-- Research data is kept separate from normal run/learning storage.
-- RAW/research is local-first; retained locally and retried after network loss/reopen.
+- Third-gear GPS + MIC research uses GPS MASTER and a gear-confirm guard.
+- Research storage stays separate from normal run/learning storage.
+- RAW/research is local-first and retried after network loss/reopen.
 - Multi-phone data is separated by persistent device identity/labels.
-- Railway receiver mirrors received RAW/research into private `anttivanttinen-max/Motolab-data`.
+- Railway mirrors accepted RAW/research into private `anttivanttinen-max/Motolab-data`.
 - Receiver/read secrets must never be committed to the public app repository.
 
 ## Vehicle / maintenance / UI decisions
-- Finland vehicle database v2 is installed; Yamaha DT125R and Derbi Senda 50 families and editable drivetrain data are retained.
-- Technical-spec editor and maintenance/history modules remain active.
+- Finland vehicle database v2, Yamaha DT125R and Derbi Senda 50 families, editable drivetrain data, technical-spec editor and maintenance/history remain active.
 - Home-screen microphone control stays directly reachable.
-- Settings contains user-changeable configuration; LIVE contains deep technical sensor/queue/diagnostic state.
+- Settings contains user-changeable configuration; LIVE contains deep technical state.
 - Settings/maintenance sections should remain compact/collapsible.
-- A selected unavailable audio input must not silently fall back to a different microphone and be treated as the same sensor.
+- An unavailable selected audio input must not silently fall back to another microphone and be treated as the same sensor.
 
 ## Current build handoff and validation priorities
-- Active `main`: **v33.3 / build `2026-08-17h-private-feedback-chat`**.
-- v32.8 microphone stability, v32.7 persistent diagnostics, v32.9 LIVE telemetry, v33.0 identity/cloud, v33.2 Beta community/private diagnostics and v33.3 private feedback chat are all retained.
-- Validate v32.8 mic behavior on real iPhone: continuous live track must not cycle; genuine ended/disconnected track must recover.
-- Validate v32.9 LIVE navigation/status/queue/event visibility without measurement-performance regression.
-- Validate diagnostics persistence across abrupt termination and RAW replay.
-- Validate identity lifecycle end-to-end: invite → pending nickname → admin approval → active login, blocked-state behavior, token persistence and per-user cloud-state restore/sync.
-- Validate RAW/research attribution to active user/device identity and rejection for non-active users.
-- Validate v33.2 community end-to-end: issue creation, comments, same-problem, public/private data separation, diagnostic package capture, admin-only diagnostic access and Railway persistence/restart behavior.
-- Validate run sharing permissions and reduced graphical-only payload, selected-own comparison and automatic best-own comparison.
-- Validate v33.3 private conversations end-to-end: user thread list/new message/reply, admin reply, state transitions, old v33.1 feedback migration, anonymous community publication and strict privacy separation.
-- Validate adaptive candidate tracking against GPS, 500-rpm region learning and Auto Gear Learn interaction without weakening GPS MASTER.
+- Active `main`: **v33.6 / build `2026-08-17k-mic-off-authority`**.
+- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit and v33.5 Beta navigation.
+- Validate v33.6 on real iPhone: explicit MIC OFF must remain OFF and not be reopened by autostart/recovery/visibility behavior; MIC ON must still recover genuinely ended tracks.
+- Validate v33.4 Tester Merit end-to-end with real active/admin users, one-time review behavior, bonus merit, persistence and privacy.
+- Validate v33.5 User/Beta navigation on phone, including all user/admin destinations and invite flow.
+- Continue validation of identity lifecycle, multi-device cloud state, RAW/research user attribution, run sharing, Beta community/private diagnostics and v33.3 private conversations.
+- Validate LIVE/diagnostics persistence and no measurement-performance regression.
+- Validate adaptive candidate tracking, 500-rpm learning and Auto Gear Learn without weakening GPS MASTER.
 
 ## Deferred / unfinished work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
 - FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
-- User identity/cloud, run sharing, Beta community/private diagnostics and two-way feedback are newly published and require real multi-user/device/server field validation before being treated as fully proven.
+- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit and MIC OFF authority remain newly published and need field validation before being treated as fully proven.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
