@@ -39,6 +39,16 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The same RAW rows preserve the GPS MASTER safety rule correctly: `rpmControlAuthority=gps`, `micInfluencesDisplayedRpm=false`, `micInfluencesRunAcceptance=false`, and `micInfluencesGearLearning=false`.
 - This is now a confirmed field-data regression/unfinished item: microphone persistence/reconnect on iOS is not yet reliable even though GPS/IMU persistence remains active. Do not mark sensor recovery complete until a new RAW session shows the microphone returning live without repeated `track_not_live` failures.
 
+## Planned iOS microphone recovery fix — not yet implemented
+- The next recovery implementation should stop trying to revive an already dead/non-live MediaStreamTrack indefinitely.
+- When persisted microphone intent remains ON but the current track is not `live`, fully tear down the stale microphone pipeline: stop/release old tracks, disconnect nodes and close/release the old `AudioContext` as needed.
+- Request a fresh `getUserMedia()` audio stream and rebuild the RPM audio chain on that new stream.
+- Use bounded/exponential retry timing (for example approximately 0.5 s → 1 s → 2 s → 5 s) instead of a tight reconnect loop.
+- Add explicit RAW/research events for stream recreation and recovery outcome, such as `mic_stream_recreated`, `mic_recovery_success`, and a structured failure reason, so field validation can prove whether recovery works.
+- If repeated automatic recreation still fails because iOS requires renewed user activation, show a clear recovery action in the UI (for example `MIC RECOVERY / TAP TO RESTORE MICROPHONE`) and use that user gesture to retry opening the microphone.
+- GPS MASTER safety must remain unchanged through this work: microphone loss/recovery must never take over displayed RPM, run acceptance, or gear learning while GPS MASTER is selected.
+- Treat this as an open implementation direction only; no v32.6 recovery build or field validation exists yet in `main` at this archive update.
+
 ## Adaptive RPM-learning implementation retained from current development
 - `rpm-learning-model.json` exists in the application repository using schema `motolab_rpm_learning_model_v1`.
 - Baseline model starts with no learned bands and explicit acceptance limits; later accepted trainer models may replace the baseline only after validation.
