@@ -1,0 +1,144 @@
+# VÄNÄ MotoLab — English language pack v1
+
+Status: INCLUDED IN V34 REBUILD, VALIDATION REQUIRED BEFORE WIDER BETA
+
+## Language behavior
+- Default remains Finnish for existing installations unless the user changes language.
+- Settings > Language: Suomi / English.
+- Persist choice locally and in per-user cloud state.
+- Apply language without changing measurement, sensor, RPM, gear-learning, RAW, run acceptance or dyno logic.
+- Beta/community/feedback/admin UI uses the same translation layer.
+
+## Core navigation
+MITTAUS = MEASURE
+VEDOT = RUNS
+LIVE = LIVE DATA
+ANALYYSI = ANALYSIS
+ASETUKSET = SETTINGS
+KÄYTTÄJÄ / BETA = USER / BETA
+
+## Measurement
+KIERROSLUKU = RPM
+NOPEUS = SPEED
+VAIHDE = GEAR
+TEHO = POWER
+VÄÄNTÖ = TORQUE
+HUIPPUTEHO = PEAK POWER
+HUIPPUVÄÄNTÖ = PEAK TORQUE
+KÄYNNISTÄ = START
+PYSÄYTÄ = STOP
+VALMIS = READY
+TALLENTAA = RECORDING
+TALLENNETTU = SAVED
+ODOTTAA = WAITING
+HYVÄKSYTTY = ACCEPTED
+HYLÄTTY = REJECTED
+VERTAA = COMPARE
+VERTAA OMAAN VETOON = COMPARE WITH MY RUN
+VERTAA PARHAASEEN OMAAN VETOON = COMPARE WITH MY BEST RUN
+
+## Sensors / sources
+GPS = GPS
+MIKROFONI = MICROPHONE
+PUHELINMIKKI = PHONE MIC
+AUDIOLÄHDE = AUDIO INPUT
+ANTURIT = SENSORS
+LÄHDE = SOURCE
+LUOTTAMUS = CONFIDENCE
+SIGNAALI = SIGNAL
+YHDISTETTY = CONNECTED
+EI YHTEYTTÄ = DISCONNECTED
+PÄÄLLÄ = ON
+POIS = OFF
+PALAUTUS = RECOVERY
+
+## Gear teaching
+3. VAIHTEEN TESTI = 3RD GEAR TEST
+ALOITA 3. VAIHDE = START 3RD GEAR TEST
+MIKÄ VAIHDE KÄYTÖSSÄ? = WHICH GEAR IS ENGAGED?
+OHITA = SKIP
+VAHVISTA = CONFIRM
+OPETUSDATA = TRAINING DATA
+REFERENSSI = REFERENCE
+
+## Runs / dyno
+VETO = RUN
+VEDON TIEDOT = RUN DETAILS
+KÄYRÄ = CURVE
+TEHOKÄYRÄ = POWER CURVE
+VÄÄNTÖKÄYRÄ = TORQUE CURVE
+KESKIARVO = AVERAGE
+ONNISTUMINEN = RUN QUALITY
+AJONEUVO = VEHICLE
+PROFIILI = PROFILE
+
+## LIVE / diagnostics
+LIVE DATA = LIVE DATA
+DIAGNOSTIIKKA = DIAGNOSTICS
+TAPAHTUMALOKI = EVENT LOG
+JONO = QUEUE
+SYNKRONOINTI = SYNC
+RAAKADATA = RAW DATA
+JÄRJESTELMÄ = SYSTEM
+VIRHE = ERROR
+VAROITUS = WARNING
+
+## User / Beta
+OMA TILI = MY ACCOUNT
+NIMIMERKKI = NICKNAME
+TILA = STATUS
+AKTIIVINEN = ACTIVE
+ODOTTAA HYVÄKSYNTÄÄ = PENDING APPROVAL
+ESTETTY = BLOCKED
+PALAUTE / VIESTIT = FEEDBACK / MESSAGES
+BETA-YHTEISÖ = BETA COMMUNITY
+JAETUT VEDOT = SHARED RUNS
+TESTAAJATASO = TESTER LEVEL
+KUTSU TESTAAJA = INVITE TESTER
+KÄYTTÄJIEN HYVÄKSYNTÄ = USER APPROVALS
+KÄYTTÖOIKEUDET = FEATURE ACCESS
+
+## Feedback / community
+ILMOITA ONGELMASTA = REPORT AN ISSUE
+PALAUTE = FEEDBACK
+KEHITYSIDEA = FEATURE IDEA
+LÄHETÄ = SEND
+VASTAA = REPLY
+MINULLA SAMA ONGELMA = I HAVE THE SAME ISSUE
+RATKAISU = SOLUTION
+TOIMIVA RATKAISU = WORKING SOLUTION
+JULKAISE YHTEISÖÖN = PUBLISH TO COMMUNITY
+YKSITYINEN = PRIVATE
+ANONYYMI = ANONYMOUS
+
+## Tester Merit
+BETA TESTER = BETA TESTER
+AKTIIVINEN TESTAAJA = ACTIVE TESTER
+EDISTYNYT TESTAAJA = ADVANCED TESTER
+YDINTES­TAAJA = CORE TESTER
+TESTAAJATASO = TESTER LEVEL
+
+## Settings / vehicle
+KIELI = LANGUAGE
+SUOMI = FINNISH
+ENGLANTI = ENGLISH
+AJONEUVOTIEDOT = VEHICLE DETAILS
+HUOLTO = MAINTENANCE
+HISTORIA = HISTORY
+TALLENNA = SAVE
+PERUUTA = CANCEL
+SULJE = CLOSE
+TYHJENNÄ = CLEAR
+
+## Terminology rules
+- Use RUN for a measured acceleration pull in the normal UI. Use PULL only where motorsport context specifically benefits from it.
+- Use RPM, not engine speed, in compact measurement UI.
+- Use TORQUE and POWER for dyno outputs.
+- Use GEAR and 3RD GEAR TEST for gear learning UI.
+- Use AUDIO INPUT for selectable microphone hardware; SOURCE is reserved for logical RPM/sensor source.
+- Use CONFIDENCE for algorithm confidence.
+- Keep RAW DATA as the technical export concept.
+- Avoid literal Finnish-to-English wording when established automotive/dyno terminology exists.
+
+## Implementation gate
+Missing English keys fall back to Finnish rather than blank UI. Dynamic server statuses remain stable machine values and are translated only at presentation. Language switching must not reload or reset active sensor state, run state, user identity or stored data.
