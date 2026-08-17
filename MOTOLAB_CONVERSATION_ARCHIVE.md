@@ -58,11 +58,11 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Planned correction: do not use the invalid frame-stale signal as a destructive recovery trigger. Fresh-stream teardown/recreation should be reserved for a genuinely non-live/ended track or another independently validated stall indicator.
 - Keep this fix separate from the full diagnostics work so measurement/recovery behavior is not accidentally changed by observability code.
 
-## v32.7 full persistent diagnostics — implementation prepared
+## v32.7 full persistent diagnostics — active on main
 - User decision: MotoLab must have an always-on comprehensive error-detection/diagnostic mode, not only microphone-specific logging.
 - The system must retain not just crashes but other error states and all relevant event/queue state needed to prove application operation and reconstruct what happened before a failure.
 - New file `diagnostics.js` uses module id `motolab-diagnostics-v1` and is loaded early by the PWA shell.
-- Prepared release identity is **v32.7 / build `2026-08-17b-full-diagnostics`** on branch `agent/v32.7-full-diagnostics` before promotion.
+- Active release identity is **v32.7 / build `2026-08-17b-full-diagnostics`** on `main`.
 - Captured error classes include `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed `fetch()` calls and non-OK HTTP responses.
 - Captured state/lifecycle classes include network online/offline, visibility/page transitions, media-device changes, selected Service Worker messages and controller changes.
 - Central `addLearningEvent` traffic is mirrored into diagnostics without changing the original event call.
@@ -86,8 +86,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Published `main` at the start of v32.7 diagnostics work is **v32.6 / build `2026-08-17a-mic-recovery`**.
-- Prepared next line is **v32.7 / build `2026-08-17b-full-diagnostics`** with persistent diagnostics only; the microphone OFF/ON stability correction remains a separate open fix.
+- Active `main` is **v32.7 / build `2026-08-17b-full-diagnostics`**.
+- Persistent diagnostics is now part of the published line; the microphone OFF/ON stability correction remains a separate open fix.
 - Third-gear research has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
@@ -112,7 +112,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 
 ## Current implementation direction
 - First microphone task remains fixing the v32.6 OFF/ON reconnect storm without weakening genuine dead-track recovery.
-- v32.7 diagnostics must then be validated on a real iPhone, including persistence across abrupt termination and RAW replay of retained diagnostic events.
+- v32.7 diagnostics must now be validated on a real iPhone, including persistence across abrupt termination and RAW replay of retained diagnostic events.
 - GPS-supervised microphone learning should improve candidate/harmonic choice and RPM continuity without weakening GPS MASTER authority.
 - Keep raw candidate sets and region-specific behavior so later models can learn 0.5x / 1x / 2x branch preference by RPM region if reference data supports it.
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
