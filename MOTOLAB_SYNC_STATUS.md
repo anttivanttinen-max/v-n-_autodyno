@@ -23,6 +23,12 @@ Updated: 2026-08-17
 - Language preference key `motolab_language` is included in per-user cloud state so the selected language can restore with the user state.
 - Language switching is presentation-only and must not reset sensors, active run state, identity, stored data, RPM authority, gear learning, RAW or dyno calculations.
 - Preferred English dyno terminology remains RPM, POWER, TORQUE, RUN, GEAR, CONFIDENCE, AUDIO INPUT and RAW DATA.
+- **Accepted visual UI is now locked as the baseline.** Future functional changes should preserve the approved appearance unless the user explicitly reopens visual redesign.
+
+## Known v34.0 field issue
+- On the user's phone after the v34.0 deploy, the **approved splash did not appear at all**. Treat this as an open real-device bug, not as successful splash validation.
+- The repository contains the splash asset/module and Service Worker references, so the next investigation should focus on actual runtime/module injection, PWA/Service Worker cache/update behavior, splash gating/session timing and asset loading on the real phone.
+- Do not change the accepted splash artwork merely to work around the visibility bug; diagnose the loading/display path first.
 
 ## Measurement strategy and safety — unchanged in v34.0
 - Road-test / learning work uses **GPS MASTER + MIC LEARN** unless an explicit test mode says otherwise.
@@ -74,7 +80,8 @@ Updated: 2026-08-17
 - Settings remains the user-changeable configuration area; deep technical state belongs under LIVE/admin tooling.
 
 ## Validation priorities after v34.0 deploy
-- Real iPhone: verify v34.0 splash, fixed bottom nav safe area, page-end spacing, settings one-open-at-a-time behavior, User menu, normal/admin role visibility and no UI loop/jank.
+- **Highest immediate UI bug:** reproduce and fix the real-phone splash-not-visible issue without changing the approved visual baseline.
+- Real iPhone: verify fixed bottom nav safe area, page-end spacing, settings one-open-at-a-time behavior, User menu, normal/admin role visibility and no UI loop/jank.
 - Verify Finnish/English switching across active screens, reload/update persistence and per-user cloud restore without sensor/run reset.
 - Re-test explicit MIC OFF -> ON, genuine ended-track recovery, rapid taps/visibility transitions and admin audio-source switching.
 - Validate third-gear beta UI with ordinary beta users and confirm telemetry/IndexedDB research markers.
@@ -87,7 +94,7 @@ Updated: 2026-08-17
 - Full Knowledge Base integration across all porting/pipe/carb/ignition tuning calculators remains parked.
 - Camera RPM remains disabled.
 - Native AirPods motion remains experimental until validated on a real device.
-- v34.0 visual layer is deployed, but real-device visual polish and field validation remain open; do not treat mockup-level styling as proof of all-screen pixel-perfect behavior until tested on phone.
+- v34.0 visual layer is deployed, but real-device field validation remains open; the first confirmed defect is that the splash is not visible on the user's phone.
 
 ## Durable project-memory rule
 - GitHub is the durable MotoLab project memory.
