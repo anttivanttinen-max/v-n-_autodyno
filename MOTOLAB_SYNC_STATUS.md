@@ -5,7 +5,7 @@ Updated: 2026-08-17
 ## Current application line
 - Active published line on `main`: **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**.
 - Field-recovery release identity was created without changing measurement logic, then the Service Worker was changed to force a clean field-recovery cache and clear older MotoLab/MotorLab caches on activation.
-- `main` was at application HEAD `189c09070802da456ab2e3f76e51442e2ac5c8af` before the documentation-only archive commits from this job.
+- `main` contains documentation-only memory commits above the application line; do not infer a newer published application build from those archive commits.
 - v32.9 remains the LIVE telemetry base beneath the field-recovery identity; v32.8 microphone-stability correction and v32.7 persistent diagnostics are preserved.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
@@ -13,11 +13,18 @@ Updated: 2026-08-17
 - Current temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded.
 
 ## Separate v34 line — do not confuse with main
-- A separate v34 release/development line exists and is **not** the currently published `main` field line.
-- `release/v34.0-2026-08-17` points to commit `58d270274b979847fd760f7681818d9e7034b2ec` with message `Trigger final v34 validation after identity normalization`.
-- That branch identifies itself as **v34.0 / build `2026-08-17o-rebuild-ui-i18n`**.
-- User decision: the newly completed v34 visual appearance is finished and **locked as the approved visual baseline**. Functional work should preserve that appearance unless UI design is explicitly reopened.
-- Installation/deploy/merge actions were intentionally paused while the repository update was being completed; this memory job must not promote or install v34.
+- v34 remains separate and is **not** the currently published `main` field line.
+- Older release branch `release/v34.0-2026-08-17` remains at `58d270274b979847fd760f7681818d9e7034b2ec` / v34.0 build `2026-08-17o-rebuild-ui-i18n`.
+- Current validated rebuild work is newer: **`dev/v34-rebuild` at `f203b3e2fb95afbbd0a04ff27319b5f40d7f8dcb`**, identity **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**.
+- User decision: the completed v34 visual appearance is finished and **locked as the approved visual baseline**. Functional work should preserve that appearance unless UI design is explicitly reopened.
+- v34 has not been promoted/installed by the memory job; explicit promotion approval and remaining real-device validation are still required.
+
+## v34.6 DEV validation / Service Worker fix
+- Chromium + Service Worker browser smoke testing is now part of the v34 rebuild validation flow.
+- The smoke test found a real reload-only runtime bug: Service Worker HTML injection regex-rewrote inline `navigator.serviceWorker.register(...)` and truncated JavaScript at the inner `encodeURIComponent(build)` parenthesis, preventing navigation handlers from initializing after SW reload.
+- Commit `f203b3e` fixes this by stopping regex rewriting of inline JavaScript and bumps the dev build/cache identity to `2026-08-17w-v34-rebuild-swfix`.
+- GitHub Actions run `32044453957` is green. It passed app/server JS syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, and **Browser + Service Worker smoke x2**.
+- Browser/SW runtime validation is therefore green in Chromium. This does not replace real iPhone GPS/microphone testing.
 
 ## Measurement strategy
 - Road-test / learning work uses **GPS MASTER + MIC LEARN** unless a specific explicit test mode says otherwise.
@@ -146,6 +153,8 @@ Updated: 2026-08-17
 
 ## Current validation priorities
 - Keep `main` v32.9.1 FIELD stable while v34 validation remains separate.
+- v34 Chromium + Service Worker smoke is green; preserve this regression test.
+- Real-device validate v34 on iPhone for GPS/microphone behavior before promotion; browser smoke does not prove hardware sensor behavior.
 - Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
 - Real-device validate LIVE navigation and telemetry on the v32.9.1 field line without measurement-performance regression.
 - Confirm LIVE GPS/MIC/IMU/RAW/SYNC traffic lights match actual states and that queue/error details are readable.
@@ -154,7 +163,7 @@ Updated: 2026-08-17
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- Before any v34 promotion, re-check current `main`, release/cache identity and measurement invariants, and preserve the locked approved UI.
+- Before any v34 promotion, re-check current `main`, release/cache identity and measurement invariants, preserve the locked approved UI, and require explicit promotion/install approval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -168,4 +177,4 @@ Updated: 2026-08-17
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 browser/Service Worker smoke regression coverage, and keep native AirPods motion experimental until validated on a real device.
