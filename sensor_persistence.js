@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const MODULE='sensor-persistence-v4';
+const MODULE='sensor-persistence-v5';
 const PREF_KEY='motolab_v32_sensor_prefs';
 const AUDIO_DEVICE_KEY='motolab_v28_audio_device';
 const KNOWN_MICS_KEY='motolab_v32_known_mics';
@@ -18,7 +18,6 @@ function selectedLabel(){const sel=$('audioDevice');if(sel?.value){const o=sel.o
 function micTrack(){try{return audioSessions?.ext?.track||audioSessions?.ext?.stream?.getAudioTracks?.()[0]||null}catch{return null}}
 function micStream(){try{return audioSessions?.ext?.stream||null}catch{return null}}
 function micActive(){const t=micTrack(),s=micStream();return !!(t&&t.readyState==='live'&&t.enabled!==false&&(!s||s.active!==false))}
-function micFramesFresh(){const t=Number(globalThis.MOTOLAB_AUDIO_LAST?.t||0);return !!(t&&Date.now()-t<3500)}
 function saveFromUi(){if(restoring)return;const p=readPrefs();p.gps=$('gpsDot')?.classList.contains('on')||false;p.imu=$('imuDot')?.classList.contains('on')||false;if(micActive()||uiOn('extMicBtn'))p.mic=true;writePrefs(p);decorateMicState()}
 function logRecovery(type,data={}){try{if(typeof addLearningEvent==='function')addLearningEvent(type,{...data,module:MODULE})}catch{}}
 function setMicUi(active,text){const b=$('extMicBtn'),dot=$('extDot'),s=$('extState');if(b)b.classList.toggle('on',!!active);if(dot)dot.classList.toggle('on',!!active);if(s&&text)s.textContent=text}
@@ -54,7 +53,7 @@ async function recoverMic(reason,force=false){
   decorateMicState();return live;
  }finally{reconnecting=false}
 }
-function healthCheck(){const active=micActive();if(active)hadLiveMic=true;decorateMicState();if(!micDesired()||!hadLiveMic||reconnecting)return;if(!active){recoverMic('track_not_live');return}if(!micFramesFresh())recoverMic('audio_frames_stale')}
+function healthCheck(){const active=micActive();if(active)hadLiveMic=true;decorateMicState();if(!micDesired()||!hadLiveMic||reconnecting)return;if(!active)recoverMic('track_not_live')}
 function bindTrackHealth(){const t=micTrack();if(!t||t.__motolabHealthBound)return;t.__motolabHealthBound=true;t.addEventListener?.('ended',()=>{decorateMicState();recoverMic('track_ended',true)});t.addEventListener?.('mute',()=>setTimeout(healthCheck,1200));t.addEventListener?.('unmute',()=>decorateMicState())}
 
 function knownMics(){try{return JSON.parse(localStorage.getItem(KNOWN_MICS_KEY)||'[]')}catch{return []}}
@@ -67,6 +66,6 @@ async function renderMicPicker(){ensureModal();const wrap=$('homeMicPicker'),lis
 function hookHomeMic(){const b=$('extMicBtn');if(!b)return false;b.onclick=e=>{if(e.target?.classList?.contains('ib'))return;e.preventDefault();e.stopPropagation();renderMicPicker()};const chip=$('extChip');if(chip)chip.onclick=e=>{e.preventDefault();e.stopPropagation();renderMicPicker()};return true}
 async function restoreSensors(){const p=readPrefs();restoring=true;try{if(p.gps&&!$('gpsDot')?.classList.contains('on'))try{if(typeof startGPS==='function')await startGPS()}catch{}if(p.imu&&!$('imuDot')?.classList.contains('on'))try{if(typeof startIMU==='function')await startIMU()}catch{}/* iOS may require a user gesture for a fresh getUserMedia start. */}finally{restoring=false;decorateMicState()}}
 function attachPersistence(){['gpsChip','imuChip','sensorBtn','extChip','extMicBtn','armBtn','manualBtn'].forEach(id=>$(id)?.addEventListener('click',()=>setTimeout(saveFromUi,350)));if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{currentInputs(false).then(()=>{decorateMicState();healthCheck()})});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){decorateMicState();setTimeout(healthCheck,500)}});window.addEventListener('motolab-audio-candidates',()=>{if(micActive()){hadLiveMic=true;bindTrackHealth()}})}
-function boot(){if(!$('extMicBtn')||!$('gpsChip')||!$('imuChip')){setTimeout(boot,200);return}ensureModal();ensureRecoveryAction();hookHomeMic();attachPersistence();decorateMicState();setTimeout(restoreSensors,450);healthTimer=setInterval(()=>{bindTrackHealth();healthCheck()},1000);logRecovery('sensor_persistence_loaded',{retryScheduleMs:RETRY_MS})}
+function boot(){if(!$('extMicBtn')||!$('gpsChip')||!$('imuChip')){setTimeout(boot,200);return}ensureModal();ensureRecoveryAction();hookHomeMic();attachPersistence();decorateMicState();setTimeout(restoreSensors,450);healthTimer=setInterval(()=>{bindTrackHealth();healthCheck()},1000);logRecovery('sensor_persistence_loaded',{retryScheduleMs:RETRY_MS,liveTrackIsAuthoritative:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
