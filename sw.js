@@ -1,7 +1,7 @@
-importScripts('./version.js?build=2026-08-17v-v34-rebuild');
+importScripts('./version.js?build=2026-08-17w-v34-rebuild-swfix');
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.6-dev';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.6 DEV';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-17v-v34-rebuild';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-17w-v34-rebuild-swfix';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-rebuild-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 const MODULES=[
@@ -18,7 +18,8 @@ const CORE=[...MODULES.map(n=>bust(n+'.js')),...STATIC.map(bust)];
 function inject(html){
  html=html.replace(/<script src=["']\.\/version\.js[^"']*["']><\/script>/i,`<script src="./version.js?v=${V}&build=${B}"></script>`);
  html=html.replace(/<link rel=["']manifest["'] href=["'][^"']+["']>/i,`<link rel="manifest" href="./manifest.webmanifest?v=${V}&build=${B}">`);
- html=html.replace(/navigator\.serviceWorker\.register\([^)]*sw\.js[^)]*\)/g,`navigator.serviceWorker.register("./sw.js?build=${BUILD}",{updateViaCache:"none"})`);
+ // Never regex-rewrite inline JavaScript here. The previous register() replacement
+ // truncated encodeURIComponent(build) and broke all handlers after SW reload.
  const tags=[];for(const n of MODULES)if(!new RegExp(`(?:\\/|\\.)${n}\\.js(?:[?"'])`).test(html))tags.push(`<script src="./${n}.js?v=${V}&build=${B}"></script>`);
  if(!html.includes('motolabFullVersion'))html=html.replace('<body>',`<body><div id="motolabFullVersion" style="position:sticky;top:0;z-index:99990;text-align:center;padding:5px 8px;background:#08090b;border-bottom:1px solid #2b1419;color:#8f949c;font:800 8px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">VÄNÄ MotorLab ${LABEL} • ${BUILD}</div>`);
  return tags.length?html.replace('</body>',tags.join('')+'</body>'):html
