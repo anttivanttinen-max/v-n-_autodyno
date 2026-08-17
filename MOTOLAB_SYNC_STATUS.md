@@ -3,158 +3,122 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.9 / build `2026-08-17d-live-status`**.
-- v32.9 was rebuilt on the then-current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` after detecting four newer v32.8 microphone-stability commits during development, then promoted by fast-forward after a final HEAD check.
-- v32.7 introduced full persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 adds the dedicated LIVE technical inspection page without changing measurement authority.
-- `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
-- v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
+- Active published line on `main`: **v33.1 / build `2026-08-17f-user-feedback`**.
+- v32.7 introduced full persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 added the dedicated LIVE technical inspection page; v33.0 added user identity/approval/cloud state; v33.1 added in-app user feedback.
+- `version.js` is the release-identity source and the Service Worker/app shell must remain aligned with it.
+- v31 remains the historical core baseline; newer modules layer onto the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
-- Current temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded.
+- Current temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); earlier 1.85 experiment is superseded.
 
-## Measurement strategy
-- Road-test / learning work uses **GPS MASTER + MIC LEARN** unless a specific explicit test mode says otherwise.
+## Measurement strategy and safety
+- Road-test / learning work uses **GPS MASTER + MIC LEARN** unless an explicit test mode says otherwise.
 - GPS/speed + selected gear remains the control RPM authority.
-- Phone microphone RPM remains a shadow/learning sensor in GPS MASTER and must not alter displayed RPM, run acceptance or gear learning.
+- Phone microphone RPM remains shadow/learning data in GPS MASTER and must not alter displayed RPM, run acceptance or gear learning.
 - GPS reference RPM may come from saved gear calibration or calculated drivetrain data.
 - Camera RPM remains disabled.
-- Historical BT/contact microphone data is retained as reference material even though the active development line focuses on the phone microphone.
-- v32.4/build 2026-08-16h remains the earlier RAW baseline for BT/contact microphone/harmonic comparisons.
+- Preserve raw/top-candidate/harmonic information for replay and later trainer evaluation.
+- User identity, feedback, LIVE and diagnostics layers are non-measurement layers and must not change RPM authority, gear-learning authority, run acceptance or dyno calculations.
 
-## Phone microphone RPM basis
-- Standalone Phone RPM Tester v3.6 produced a complete long sweep suitable for full-range development: **34.642 s / 1040 frames / displayed 1620–9890 rpm**.
-- All 1040 frames were captured with chunked IndexedDB storage.
-- Practical target accuracy is roughly **±200 rpm**, with temporary ±300 rpm tolerable; continuity and rejection of x2 / ÷2 harmonic jumps matter more than exact single-frame equality.
-- No single-frame ≥1000 rpm jumps were found in the displayed v3.6 track.
-- Raw/harmonic data repeatedly contains usable RPM information even when the strongest spectral candidate is not the final correct branch.
-- Preserve complete candidate/harmonic information; do not discard frames only because confidence is low.
-
-## Smart phone RPM sensor
-- Active smart-phone sensor module: `phone_rpm_smart.js` / `phone-rpm-smart-v1`.
-- It evaluates H1–H6 harmonic structure and simultaneous **0.5x / 1x / 2x RPM hypotheses**.
-- Candidate selection uses spectral strength, harmonic count, previous RPM, predicted RPM/velocity, temporal continuity, candidate gap and a soft GPS reference when available.
-- Large implausible branch jumps require confirmation; the tracker may hold/follow the predicted branch instead of accepting a one-frame harmonic jump.
-- Rich phone telemetry is stored in learning rows, including smart/raw/corrected/predicted RPM, chosen ratio, confidence, gap, runner-up, f0, RMS, harmonic data, top candidates and GPS assist.
+## Phone microphone / RPM basis
+- Standalone Phone RPM Tester v3.6 reference: 34.642 s / 1040 frames / displayed 1620–9890 rpm; all frames captured with chunked IndexedDB storage.
+- Practical target accuracy remains roughly ±200 rpm, with temporary ±300 rpm tolerable; continuity and rejection of x2/÷2 harmonic jumps matter more than exact single-frame equality.
+- `phone_rpm_smart.js` / `phone-rpm-smart-v1` evaluates H1–H6 and simultaneous 0.5x / 1x / 2x hypotheses using spectral strength, continuity, prediction, candidate gap and soft GPS reference.
+- Historical v32.4 RAW/contact baseline remains valid reference material, including the ~6600 rpm truth / 6591 rpm audio / 92.2% confidence contact result.
 
 ## Adaptive GPS-taught RPM learning
-- `rpm-learning-model.json` exists in the app repository using schema `motolab_rpm_learning_model_v1`.
-- The checked-in baseline model currently contains no learned bands; it defines acceptance limits for later validated models.
-- Adaptive GPS-taught RPM learning and local RAW replay were added in commits `58c1feb`, `fd6cfe4` and `fe66331`.
-- Learning is designed around **500 rpm regions**, where GPS-supervised evidence may prefer 0.5x / 1x / 2x harmonic branches.
-- Candidate continuity/prediction is part of the selection logic.
-- Existing local RAW history can be replayed through newer learning logic instead of requiring only new road data after every algorithm change.
-- Auto Gear Learn remains present, but GPS MASTER + MIC LEARN must not let microphone shadow RPM gain gear-learning authority.
-- The overnight trainer may publish a replacement model only after validation; bad/non-improving models must be rejected and rollback history kept in `Motolab-data`.
+- `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; checked-in baseline still starts with no learned bands.
+- Learning is organized around 500-rpm regions and may prefer 0.5x / 1x / 2x branches when GPS-supervised evidence supports them.
+- Candidate continuity/prediction remains part of selection.
+- Existing local RAW history can be replayed through newer logic.
+- Auto Gear Learn must not receive microphone authority in GPS MASTER + MIC LEARN.
+- Trainer may publish only validated improving models; reject bad/non-improving models and retain rollback history in `Motolab-data`.
 
-## Full-trip 3rd-gear GPS + MIC research
-- `trip_research.js` provides the **3. VAIHTEEN GPS + MIC TUTKIMUSAJO** flow.
-- The research path uses GPS MASTER and third gear as the reference structure.
-- Phone RAW research capture is intentionally non-invasive relative to normal MotoLab measurement logic.
-- The current gear-confirm development adds a third-gear guard: microphone/raw research capture pauses when the third-gear condition is not active/confirmed and resumes only deliberately.
-- Gear-guard transitions are logged in the research timeline.
-- Research data uses a separate `VanaMotoLabResearch` IndexedDB so normal runs and learning RAW storage are not disturbed.
+## Research / RAW sync
+- Third-gear GPS + MIC research uses GPS MASTER and a gear-confirm guard; microphone/raw research capture pauses when the required gear is not confirmed.
+- Research storage remains separate from normal run/learning storage.
+- RAW/research is local-first and retried after network loss/reopen.
+- Multi-phone data is separated by persistent device identity/labels.
+- Railway mirrors accepted RAW/research into private `anttivanttinen-max/Motolab-data`.
+- Receiver/read secrets must never be committed to the public app repository.
 
-## Automatic multi-phone research / RAW sync
-- Research sync is local-first; the phone retains research data and retries later after network loss/app reopen.
-- Per-device persistent identity plus driver/phone labels separate simultaneous tests.
-- RAW remains local-first and is not deleted by automatic sync.
-- Beta auth has been enabled for automatic RAW sync.
-- Receiver/read secrets must never be committed to the public application repository.
-- Received RAW/research data belongs in private `anttivanttinen-max/Motolab-data`.
-
-## Vehicle / maintenance work
-- Finland vehicle database v2 files are installed in the application repository.
-- Vehicle lookup includes Yamaha DT125R and Derbi Senda 50 families and editable drivetrain data.
-- Technical-spec editor and maintenance/history modules remain active.
-- Vehicle lookup / technical-spec refresh fixes from v32.3 must be preserved.
-
-## UI / usability
+## Vehicle / maintenance / UI
+- Finland vehicle database v2, Yamaha DT125R and Derbi Senda 50 families, editable drivetrain data, technical-spec editor and maintenance/history remain active.
 - Home-screen microphone control remains directly reachable.
-- Settings panels remain collapsible with remembered open/closed state.
-- Third-gear research confirmation buttons are part of the current build.
-- Dedicated bottom-navigation **LIVE** inspection page is active in v32.9.
-- Product split: normal measurement/home stays focused; Settings contains user-adjustable choices; LIVE contains deep technical state and observability.
-- LIVE provides a traffic-light GPS / MIC / IMU / RAW / SYNC summary and expandable cards for GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
+- Settings contains user-adjustable configuration; LIVE contains deep technical sensor/queue/diagnostic state.
+- Settings/maintenance sections should remain compact/collapsible.
 
-## v32.6 iOS microphone recovery implementation
-- v32.6 introduced fresh-stream recovery through `stopAudio()` + `startAudio()`, bounded approximately **0.5 s → 1 s → 2 s → 5 s** retry, structured recovery telemetry, and the **MIC RECOVERY • PALAUTA MIKROFONI** user-gesture action.
-- The implementation did not change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
-- Field report after v32.6 showed repeated microphone OFF/ON cycling.
+## v32.8 microphone stability correction — retained
+- `sensor_persistence.js` is `sensor-persistence-v5`.
+- Root cause of the earlier OFF/ON reconnect storm was use of `globalThis.MOTOLAB_AUDIO_LAST?.t` as a destructive frame-stale trigger without a reliable producer-backed timestamp.
+- `audio_frames_stale` no longer causes destructive reconnect; a live enabled track on an active stream is authoritative.
+- Fresh-stream teardown/recreation remains for genuinely non-live/ended tracks with existing backoff and manual recovery.
+- Real-device validation remains required: live mic must stay continuously ON while a genuinely ended/disconnected track must still recover.
+- Details: `MIC_STABILITY_V32_8.md`.
 
-## v32.8 microphone stability correction
-- `sensor_persistence.js` is now `sensor-persistence-v5`.
-- Root cause of the OFF/ON reconnect storm was the use of `globalThis.MOTOLAB_AUDIO_LAST?.t` as a destructive frame-stale trigger without a reliable producer-backed timestamp in the active repository line.
-- v32.8 removes `audio_frames_stale` as a destructive reconnect reason.
-- A live, enabled track on an active stream is authoritative for the persistence watchdog.
-- Fresh-stream teardown/recreation remains available for genuinely non-live/ended tracks and existing backoff/manual recovery behavior is retained.
-- Details are recorded in `MIC_STABILITY_V32_8.md`.
-- Real-device validation remains required: live mic must stay continuously ON while a real ended/disconnected track must still recover correctly.
-
-## v32.7 full persistent diagnostics
-- `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational only.
-- It records `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed fetches, non-OK HTTP responses, network changes, visibility/page lifecycle, media-device changes and selected Service Worker state messages.
-- It mirrors central `addLearningEvent` traffic into a local persistent ring without changing the original event call.
-- Every diagnostic record carries build/release identity, session id and a sensor snapshot where available.
+## v32.7 persistent diagnostics — retained
+- `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational.
+- It records global JS errors, unhandled rejections, console warnings/errors, failed fetch/non-OK HTTP, network/visibility/page lifecycle, media-device changes and selected Service Worker events.
 - A 500-event persistent local ring, session marker and heartbeat survive app restarts/crashes.
-- Previous sessions without a reliable clean shutdown produce `previous_session_unclean` on the next boot with the last heartbeat, sensor state and queue summary.
-- iOS `pagehide` is intentionally **not** treated as proof of clean shutdown, because the PWA may be backgrounded and later killed.
-- All known persistent queue states plus other localStorage keys containing `queue` are summarized. Queue counts/status/errors are captured without copying authentication secrets or arbitrary payload contents.
-- Pending diagnostic events carry `rawMirrored=false` and are replayed in bounded batches into the normal MotoLab RAW/learning stream as `diagnostic_replay` once `addLearningEvent` is available again.
-- Detailed architecture and safety rules are documented in `MOTOLAB_DIAGNOSTICS.md`.
-- Diagnostics must never gain authority over GPS MASTER, RPM, run acceptance, gear learning, candidate selection, sensor recovery or dyno calculations.
+- Known queue states plus other `queue` localStorage keys are summarized without copying secrets/arbitrary payloads.
+- Pending diagnostics replay into normal RAW/learning stream as `diagnostic_replay` when available.
+- Diagnostics must never gain measurement or recovery authority.
+- Details: `MOTOLAB_DIAGNOSTICS.md`.
 
-## v32.9 LIVE technical status page — active on main
-- New `live_status.js` / `motolab-live-status-v1` dynamically adds a **LIVE** button to the bottom navigation and a dedicated technical status page.
-- Normal visible navigation becomes effectively MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET; developer-only AUTOTUNE remains controlled by existing developer mode.
-- LIVE reads existing runtime state only. It does not write measurement configuration or control sensors.
-- GPS card exposes active state, speed, GPS-derived RPM and control-authority context where available.
-- MIC/RPM card exposes wanted state, track state/enabled/muted/device, audio/raw RPM, confidence, f0, candidate gap and runner-up when available.
-- Additional cards expose IMU, gear/fusion/slip, live dyno/run state, RAW learning counters, RAW/sync queue status, all diagnostics queue summaries, recent diagnostic events and system/build/PWA state.
-- `live_status_guard.js` keeps the dynamically injected LIVE page outside the legacy `.screen` count used by the existing self-test while ensuring leaving LIVE through any normal nav button hides the page correctly.
-- LIVE refreshes only while its page is active, approximately every 750 ms, to limit unnecessary UI work.
-- Details and validation checklist are documented in `LIVE_STATUS_V32_9.md`.
-- LIVE is strictly observational and must not alter GPS MASTER, RPM, run acceptance, gear learning, microphone recovery, adaptive learning or dyno calculations.
+## v32.9 LIVE technical status page — retained
+- `live_status.js` / `motolab-live-status-v1` adds the dedicated **LIVE** bottom-navigation page; `live_status_guard.js` preserves compatibility with legacy self-test/navigation behavior.
+- LIVE summary: GPS / MIC / IMU / RAW / SYNC traffic-light states.
+- Expandable cards: GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
+- LIVE reads runtime state only and refreshes only while active, about every 750 ms.
+- LIVE must not alter sensors, GPS MASTER, RPM, run acceptance, gear learning, recovery, adaptive learning or sync decisions.
+- Details: `LIVE_STATUS_V32_9.md`.
 
-## ARM AUTO / multi-pull capture
-- ARM AUTO remains a persistent session across multiple pulls.
-- Every detected pull is completed and saved as its own run; no new ARM press is required between pulls.
-- Re-arm uses cooldown/reset hysteresis and clears the pre-buffer so the previous pull tail is not merged into the next pull.
-- STOP explicitly ends/disarms the continuous ARM AUTO session.
+## v33.0 user identity / approval / cloud state — active foundation
+- v33.0 release identity was `2026-08-17e-user-identity`; v33.1 supersedes it only as the visible release number, not functionally.
+- `user_identity.js` / `motolab-user-identity-v1` creates/preserves device identity and resolves a server-side user record through the existing beta server/token path.
+- `raw_sync_server/user_server.js` adds persistent user registry, invites and per-user cloud-state storage.
+- User status values: `pending`, `active`, `blocked`.
+- Pending users see an approval lock screen and can set nickname; active users receive account UI.
+- Active users can create invitation links; admin users can list users and approve/block accounts.
+- Dynamic invites are one-use and expire after seven days; invitation values are stored hashed server-side.
+- Device tokens are HMAC-signed using `BETA_TOKEN_SECRET`; default lifetime 365 days unless configured otherwise.
+- RAW/research requests carrying beta identity are tied to an active resolved user/device identity.
+- Per-user cloud state uses `/api/users/v1/state`; selected profiles/runs/learning/sync/consent/dev state is synchronized. Existing remote state is preferred on initial sync when present, otherwise local state is uploaded. Change checks occur about every 6 seconds after activation.
 
-## Pull comparison rule
-- Development comparisons should primarily show change relative to the **previous MotoLab pull**, treated as the 100% reference.
-- PerfExpert results may be compared against the same previous MotoLab reference.
+## v33.1 in-app user feedback — active on main
+- Current release: **v33.1 / build `2026-08-17f-user-feedback`**.
+- `raw_sync_server/feedback_server.js` adds authenticated feedback storage/API using `data/users/feedback.json`.
+- Active users can submit `problem`, `update`, `development` or `other` feedback through `/api/feedback/v1/comment`.
+- Feedback items retain user/nickname/device attribution, category, message, app version, page, creation time and workflow status.
+- Workflow statuses: `new`, `reviewing`, `done`, `archived`; admin notes are supported.
+- Admin endpoints list feedback and update status.
+- `feedback.js` / `motolab-feedback-v1` adds in-app **PALAUTE** UI for users and **PALAUTTEET** admin review UI.
+- App shell/server wiring and Service Worker include the identity and feedback modules in the published PWA.
+
+## ARM AUTO / pull comparison
+- ARM AUTO remains persistent across multiple pulls; each detected pull saves separately, cooldown/reset hysteresis re-arms automatically, STOP explicitly disarms.
+- Development comparisons should primarily use the previous MotoLab pull as the 100% reference; PerfExpert can be compared against the same reference.
 - Compare peak power, peak torque and useful-range/curve performance, not only one peak point.
 
-## Contact RPM reference
-- Preferred historical contact mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
-- Strong reference: approximately 6600 rpm truth, 6591 rpm audio average, 92.2% confidence, f0 ~109–112 Hz, harmonics ~220/330/440/550/660 Hz.
-- Older tests without the extension nut remain a separate calibration set.
-
-## Native iOS / AirPods motion research
-- `ios/AirPodsMotionTest/` contains the native SwiftUI `CMHeadphoneMotionManager` experiment.
-- Real-device installation/code signing remains postponed while Apple Developer enrollment is unresolved.
-- AirPods motion remains experimental and is not a validated MotoLab RPM source.
-
 ## Current validation priorities
-- Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
-- Real-device validate v32.9 LIVE navigation and telemetry without measurement-performance regression.
-- Confirm LIVE GPS/MIC/IMU/RAW/SYNC traffic lights match actual states and that queue/error details are readable.
-- Validate v32.7 diagnostics on a real iPhone: confirm errors/queue transitions survive reload, `previous_session_unclean` appears after an abrupt termination, and retained diagnostic events replay into RAW.
-- Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
-- Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
-- Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
-- Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
+- Real-device validate v32.8 mic stability: no false OFF/ON cycle and genuine ended-track recovery still works.
+- Real-device validate v32.9 LIVE navigation, traffic lights, queue/error details and no measurement-performance regression.
+- Validate v32.7 diagnostics persistence across abrupt termination and RAW replay.
+- Validate v33.0 identity end-to-end: invite → pending nickname → admin approval → active, blocked state, token persistence, multi-device behavior and cloud-state restore/sync.
+- Confirm RAW/research uploads are correctly associated with active user/device identity and rejected for non-active users.
+- Validate v33.1 feedback end-to-end: submission, attribution/version capture, admin list/status workflow and server-restart persistence.
+- Validate adaptive candidate tracking against GPS, 500-rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
-- Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains intentionally parked.
-- FI/EN language-system work exists only on a separate unpromoted development branch and must not be treated as active until explicitly resumed.
+- Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
+- FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
+- User identity/cloud sync and in-app feedback are newly published and still require real multi-user/device field validation.
 
 ## Durable project-memory rule
 - GitHub is the durable MotoLab project memory.
-- Important decisions, test results, RAW interpretations, build changes, regressions/fixes and unfinished work must be archived in `MOTOLAB_CONVERSATION_ARCHIVE.md` and, when they change the active handoff, here.
-- A recurring archive job checks for new relevant MotoLab information and updates documentation only; it must not alter application code or create empty commits.
-- Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
+- Archive important decisions, tests, RAW interpretations, build changes, regressions/fixes and unfinished work in `MOTOLAB_CONVERSATION_ARCHIVE.md` and, when they change active handoff, here.
+- The recurring archive job updates documentation only; it must not alter application code or create empty commits.
+- Before implementation, check current `main`, this status, archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export/replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/PWA behavior, persistent diagnostics, v32.8 microphone stability, LIVE technical inspection, v33.x identity/cloud/feedback layers, and keep native AirPods motion experimental until validated on a real device.
