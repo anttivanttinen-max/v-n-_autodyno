@@ -1,0 +1,34 @@
+{
+  "schema":"motolab_vehicle_125_completion_round7",
+  "updated":"2026-08-16",
+  "production":false,
+  "rules":{"probableNeverForcesGear":true,"gpsRpmLearningOverridesCatalog":true,"generationSpecific":true},
+  "gearboxes":{
+    "KTM_EXC125_2010":{"speeds":6,"primaryRatio":3.174,"primaryTeeth":"73/23","ratios":[2.750,2.067,1.647,1.368,1.190,1.000],"confidence":"verified-owner-manual"},
+    "HUSQVARNA_TE125_2015":{"speeds":6,"primaryRatio":3.174,"primaryTeeth":"73/23","ratios":[2.750,2.067,1.647,1.368,1.190,1.000],"confidence":"verified-owner-manual-copy"},
+    "HONDA_NSR125R_1993":{"speeds":6,"primaryRatio":3.260,"ratios":[3.091,2.000,1.471,1.211,1.043,0.917],"confidence":"verified-service-manual-copy"},
+    "KAWASAKI_KLX125":{"speeds":5,"primaryRatio":2.880,"ratios":[2.917,2.000,1.474,1.182,1.000],"confidence":"verified-owner-manual"},
+    "DERBI_GPR125_2T":{"speeds":6,"primaryRatio":3.227,"ratios":[2.833,1.875,1.412,1.143,0.957,0.818],"confidence":"verified-workshop-manual","notes":"Source print shows 34/12 = 2.883 in one rendering; tooth count mathematically equals 2.833. Stored ratio uses tooth-count result."},
+    "DERBI_GPR125_4T":{"speeds":6,"primaryRatio":3.042,"ratios":[3.000,2.000,1.500,1.200,1.080,1.045],"confidence":"verified-workshop-manual"},
+    "CAGIVA_MITO125_6S_LATE":{"speeds":6,"primaryRatio":3.272,"ratios":[2.727,1.857,1.411,1.142,0.956,0.863],"confidence":"probable-secondary-crosscheck"}
+  },
+  "vehicleOverlays":[
+    {"targetId":"ktm-exc125","generation":"2010 EU road-homologated reference","engine":{"displacementCc":124.8,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"KTM_EXC125_2010","status":"verified-generation"},
+    {"targetId":"husqvarna-te125","generation":"2015","engine":{"displacementCc":124.8,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"HUSQVARNA_TE125_2015","status":"verified-generation"},
+    {"targetId":"honda-nsr125r","generation":"1993 service-manual reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"HONDA_NSR125R_1993","status":"verified-generation"},
+    {"targetId":"kawasaki-klx125","engine":{"displacementCc":125,"boreMm":54.0,"strokeMm":54.4,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"KAWASAKI_KLX125","status":"verified"},
+    {"targetId":"kawasaki-dtracker125","engine":{"displacementCc":125,"boreMm":54.0,"strokeMm":54.4,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"KAWASAKI_KLX125","gearboxOverrideConfidence":"probable-shared-platform","status":"probable"},
+    {"targetId":"derbi-gpr125-2t","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid","carburetor":"Mikuni TM28"},"gearbox":"DERBI_GPR125_2T","status":"verified"},
+    {"targetId":"derbi-gpr125-4t","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"DERBI_GPR125_4T","status":"verified"},
+    {"targetId":"cagiva-mito125","generation":"later 6-speed reference","engine":{"displacementCc":124.6,"boreMm":56.0,"strokeMm":50.6,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"CAGIVA_MITO125_6S_LATE","status":"probable-needs-generation-selection"}
+  ],
+  "sources":[
+    {"title":"KTM 125 EXC EU 2010 owner manual","url":"https://manualzz.com/doc/48443628/ktm-125-exc-eu-motorcycle-owner-s-manual"},
+    {"title":"Husqvarna TE125 2015 owner manual copy","url":"https://www.scribd.com/document/989482155/2015-Husqvarna-TE-125-250-300-Owners-Manual"},
+    {"title":"Honda NSR125R 1993 maintenance manual copy","url":"https://www.scribd.com/doc/297447180/Manual-de-mantenimiento-Honda-NSR-125-F-R-1993-Castellano-40-Hojas-pdf"},
+    {"title":"Kawasaki KLX125 owner manual","url":"https://dokumen.pub/kawasaki-klx125-owner-manual-99976-1655-z-2967655.html"},
+    {"title":"Derbi GPR125 Racing workshop manual","url":"https://www.manualslib.com/manual/845094/Derbi-Gpr-125-Racing.html?page=12"},
+    {"title":"Derbi GPR125 4T workshop manual copy","url":"https://fr.scribd.com/document/814837756/DERFR-31861-ManualAtelierGpr1254t"},
+    {"title":"Cagiva Mito 125 late 6-speed crosscheck","url":"https://cagivamitoevo125.blogspot.com/2013/07/cagiva-mito-125-history-technical_26.html"}
+  ]
+}

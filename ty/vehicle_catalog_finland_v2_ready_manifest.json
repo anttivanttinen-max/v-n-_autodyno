@@ -1,0 +1,55 @@
+{
+  "schema":"motolab_finland_vehicle_catalog_ready_manifest_v2",
+  "updated":"2026-08-16",
+  "production":false,
+  "readyForControlledIntegration":true,
+  "installRequiresExplicitUserApproval":true,
+  "base":"vehicle_catalog_finland_complete_staging.json",
+  "overlayOrder":[
+    "vehicle_catalog_finland_125_completion_v2.json",
+    "vehicle_catalog_finland_125_completion_round5.json",
+    "vehicle_catalog_finland_125_completion_round6.json",
+    "vehicle_catalog_finland_125_completion_round7.json",
+    "vehicle_catalog_finland_125_completion_round8.json",
+    "vehicle_catalog_finland_125_completion_round9.json",
+    "vehicle_catalog_finland_125_completion_round10.json",
+    "vehicle_catalog_finland_completion_round11.json",
+    "vehicle_catalog_finland_completion_round12.json"
+  ],
+  "mergePolicy":{
+    "laterOverlayWinsForSameField":true,
+    "gearboxDefinitionsMergeByKey":true,
+    "vehicleOverlaysMatchByTargetId":true,
+    "verifiedBeatsProbableWhenConflict":true,
+    "probableRatiosAreWeakPriorsOnly":true,
+    "probableRatiosMustNeverForceGear":true,
+    "gpsRpmLearningOverridesCatalog":true,
+    "userProfileOverridesCatalog":true,
+    "generationSpecific":true,
+    "overallTransmissionRatiosMustNotBeUsedAsInternalRatios":true,
+    "nullExactRatiosStayNull":true
+  },
+  "integrationTargets":[
+    "vehicle lookup result display",
+    "profile drivetrain seed",
+    "Gear Learn weak-prior seed",
+    "engine/basic technical data display"
+  ],
+  "safetyChecksBeforeMain":[
+    "build merged staging catalog",
+    "validate JSON and unique vehicle IDs",
+    "validate gear ratio arrays against gear count",
+    "do not reinterpret overallTransmissionRatios as internal ratios",
+    "ensure probable/candidate values cannot override learned GPS/RPM data",
+    "test searches for representative 50cc and 125cc models",
+    "only then update main after explicit approval"
+  ],
+  "knownExactRatioGaps":[
+    "Benelli BN125",
+    "Benelli TNT125",
+    "Brixton Cromwell/BX125 internal-only ratios",
+    "Brixton Felsberg125 internal-only ratios",
+    "Keeway RKF125",
+    "some old/new generation splits where a model name spans different engines"
+  ]
+}

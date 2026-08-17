@@ -1,0 +1,105 @@
+{
+  "schema": "motolab_vehicle_125_completion_v2",
+  "updated": "2026-08-16",
+  "production": false,
+  "policy": {
+    "roadLegalFinlandPriority": true,
+    "gearRatiosArePrimaryResearchTarget": true,
+    "verifiedMaySeedGearLearn": true,
+    "probableIsWeakPriorOnly": true,
+    "probableMustNeverForceGear": true,
+    "gpsRpmLearnedDataOverridesCatalog": true,
+    "generationSpecific": true,
+    "doNotMergeWithoutApproval": true
+  },
+  "gearboxes": {
+    "YAMAHA_DT125R": {"speeds":6,"ratios":[2.833,1.875,1.412,1.143,0.957,0.818],"primaryRatio":3.227,"confidence":"verified"},
+    "YAMAHA_125_4T": {"speeds":6,"ratios":[2.833,1.875,1.364,1.143,0.957,0.840],"primaryRatio":3.042,"confidence":"verified-early-primary-current-ratios"},
+    "YAMAHA_YBR_XT125_5": {"speeds":5,"ratios":[2.643,1.778,1.316,1.045,0.875],"primaryRatio":3.400,"confidence":"verified-manual-family"},
+    "HONDA_CBR125R": {"speeds":6,"ratios":[3.455,1.941,1.450,1.174,1.041,0.923],"primaryRatio":3.350,"confidence":"verified-service-manual"},
+    "HONDA_CB125R_2021": {"speeds":6,"ratios":[3.083,1.941,1.500,1.227,1.041,0.923],"primaryRatio":3.260,"confidence":"verified-owner-manual"},
+    "HONDA_CBF125_2010": {"speeds":5,"ratios":[3.076,1.944,1.473,1.190,1.038],"primaryRatio":3.350,"confidence":"verified-honda-press-data"},
+    "HONDA_CBF125_2024": {"speeds":5,"ratios":[3.454,1.933,1.315,1.095,0.933],"primaryRatio":3.421,"confidence":"verified-owner-manual"},
+    "HONDA_XL125V_VARADERO": {"speeds":5,"ratios":[3.083,1.933,1.428,1.173,1.000],"primaryRatio":3.722,"confidence":"verified-shop-manual"},
+    "HONDA_XR125L": {"speeds":5,"ratios":[2.769,1.882,1.400,1.130,0.960],"primaryRatio":3.333,"confidence":"verified-owner-manual"},
+    "KAWASAKI_NINJA_Z125": {"speeds":6,"ratios":[2.833,1.875,1.444,1.208,1.056,0.962],"primaryRatio":2.966,"confidence":"verified-manufacturer"},
+    "KAWASAKI_ELIMINATOR125": {"speeds":5,"ratios":[2.700,1.705,1.300,1.090,0.952],"primaryRatio":3.666,"confidence":"verified-service-manual"},
+    "SUZUKI_GSXR_GSXS125": {"speeds":6,"ratios":[2.923,1.933,1.476,1.217,1.045,0.925],"primaryRatio":3.285,"confidence":"verified-service-manual-copy"},
+    "SUZUKI_RV125_VANVAN": {"speeds":6,"ratios":[3.000,1.857,1.368,1.095,0.923,0.833],"primaryRatio":3.470,"confidence":"verified-service-manual"},
+    "SUZUKI_GN125F": {"speeds":5,"ratios":[3.000,1.857,1.368,1.095,0.957],"primaryRatio":3.470,"confidence":"verified-service-manual"},
+    "APRILIA_RS125_ROTAX_2T": {"speeds":6,"ratios":[3.000,2.071,1.588,1.316,1.143,1.045],"primaryRatio":3.316,"confidence":"verified-owner-manual"},
+    "APRILIA_RX_SX125_2T": {"speeds":6,"ratios":[3.000,2.071,1.588,1.316,1.143,1.045],"primaryRatio":3.316,"confidence":"verified-service-station-manual-generation"},
+    "APRILIA_RS4_125_4T": {"speeds":6,"ratios":[3.000,2.000,1.500,1.200,1.080,0.956],"confidence":"verified-service-manual-generation"},
+    "BETA_RR125_2T_2018": {"speeds":6,"ratios":[2.750,2.067,1.647,1.368,1.190,1.000],"primaryRatio":3.174,"confidence":"verified-workshop-manual"},
+    "BETA_RR125_4T_OLD": {"speeds":5,"primaryRatio":3.400,"ratios":null,"confidence":"partial-verified"},
+    "HUSQVARNA_WRE_SM125_2003": {"speeds":6,"ratios":[2.692,1.800,1.333,1.100,0.954,0.869],"primaryRatio":3.272,"confidence":"verified-owner-manual-generation"},
+    "CAGIVA_RAPTOR_PLANET125": {"speeds":6,"ratios":[2.727,1.857,1.352,1.095,0.956,0.863],"primaryRatio":3.272,"confidence":"verified-owner-manual"},
+    "HYOSUNG_GT125_GT125R": {"speeds":5,"ratios":[2.750,1.790,1.350,1.090,0.910],"confidence":"verified-service-manual"},
+    "FANTIC_CABALLERO125_E5": {"speeds":6,"ratios":[2.833,1.875,1.364,1.143,0.957,0.840],"primaryRatio":3.042,"confidence":"verified-owner-manual-copy"},
+    "FANTIC_XE125_2023": {"speeds":6,"ratios":[2.385,1.933,1.588,1.353,1.176,1.056],"confidence":"verified-owner-manual"},
+    "KTM_DUKE_RC125_EARLY": {"speeds":6,"ratios":[2.917,2.143,1.556,1.238,1.045,0.917],"primaryRatio":3.273,"confidence":"probable-composite-manual"}
+  },
+  "vehicleOverlays": [
+    {"targetId":"yamaha-dt125r-x","engine":{"displacementCc":124,"boreMm":56.0,"strokeMm":50.7,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"YAMAHA_DT125R","status":"verified"},
+    {"targetId":"yamaha-yzf-r125-early","engine":{"displacementCc":124.7,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"YAMAHA_125_4T","status":"verified"},
+    {"targetId":"yamaha-yzf-r125-vva","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid","valvetrain":"VVA"},"gearbox":"YAMAHA_125_4T","gearboxOverrideConfidence":"verified-ratios-primary-probable","status":"researched"},
+    {"targetId":"yamaha-mt125-early","engine":{"displacementCc":124.7,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"YAMAHA_125_4T","status":"verified"},
+    {"targetId":"yamaha-mt125-vva","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid","valvetrain":"VVA"},"gearbox":"YAMAHA_125_4T","gearboxOverrideConfidence":"probable-current-generation","status":"researched"},
+    {"targetId":"yamaha-wr125r-x","engine":{"displacementCc":124.7,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"YAMAHA_125_4T","status":"verified"},
+    {"targetId":"yamaha-ybr125","engine":{"displacementCc":123.7,"boreMm":54.0,"strokeMm":54.0,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"YAMAHA_YBR_XT125_5","status":"verified-generation"},
+    {"targetId":"yamaha-xt125r-x","engine":{"displacementCc":124,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"YAMAHA_YBR_XT125_5","status":"verified-manual-copy"},
+
+    {"targetId":"honda-cbr125r","engine":{"displacementCc":124.7,"boreMm":58.0,"strokeMm":47.2,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"HONDA_CBR125R","status":"verified"},
+    {"targetId":"honda-cb125r","generation":"2021-family","engine":{"displacementCc":125,"boreMm":57.3,"strokeMm":48.4,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"HONDA_CB125R_2021","status":"verified-generation"},
+    {"targetId":"honda-cbf125","generation":"2010-family","engine":{"displacementCc":124.7,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"HONDA_CBF125_2010","status":"verified-generation"},
+    {"targetId":"honda-cb125f","generation":"2024-family","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"HONDA_CBF125_2024","status":"verified-generation"},
+    {"targetId":"honda-xl125v-varadero","engine":{"displacementCc":124,"cylinders":2,"configuration":"V2","cycle":"4T","cooling":"liquid"},"gearbox":"HONDA_XL125V_VARADERO","status":"verified-generation"},
+    {"targetId":"honda-xr125l","engine":{"displacementCc":124,"boreMm":56.5,"strokeMm":49.5,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"HONDA_XR125L","status":"verified"},
+
+    {"targetId":"kawasaki-ninja125","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"KAWASAKI_NINJA_Z125","status":"verified"},
+    {"targetId":"kawasaki-z125","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"KAWASAKI_NINJA_Z125","status":"verified"},
+    {"targetId":"kawasaki-eliminator125","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T"},"gearbox":"KAWASAKI_ELIMINATOR125","status":"verified-generation"},
+
+    {"targetId":"suzuki-gsx-r125","engine":{"displacementCc":124.4,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"SUZUKI_GSXR_GSXS125","status":"verified-copy"},
+    {"targetId":"suzuki-gsx-s125","engine":{"displacementCc":124.4,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"SUZUKI_GSXR_GSXS125","status":"verified-copy"},
+    {"targetId":"suzuki-vanvan125","engine":{"displacementCc":125,"boreMm":57.0,"strokeMm":48.8,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"SUZUKI_RV125_VANVAN","status":"verified"},
+    {"targetId":"suzuki-gn125","engine":{"displacementCc":124,"boreMm":57.0,"strokeMm":48.8,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"SUZUKI_GN125F","status":"verified-generation"},
+
+    {"targetId":"aprilia-rs125-2t","engine":{"displacementCc":124.8,"cylinders":1,"cycle":"2T","cooling":"liquid","engineFamily":"Rotax-era"},"gearbox":"APRILIA_RS125_ROTAX_2T","status":"verified"},
+    {"targetId":"aprilia-rs125-4t","generation":"RS4/early modern 4T reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"APRILIA_RS4_125_4T","gearboxOverrideConfidence":"probable-for-modern-RS-until-exact-generation-match","status":"researched"},
+    {"targetId":"aprilia-sx125","generation":"2T service-station generation reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"APRILIA_RX_SX125_2T","status":"verified-generation"},
+    {"targetId":"aprilia-rx125","generation":"2T service-station generation reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"APRILIA_RX_SX125_2T","status":"verified-generation"},
+
+    {"targetId":"beta-rr125-2t","generation":"2018-family","engine":{"displacementCc":124.8,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"BETA_RR125_2T_2018","status":"verified-generation"},
+    {"targetId":"beta-rr125-4t","generation":"older air-cooled 5-speed","engine":{"displacementCc":124,"boreMm":54.0,"strokeMm":54.0,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"BETA_RR125_4T_OLD","status":"partial-needs-generation-split"},
+
+    {"targetId":"husqvarna-sm125","generation":"2003-era SMS/SM","engine":{"displacementCc":124.8,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"HUSQVARNA_WRE_SM125_2003","status":"verified-generation"},
+    {"targetId":"husqvarna-wre125","generation":"2003-era","engine":{"displacementCc":124.8,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"HUSQVARNA_WRE_SM125_2003","status":"verified-generation"},
+
+    {"targetId":"cagiva-raptor125","generation":"2003-2007 family","engine":{"displacementCc":125,"boreMm":56.0,"strokeMm":50.6,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"CAGIVA_RAPTOR_PLANET125","status":"verified"},
+    {"targetId":"hyosung-gt125r","engine":{"displacementCc":124.7,"cylinders":2,"configuration":"V2","cycle":"4T","cooling":"air/oil"},"gearbox":"HYOSUNG_GT125_GT125R","status":"verified-service-manual"},
+    {"targetId":"hyosung-gt125","engine":{"displacementCc":124.7,"cylinders":2,"configuration":"V2","cycle":"4T","cooling":"air/oil"},"gearbox":"HYOSUNG_GT125_GT125R","status":"verified-service-manual"},
+
+    {"targetId":"fantic-caballero125","generation":"Euro5 2021-2024 reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"FANTIC_CABALLERO125_E5","status":"verified-generation"},
+    {"targetId":"fantic-xmf-xef125","generation":"XE 125 2023 2T reference only","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"FANTIC_XE125_2023","gearboxOverrideConfidence":"reference-only-model-mismatch-risk","status":"candidate-not-auto-apply"},
+
+    {"targetId":"ktm-duke125","generation":"early 2010s reference","engine":{"displacementCc":125,"boreMm":58.0,"strokeMm":47.2,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"KTM_DUKE_RC125_EARLY","status":"probable"},
+    {"targetId":"ktm-rc125","generation":"early 2010s reference","engine":{"displacementCc":125,"boreMm":58.0,"strokeMm":47.2,"cylinders":1,"cycle":"4T","cooling":"liquid"},"gearbox":"KTM_DUKE_RC125_EARLY","status":"probable"}
+  ],
+  "stillPending": [
+    "yamaha-tzr125","yamaha-tdr125","yamaha-ys125","ktm-exc125","ktm-125-smc-r","ktm-125-enduro-r","husqvarna-wr125","husqvarna-te125","husqvarna-svartpilen125","husqvarna-vitpilen125","honda-nsr125r","honda-msx125","honda-monkey125","honda-vt125-shadow","aprilia-tuono125","beta-rr125-4t-current","kawasaki-klx125","kawasaki-dtracker125","kawasaki-kmx125","suzuki-dr125sm","suzuki-gz125-marauder","suzuki-rg125","derbi-gpr125-2t","derbi-gpr125-4t","derbi-mulhacen125","derbi-terra125","cagiva-mito125","benelli-bn125","benelli-tnt125","keeway-rkf125","keeway-rks125","keeway-superlight125","keeway-tx125","brixton-bx-cromwell125","brixton-felsberg125","zontes-zt125"
+  ],
+  "sources": [
+    {"id":"beta-rr125-2018","title":"Beta RR 125 2T MY2018 workshop manual","url":"https://www.manualslib.com/manual/1725767/Beta-Motorcycles-Rr-125-2t-My-2018.html"},
+    {"id":"cagiva-raptor-2007","title":"Cagiva Raptor 125 2007 owner manual","url":"https://manualzz.com/doc/68159969/cagiva-2007-raptor-125-e-3-owner-s-manual"},
+    {"id":"hyosung-gt125","title":"Hyosung GT125/GT125R service manual","url":"https://manualzz.com/doc/2239915/hyosung-gt-125-r--gt-250-r-motorcycle-servicemanual"},
+    {"id":"honda-cbf125","title":"Honda CBF125 press pack","url":"https://hondanews.eu/eu/cs/cars/media/pressreleases/34824/cbf125-press-pack"},
+    {"id":"honda-cb125r-2021","title":"Honda CB125R 2021 owner manual specifications","url":"https://ownersmanuals2.com/honda/cbf125nacb125r-2021-owners-manual-85038/page-119"},
+    {"id":"honda-xr125l","title":"Honda XR125L owner manual specifications","url":"https://www.manualslib.es/manual/109527/Honda-Xr125L.html"},
+    {"id":"suzuki-rv125","title":"Suzuki RV125 service manual","url":"https://www.manualslib.com/manual/1598504/Suzuki-Rv125.html"},
+    {"id":"suzuki-gn125f","title":"Suzuki GN125F service manual","url":"https://www.manualslib.com/manual/1260371/Suzuki-Gn125f.html"},
+    {"id":"fantic-caballero-e5","title":"Fantic Caballero 125 E5 owner manual copy","url":"https://it.scribd.com/document/948113117/08114005-LUM-Fantic-Caballero-125-E5-00-2022-IT"},
+    {"id":"fantic-xe125","title":"Fantic XX/XE 125 2023 manual","url":"https://www.manualslib.com/manual/3091594/Fantic-Xx-125.html"},
+    {"id":"yamaha-yzfr125-2023","title":"Yamaha YZF-R125 2023 owner manual specifications","url":"https://www.manuals.co.uk/yamaha/yzf-r125-2023/manual?p=95"}
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema":"motolab_vehicle_completion_round12",
+  "updated":"2026-08-16",
+  "production":false,
+  "rules":{"neverInventInternalRatios":true,"probableNeverForcesGear":true,"gpsRpmLearningOverridesCatalog":true,"generationSpecific":true},
+  "gearboxes":{
+    "SUZUKI_GZ125_MARAUDER":{"speeds":5,"primaryRatio":3.470588,"primaryTeeth":"59/17","ratios":[3.000,1.857143,1.368421,1.095238,0.913043],"gearTeeth":["33/11","26/14","26/19","23/21","21/23"],"confidence":"verified-oem-parts-tooth-counts"}
+  },
+  "vehicleOverlays":[
+    {"targetId":"benelli-bn125","engine":{"displacementCc":125,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"4T","cooling":"air"},"speeds":5,"gearRatios":null,"gearRatioConfidence":"pending-exact","status":"engine-and-gear-count-verified"},
+    {"targetId":"benelli-tnt125","engine":{"displacementCc":125,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"4T","cooling":"air"},"speeds":5,"gearRatios":null,"gearRatioConfidence":"pending-exact","status":"engine-and-gear-count-verified"},
+    {"targetId":"brixton-bx-cromwell125","generation":"2025 BX125/BX125XT manual reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"air"},"speeds":5,"gearRatios":null,"overallTransmissionRatios":[33.767,21.257,15.881,12.858,10.515],"finalRatio":3.286,"gearRatioConfidence":"pending-internal-ratios","status":"overall-ratios-verified-do-not-use-as-internal"},
+    {"targetId":"brixton-felsberg125","generation":"BX125 family reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"4T","cooling":"air"},"speeds":5,"gearRatios":null,"gearRatioConfidence":"pending-exact","status":"engine-and-gear-count-verified"},
+    {"targetId":"keeway-rkf125","engine":{"displacementCc":125,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"4T","cooling":"liquid"},"speeds":6,"gearRatios":null,"gearRatioConfidence":"pending-exact","status":"engine-and-gear-count-verified"},
+    {"targetId":"suzuki-gz125-marauder","engine":{"displacementCc":124,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"SUZUKI_GZ125_MARAUDER","status":"verified-oem-tooth-counts"}
+  ],
+  "notes":[
+    "Brixton manual's 33.767/21.257/15.881/12.858/10.515 values are stored separately as overallTransmissionRatios. They must not be interpreted as the internal 1st-5th gearbox pair ratios.",
+    "Benelli BN125/TNT125 exact internal tooth-pair ratios were not located from a sufficiently reliable model-specific source in this research pass. The app should show the model and gear count but leave exact internal ratios pending.",
+    "Suzuki GZ125 ratios are calculated directly from OEM gear tooth counts: 33/11, 26/14, 26/19, 23/21 and 21/23. Primary reduction is 59/17 from OEM primary driven/drive gear tooth counts."
+  ],
+  "sources":[
+    {"title":"Brixton Cromwell 125 ABS 2025 owner manual technical data","url":"https://www.manualslib.de/manual/1488418/Brixton-Cromwell-125-Abs-2025.html"},
+    {"title":"Brixton Cromwell 125 owner manual engine and 5-speed data","url":"https://www.manualslib.de/manual/841906/Brixton-Cromwell-125.html?page=45"},
+    {"title":"Brixton service manual index","url":"https://foromotos.net/resources/"},
+    {"title":"Benelli BN125 manufacturer specification reference","url":"https://benelli.co.uk/model/2026-benelli-bn-125-2179/pmw-scooters-bikes-54"},
+    {"title":"Keeway RKF125 manufacturer specifications","url":"https://www.keeway.com/int-en/products/rkf-125"},
+    {"title":"Suzuki GZ125 OEM transmission tooth counts","url":"https://fr.scribd.com/document/50770314/125cc-20-GZ125-20AP131-201998-2000"},
+    {"title":"Suzuki GZ125 OEM primary driven gear assembly","url":"https://www.npm.fi/fi/varaosa-luettelot/suzuki/125-cc/gz-125-x/14-kytkin"},
+    {"title":"Suzuki OEM primary drive gear 21111-05200 NT17","url":"https://www.revzilla.com/oem/suzuki/suzuki-21111-05200-0c0-gear-primary-drive-nt17"}
+  ]
+}

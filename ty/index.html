@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060204">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VÄNÄ MOTOLAB v32.4</title>
+<style>
+:root{
+ --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
+ --green:#3bf06b;--yellow:#ffc62b;--blue:#35a7ff;--white:#f6f7f9;--muted:#99a0aa;--line:#302126;
+}
+*{box-sizing:border-box}html,body{margin:0;background:#000;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent 23%),linear-gradient(#020202,#080305 55%,#010101)}
+.app{width:min(100vw,440px);min-height:100vh;margin:auto;padding:8px 8px calc(16px + env(safe-area-inset-bottom));position:relative;overflow:hidden;background:
+ radial-gradient(circle at 77% 13%,rgba(255,20,55,.12),transparent 24%),
+ repeating-linear-gradient(115deg,transparent 0 51px,rgba(255,40,65,.045) 51px 54px,transparent 54px 102px),
+ linear-gradient(180deg,#040203,#090406 60%,#030202)}
+.topbar{position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.brand{font-weight:1000;font-style:italic;letter-spacing:-.04em;font-size:13px}.brand .red{color:var(--red)}
+.statuses{display:flex;gap:4px;align-items:center}
+.spill{border:1px solid rgba(255,255,255,.08);background:#0d0f13;color:#d9dce0;border-radius:9px;padding:5px 6px;font-size:7px;font-weight:1000;display:flex;gap:4px;align-items:center}
+.spill.clickable{cursor:pointer}.dot{width:7px;height:7px;border-radius:50%;background:#555b63}.dot.on{background:var(--green);box-shadow:0 0 10px rgba(59,240,107,.55)}.dot.warn{background:var(--yellow)}
+.ver{font-size:8px;color:var(--red);font-weight:1000;border:1px solid rgba(255,38,63,.4);padding:4px 5px;border-radius:8px;background:#15070a}
+
+.hero{height:445px;margin-top:6px;position:relative;border-radius:18px;overflow:hidden;z-index:3;background:linear-gradient(180deg,rgba(12,9,11,.54),rgba(5,4,5,.22))}
+.logo{position:absolute;left:6px;top:10px;z-index:7}.logo1{font-size:57px;line-height:.82;font-weight:1000;font-style:italic;letter-spacing:-4px;transform:skewX(-10deg) rotate(-4deg)}.logo2{font-size:42px;line-height:.88;font-weight:1000;font-style:italic;letter-spacing:-2px;color:var(--red);transform:skewX(-10deg) rotate(-5deg)}
+.tag{margin-top:8px;font-size:8px;font-weight:900;letter-spacing:.15em;color:#cfd2d6}
+.bike{position:absolute;right:-26px;top:38px;width:270px;max-width:68%;opacity:.53;filter:saturate(.7) brightness(.72) contrast(1.08) drop-shadow(0 18px 22px rgba(0,0,0,.65));z-index:1}
+.heroChartBox{position:absolute;right:-2px;top:119px;width:58%;height:206px;z-index:5;border-radius:14px;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.26))}
+.heroChartTitle{position:absolute;top:4px;left:7px;color:var(--red);font-size:7px;font-weight:1000}.heroChartBox canvas{position:absolute;left:0;bottom:0;width:100%;height:178px}
+.gauge{position:absolute;left:-7px;bottom:4px;width:270px;height:260px;z-index:6}
+.gaugeRing{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 220deg,var(--red) 0 150deg,rgba(255,255,255,.08) 150deg 240deg,transparent 240deg);-webkit-mask:radial-gradient(circle,transparent 0 73%,#000 74%);mask:radial-gradient(circle,transparent 0 73%,#000 74%);filter:drop-shadow(0 0 16px rgba(255,38,63,.3))}
+.tick{position:absolute;font-size:11px;font-weight:1000}.t0{left:22px;bottom:46px}.t2{left:40px;top:112px}.t4{left:75px;top:62px}.t6{left:126px;top:42px}.t8{right:73px;top:62px}.t10{right:31px;top:116px}.t12{right:19px;bottom:48px}
+.gcenter{position:absolute;left:50%;top:80px;transform:translateX(-50%);width:146px;height:146px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#191b21,#050609 73%);border:1px solid rgba(255,255,255,.12)}
+.gcenter .small{font-size:10px;font-weight:900}.gcenter .rpm{font-size:47px;font-weight:1000;line-height:.95}.gcenter .source{font-size:7px;margin-top:7px;padding:4px 7px;border-radius:8px;background:#101217;border:1px solid rgba(255,255,255,.08)}.gcenter .source b{color:var(--red)}
+.needle{position:absolute;left:50%;top:148px;width:87px;height:4px;border-radius:99px;background:linear-gradient(90deg,#fff,var(--red));transform-origin:0 50%;transform:rotate(-25deg);box-shadow:0 0 10px rgba(255,38,63,.55);transition:transform .08s linear}.needle:before{content:"";position:absolute;left:-7px;top:-5px;width:12px;height:12px;border-radius:50%;background:#eee;border:2px solid #fff}
+.gearBadge{position:absolute;right:11px;bottom:22px;z-index:7;width:84px;height:84px;border-radius:50%;background:radial-gradient(circle,#15171c,#07080b);border:1px solid rgba(255,38,63,.45);display:flex;flex-direction:column;align-items:center;justify-content:center}.gearBadge span{font-size:7px;color:#9ba1a9;font-weight:1000}.gearBadge b{font-size:31px;line-height:1}.gearBadge small{font-size:7px;color:var(--green);font-weight:1000}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px;position:relative;z-index:4}.metric{min-height:78px;border-radius:14px;padding:9px;background:linear-gradient(#111319,#08090c);border:1px solid rgba(255,255,255,.09)}.metric.red{border-color:rgba(255,38,63,.48)}.metric span{font-size:7px;font-weight:1000;color:#aeb4bc}.metric.red span{color:var(--red)}.metric b{display:block;font-size:24px;margin-top:6px}.metric small{font-size:8px;color:#aaa}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px;position:relative;z-index:4}.ctl{min-height:78px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:linear-gradient(#121419,#08090c);color:#fff;position:relative;padding:7px 5px;text-align:center}.ctl.on{background:linear-gradient(#153c18,#0b220d);border-color:#3b8e42}.ctl.hot.on{background:linear-gradient(#6a1220,#31080e);border-color:var(--red)}.ctl .ico{font-size:21px}.ctl .lbl{font-size:9px;font-weight:1000;margin-top:4px}.ctl .state{font-size:7px;color:#9ba0a8;margin-top:3px}.ctl.on .state{color:#63f56c}.ctl.hot.on .state{color:#ff6172}.ib{position:absolute;right:5px;top:5px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.15);background:#15171b;color:#ddd;font-size:8px;font-weight:1000;z-index:6}body.info-off .ib{display:none!important}body:not(.dev-mode) .devOnly{display:none!important}
+
+.screen{display:none;position:relative;z-index:4}.screen.active{display:block}.panel{margin-top:8px;border-radius:15px;overflow:hidden;background:linear-gradient(#0d0f13,#08090c);border:1px solid rgba(255,255,255,.09);box-shadow:0 9px 22px rgba(0,0,0,.27)}.phead{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;position:relative}.ptitle{font-size:11px;font-weight:1000;font-style:italic}.ptitle .r{color:var(--red)}.statusbox{margin:8px;padding:9px;border-radius:11px;background:#08090c;border:1px solid #302126;color:#c8ccd2;font-size:9px;line-height:1.45}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}.card{padding:9px;border-radius:11px;background:#08090c;border:1px solid #302126}.card span{display:block;color:#969ca5;font-size:8px}.card b{display:block;margin-top:4px;font-size:11px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}.full{grid-column:1/-1}label{font-size:8px;color:#9ba0a8}input,select{width:100%;margin-top:4px;padding:8px;border-radius:9px;border:1px solid #342126;background:#08090c;color:#fff}.action{padding:10px;border-radius:11px;border:1px solid var(--red);background:linear-gradient(#5f101b,#2d070d);color:#fff;font-size:9px;font-weight:1000}.action.gray{border-color:#535860;background:linear-gradient(#282b31,#17191e)}.action.yellow{border-color:#a87900;background:linear-gradient(#705000,#3a2900)}
+.switchrow{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:9px;border-radius:11px;background:#08090c;border:1px solid #302126}.switch{width:49px;height:27px;border:0;border-radius:99px;background:#34383e;position:relative}.switch:before{content:"";position:absolute;top:4px;left:4px;width:19px;height:19px;border-radius:50%;background:#a0a5ad}.switch.on{background:linear-gradient(#ff304c,#a91126)}.switch.on:before{left:26px;background:#fff}
+.runToolbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;padding:8px}.runlist{padding:0 8px 8px}.runCard{position:relative;margin-top:7px;padding:10px 36px 10px 10px;border-radius:13px;background:#090a0d;border:1px solid #34363d}.runCard.good{border-color:#264f2d}.runCard.warn{border-color:#5f4a15}.runCard.bad{opacity:.72;border-color:#57303a}.runCard h4{margin:0 0 4px;font-size:11px}.runCard p{margin:2px 0;font-size:8px;color:#c6cad0}.runCard .hp{position:absolute;right:9px;top:10px;color:var(--red);font-size:12px;font-weight:1000}.runCheck{position:absolute;right:11px;bottom:10px;width:18px;height:18px}.badge{display:inline-block;border-radius:99px;padding:2px 6px;font-size:7px;font-weight:1000;background:#292c32}.badge.good{background:#113a17;color:#64f76d}.badge.warn{background:#4f3908;color:#ffd252}.badge.bad{background:#45121a;color:#ff7586}
+.chartwrap{padding:8px}canvas.chart{display:block;width:100%;height:auto;border-radius:10px;background:#06070a;border:1px solid rgba(255,255,255,.05)}
+.profileRow{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px}.profileRow select{margin:0}.tiny{font-size:8px;color:#9ba0a8}
+
+.bottomNav{display:grid;grid-template-columns:repeat(auto-fit,minmax(52px,1fr));gap:5px;margin-top:8px;position:sticky;bottom:calc(4px + env(safe-area-inset-bottom));z-index:30;background:rgba(3,3,4,.88);backdrop-filter:blur(14px);padding:5px;border-radius:15px;border:1px solid rgba(255,255,255,.08)}.nav{min-height:61px;border-radius:11px;border:1px solid transparent;background:transparent;color:#b7bcc3;padding:7px 2px}.nav.active{background:linear-gradient(#500d16,#240508);border-color:var(--red);color:#fff}.nav .ico{font-size:18px}.nav .txt{font-size:7px;font-weight:1000;margin-top:4px}
+.modal{position:fixed;inset:0;z-index:100;display:none;background:rgba(0,0,0,.76);align-items:flex-end;justify-content:center;padding:8px}.modal.show{display:flex}.sheet{width:min(100%,440px);max-height:92vh;overflow:auto;border-radius:22px 22px 14px 14px;background:linear-gradient(#121419,#08090c);border:1px solid rgba(255,38,63,.5);padding:13px}.sheet h3{margin:0 0 8px;font-size:16px}.sheet p{font-size:9px;color:#c9cdd2;line-height:1.5}.sheet .action{width:100%;margin-top:8px}
+.fullchart{position:fixed;inset:0;z-index:120;display:none;background:#050507;padding:calc(10px + env(safe-area-inset-top)) 8px calc(10px + env(safe-area-inset-bottom));flex-direction:column}.fullchart.show{display:flex}.fcTop{display:flex;align-items:center;justify-content:space-between;gap:6px}.fcTop h3{margin:0;font-size:13px}.fcCanvasWrap{flex:1;min-height:0;padding-top:8px}.fcCanvasWrap canvas{width:100%;height:100%;background:#06070a;border-radius:12px;border:1px solid #282b31}.fcControls{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding-top:7px}.pointread{font-size:9px;color:#ddd;padding:6px 0;text-align:center;min-height:27px}
+
+/* V30 dynolappu */
+.runCard{padding:11px 12px;border-radius:12px;background:#0a0b0e;border-color:#2c3037}
+.runCard h4{font-size:10px;letter-spacing:.15px;margin-right:68px}
+.runCard .hp{font-size:14px;top:10px;right:11px}
+.runCard p{font-size:8px;line-height:1.35}
+.dynoSheet{padding:0 10px 10px}
+.dynoHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:2px 0 8px}
+.dynoTitle{font-size:13px;font-weight:1000;font-style:italic}
+.dynoMeta{font-size:8px;color:#9399a2;line-height:1.4;margin-top:2px}
+.dynoPeaks{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px}
+.dynoPeak{padding:9px 7px;border-radius:11px;background:#090a0d;border:1px solid #30343b;text-align:center}
+.dynoPeak span{display:block;color:#858c96;font-size:7px;font-weight:900}
+.dynoPeak b{display:block;font-size:18px;line-height:1.05;margin-top:4px}
+.dynoPeak.red b{color:#ff2d48}.dynoPeak.orange b{color:#f4a340}
+.dynoSetup{padding:7px 8px;border-radius:9px;background:#08090b;border:1px solid #262a30;font-size:8px;color:#b8bdc5;margin-bottom:7px}
+.dynoChartShell{position:relative;border-radius:11px;overflow:hidden;border:1px solid #30343b;background:#07080a}
+.dynoChartShell canvas{display:block;width:100%;height:auto;background:#07080a}
+.dynoLegend{display:flex;gap:12px;align-items:center;padding:7px 3px 2px;font-size:8px;color:#aab0b8}
+.legendLine{display:inline-block;width:18px;height:3px;border-radius:4px;margin-right:5px;vertical-align:middle;background:#ff263f}
+.legendLine.tq{height:2px;background:#f4a340}
+.dynoFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 2px 0;color:#818893;font-size:7px}
+#runModal .sheet{padding:12px}
+#runModal #runTitle{display:none}
+#runModal #runDetails{margin:0}
+#runModal #runChart{width:100%;height:auto}
+.fullchart{background:#050607}
+.fcCanvasWrap canvas{background:#07080a;border-color:#30343b}
+
+@media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest?v=32.3">
+<meta name="theme-color" content="#0b0b0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script src="./version.js?build=2026-08-16l"></script>
+</head>
+<body>
+<div class="app">
+ <div class="topbar">
+   <div class="brand"><span class="red">VÄNÄ</span> MOTOLAB</div>
+   <div class="statuses">
+     <button class="spill clickable" id="gpsChip"><span id="gpsDot" class="dot"></span>GPS</button>
+     <button class="spill clickable" id="imuChip"><span id="imuDot" class="dot"></span>IMU</button>
+     <button class="spill clickable" id="extChip"><span id="extDot" class="dot"></span>BT MIC</button>
+     <div class="ver" id="appVersionBadge">v32.4</div>
+   </div>
+ </div>
+
+ <section class="hero">
+   <div class="logo"><div class="logo1">VÄNÄ</div><div class="logo2">MOTOLAB</div><div class="tag">DYNO • TUNE • RIDE</div></div>
+   <img src="bike.png?v=26" class="bike" alt="">
+   <div class="heroChartBox"><div class="heroChartTitle">NYKYINEN VETO • HP / Nm</div><canvas id="heroChart" width="230" height="178"></canvas></div>
+   <div class="gauge">
+     <div class="gaugeRing"></div>
+     <span class="tick t0">0</span><span class="tick t2">2</span><span class="tick t4">4</span><span class="tick t6">6</span><span class="tick t8">8</span><span class="tick t10">10</span><span class="tick t12">12</span>
+     <div id="needle" class="needle"></div>
+     <div class="gcenter"><div class="small">RPM</div><div id="rpmMain" class="rpm">0</div><div class="source"><b id="rpmSource">NO SIGNAL</b> • <span id="rpmConf">0%</span></div></div>
+   </div>
+   <div class="gearBadge"><span>VAIHDE</span><b id="gearMain">?</b><small id="gearState">OPETETAAN</small></div>
+ </section>
+
+ <div class="metrics">
+   <div class="metric red"><span>NOPEUS</span><b id="speedMain">0</b><small>km/h</small></div>
+   <div class="metric red"><span>TEHO</span><b id="hpMain">0.0</b><small>hv</small></div>
+   <div class="metric red"><span>VÄÄNTÖ</span><b id="nmMain">0.0</b><small>Nm</small></div>
+   <div class="metric"><span>G</span><b id="gMain">0.00</b><small>G</small></div>
+ </div>
+
+ <div class="controls">
+   <button id="sensorBtn" class="ctl"><span class="ib" data-info="sensors">i</span><div class="ico">📡</div><div class="lbl">ANTURIT</div><div id="sensorState" class="state">POIS</div></button>
+   <button id="extMicBtn" class="ctl"><span class="ib" data-info="ext">i</span><div class="ico">🎧</div><div class="lbl">BT KUULOKE</div><div id="extState" class="state">POIS</div></button>
+   <button id="armBtn" class="ctl hot"><span class="ib" data-info="arm">i</span><div class="ico">🎯</div><div class="lbl">ARM AUTO</div><div id="armState" class="state">VALMIS</div></button>
+   <button id="manualBtn" class="ctl"><span class="ib" data-info="manual">i</span><div class="ico">▶</div><div class="lbl">MANUAALI</div><div id="manualState" class="state">VALMIS</div></button>
+   <button id="stopBtn" class="ctl"><span class="ib" data-info="stop">i</span><div class="ico">■</div><div class="lbl">STOP</div><div class="state">VALMIS</div></button>
+ </div>
+
+ <section id="screen-measure" class="screen active">
+   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📡</span> MITTAUKSEN TILA</div></div>
+     <div class="grid2">
+       <div class="card"><span>GPS tarkkuus</span><b id="gpsAccuracy">–</b></div>
+       <div class="card"><span>RPM Fusion</span><b id="fusionState">EI SIGNAALIA</b></div>
+       <div class="card"><span>BT Audio RPM</span><b id="audioRpmState">–</b></div>
+       <div class="card"><span>BT taso</span><b id="btLevelState">–</b></div>
+       <div class="card"><span>BT f0 / FP</span><b id="btFpState">–</b></div>
+       <div class="card"><span>Nopeus-RPM</span><b id="speedRpmState">–</b></div>
+       <div class="card"><span>Fusion tila</span><b id="fusionModeState">–</b></div>
+       <div class="card"><span>MIC kalibrointi</span><b id="micCalMain">0 pistettä</b></div>
+       <div class="card"><span>Raakadata</span><b id="rawFpMain">REFERENCE ON</b></div>
+       <div class="card"><span>Vedon laatu</span><b id="qualityMain">–</b></div>
+       <div class="card"><span>Delta edelliseen</span><b id="deltaMain">–</b></div>
+       <div class="card"><span>Auto Gear Learn</span><b id="learnState">ODOTTAA RPM:ÄÄ</b></div>
+       <div class="card"><span>Mittausputki</span><b id="engineHealth">OK</b></div>
+     </div>
+     <div id="measureStatus" class="statusbox">Valmis. RPM-lähde valitaan Asetuksista: GPS ONLY / BT MIC ONLY / AUTO FUSION.</div>
+   </div>
+ </section>
+
+ <section id="screen-runs" class="screen">
+   <div class="panel">
+     <div class="phead"><div class="ptitle"><span class="r">🏁</span> VEDOT</div><span class="tiny">kaikki vedot valittavissa</span></div>
+     <div class="runToolbar">
+       <button id="compareSelectedBtn" class="action">VERTAA</button>
+       <button id="mergeSelectedBtn" class="action yellow">YHDISTÄ</button>
+       <button id="showFailedBtn" class="action gray">MYÖS HYLÄTYT</button>
+     </div>
+     <div id="runsList" class="runlist"></div>
+   </div>
+   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📊</span> PÄÄLLEKKÄISVERTAILU</div><button id="openCompareFull" class="action" style="padding:6px 9px">AVAA</button></div>
+     <div class="chartwrap"><canvas id="compareChart" class="chart" width="410" height="240"></canvas></div><div id="compareText" class="statusbox">Valitse vedot listasta.</div>
+   </div>
+ </section>
+
+ <section id="screen-analysis" class="screen">
+   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📉</span> ANALYYSI</div></div>
+     <div class="grid2"><div class="card"><span>Viimeisin teho</span><b id="anaHp">–</b></div><div class="card"><span>Viimeisin vääntö</span><b id="anaNm">–</b></div><div class="card"><span>Laatu</span><b id="anaQuality">–</b></div><div class="card"><span>Profiili</span><b id="anaProfile">–</b></div></div>
+     <div id="analysisText" class="statusbox">Tee veto analyysiä varten.</div>
+   </div>
+   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧪</span> KAASUTTIMEN SÄÄTÖ</div></div>
+     <div class="form">
+      <label>Pääsuutin<input id="mainJet" type="number" value="165"></label><label>Tyhjäkäyntisuutin<input id="pilotJet" type="number" value="45"></label>
+      <label>Neula<input id="needleType" value="X7"></label><label>Klipsi<select id="needleClip"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+      <label>Seosruuvi<input id="airScrew" type="number" value="1.5" step=".25"></label><label>Luisti<input id="slide" type="number" value="40"></label>
+      <button id="saveCarbBtn" class="action full">TALLENNA SÄÄTÖ</button>
+     </div><div id="carbStatus" class="statusbox">Säätö tallentuu pyöräprofiiliin ja seuraaviin vetoihin.</div>
+   </div>
+   <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧠</span> SUUTIN-EHDOTUS</div></div>
+     <div class="form"><label>Lämpötila °C<input id="tempC" type="number" value="20"></label><label>Ilmanpaine hPa<input id="pressure" type="number" value="1013"></label><label>AFR<input id="afr" type="number" step=".1" placeholder="valinnainen"></label><label>EGT °C<input id="egt" type="number" placeholder="valinnainen"></label><button id="jetSuggestBtn" class="action full">LASKE EHDOTUS</button></div>
+     <div id="jetSuggestion" class="statusbox">Ehdotus on konservatiivinen ja käyttää saatavilla olevaa dataa.</div>
+   </div>
+ </section>
+
+ <section id="screen-autotune" class="screen devOnly">
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">💾</span> AUTOTUNE</div></div>
+   <div class="form"><label>Ohjain<select id="controller"><option>Arduino</option><option>Zeeltronic</option></select></label><label>Alkaen RPM<input id="analyzeFrom" type="number" value="4000"></label><label>RPM askel<input id="rpmStep" type="number" value="500"></label><label>Max muutos °<input id="maxIgnStep" type="number" value=".5" step=".1"></label><button id="autoTuneBtn" class="action full">LUO TESTIEHDOTUS</button></div><div id="autoTuneResult" class="statusbox">Tarvitaan kaksi saman profiilin vertailukelpoista vetoa.</div>
+  </div>
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🏙️</span> AUTORIDE</div></div>
+   <div class="form"><label>Herkkyys<select id="rideAutoSensitivity"><option value=".18">Herkkä</option><option value=".28" selected>Normaali</option><option value=".40">Tiukka</option></select></label><label>Lopetusviive s<input id="rideAutoStopDelay" type="number" value=".7" step=".1"></label><label>Record from RPM<input id="rideRecordFrom" type="number" value="1500"></label><label>Stop RPM<input id="rideStopRpm" type="number" value="10500"></label></div>
+  </div>
+ </section>
+
+ <section id="screen-settings" class="screen">
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🏍️</span> SMART BIKE PROFILES</div></div>
+    <div class="profileRow"><select id="profileSelect"></select><button id="newProfileBtn" class="action">+ UUSI</button></div>
+    <div id="profileInfo" class="statusbox">Profiili sisältää opitut vaihteet, säädöt ja vertailuvedot.</div>
+  </div>
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧠</span> VEHICLE / ENGINE KNOWLEDGE BASE</div><span class="tiny">yhteinen tieto kaikille moduuleille</span></div>
+   <div class="form">
+    <label>Tilavuus cc<input id="kbDisplacement" type="number" step="0.1" placeholder="esim. 170"></label><label>Sylinterit<input id="kbCylinders" type="number" min="1" max="8" value="1"></label>
+    <label>Poraus mm<input id="kbBore" type="number" step="0.01"></label><label>Isku mm<input id="kbStroke" type="number" step="0.01"></label>
+    <label>Sylinteri / kit<input id="kbCylinderKit" placeholder="malli / valmistaja"></label><label>Squish mm<input id="kbSquish" type="number" step="0.01"></label>
+    <label>Palotila cc<input id="kbChamberCc" type="number" step="0.1"></label><label>Kaasutin mm<input id="kbCarbSize" type="number" step="0.1"></label>
+    <label>Pakoputki<input id="kbExhaust" placeholder="malli / mitat"></label><label>Sytytys / CDI<input id="kbIgnition" placeholder="malli"></label>
+    <label>Eturatas<input id="kbFrontSprocket" type="number" step="1"></label><label>Takaratas<input id="kbRearSprocket" type="number" step="1"></label>
+    <label>Renkaan ympärys mm<input id="kbWheelCirc" type="number" step="1"></label><label>Kokoonpanotagi<input id="kbSetupTag" placeholder="esim. setup A"></label>
+    <label class="full">Muistiinpanot<input id="kbNotes" placeholder="portit, läpät, muutokset, testit..."></label>
+    <button id="exportProfileBtn" class="action gray full" type="button">VIE PROFIILI + KNOWLEDGE JSON</button>
+   </div>
+   <div id="kbStatus" class="statusbox">Knowledge Base tallennetaan pyöräprofiiliin. Jokainen veto ja oppimisdata saa kokoonpanosta snapshotin.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎛️</span> MITTAUS & RPM</div><span class="tiny">ajon aikana käytettävä lähde</span></div>
+   <div class="form">
+    <label>RPM-lähde<select id="rpmSourceMode"><option value="gps">GPS ONLY</option><option value="bt">BT MIC ONLY</option><option value="fusion" selected>AUTO FUSION</option></select></label>
+    <label>Vedon / kalibroinnin vaihde<input id="manualGear" type="number" min="1" max="6" value="3"></label>
+    <label>AutoRide aloitus RPM<input id="recordFrom" type="number" value="1500"></label><label>AutoRide lopetus RPM<input id="stopRpm" type="number" value="10500"></label>
+    <label>AutoRide herkkyys G<input id="autoSensitivity" type="number" value=".28" step=".01"></label><label>Auto-stop viive s<input id="autoStopDelay" type="number" value=".7" step=".1"></label>
+    <div class="switchrow"><div><b style="font-size:9px">Auto Gear Learn</b><div class="tiny">Oppii vaihdesuhteita luotettavasta BT-RPM + GPS -datasta.</div></div><button id="gearLearnToggle" class="switch on"></button></div>
+   </div>
+   <div id="sourceModeStatus" class="statusbox">AUTO FUSION: BT-RPM + GPS/nopeus tukevat toisiaan.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧭</span> VAIHDE / RPM / GPS KALIBROINTI</div><span class="tiny">GPS ONLY -RPM</span></div>
+    <div class="statusbox">Valitse vaihde ja tapa. Esim. 3. vaihde + 3000 rpm. Automaattisessa tilassa pidä kierrokset mittarista 3000 rpm:ssä; sovellus odottaa vakaata GPS-nopeutta ja tallentaa suhteen itse.</div>
+    <div class="form">
+      <label>Kalibrointitapa<select id="calMode"><option value="auto">AUTOMAATTINEN – vakaa nopeus → tallenna</option><option value="manual">MANUAALINEN – syötä RPM + nopeus</option><option value="learn">AUTO GEAR LEARN – opi BT + GPS:stä</option></select></label>
+      <label>Vaihde<input id="calGear" type="number" min="1" max="6" value="3"></label>
+      <label>Tavoite RPM<input id="calTargetRpm" type="number" value="3000" step="100"></label>
+      <label>Vakaa aika s<input id="calStableSec" type="number" value="3" min="1" max="10" step="0.5"></label>
+      <label>Sallittu GPS-vaihtelu km/h<input id="calToleranceKmh" type="number" value="1.0" min="0.2" max="5" step="0.1"></label>
+      <label>Manuaalinen nopeus km/h<input id="calSpeed" type="number" value="60" step="0.1"></label>
+      <label>Manuaalinen RPM<input id="calRpm" type="number" value="6000" step="100"></label>
+      <button id="autoCalBtn" class="action full">ALOITA AUTOMAATTINEN KALIBROINTI</button>
+      <button id="calibrateBtn" class="action">TALLENNA MANUAALINEN</button><button id="clearGearCalBtn" class="action gray">TYHJENNÄ VAIHDE</button>
+    </div>
+    <div id="gearCalStatus" class="statusbox">Ei käynnissä.</div>
+    <div id="gearCalList" class="statusbox">Ei GPS-vaihdekalibrointeja.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🏍️</span> AJONEUVO & DYNO</div></div>
+   <div class="form">
+    <label>Profiilin nimi<input id="profileName" value="Oma pyörä"></label><label>Moottori<select id="engineType"><option>2T</option><option>4T</option></select></label>
+    <label>Massa ajossa kg<input id="mass" type="number" value="190"></label><label>CdA<input id="cda" type="number" value=".55" step=".01"></label>
+    <label>Crr<input id="crr" type="number" value=".015" step=".001"></label><label>Ilman tiheys<input id="rho" type="number" value="1.225" step=".001"></label>
+    <div class="switchrow"><div><b style="font-size:9px">Dynolapun ristikko</b><div class="tiny">RPM ja tehoalue luettavissa ilman kursorin liikuttelua.</div></div><button id="gridToggle" class="switch on"></button></div>
+    <div class="switchrow"><div><b style="font-size:9px">ⓘ Info-napit</b></div><button id="infoToggle" class="switch on"></button></div>
+    <div class="switchrow"><div><b style="font-size:9px">☀ Pidä näyttö päällä</b></div><button id="wakeToggle" class="switch on"></button></div>
+    <button id="saveSettingsBtn" class="action full">TALLENNA ASETUKSET</button>
+   </div><div id="settingsStatus" class="statusbox">Asetukset tallennetaan paikallisesti.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎧</span> BT RPM – LISÄASETUKSET</div><span class="tiny">testerin toimiva audioavaus</span></div>
+    <div class="statusbox">BT MIC käyttää valittua mikrofonia täsmällisellä laite-ID:llä. Valitse sama kuulokemikrofoni, joka näkyy testerissä (esim. terosissari). Jos selain avaa iPhone-mikrofonin valitun laitteen sijasta, RPM-mittaus estetään.</div>
+    <div class="form">
+      <label class="full">BT / kuulokemikrofoni
+        <select id="audioDevice"><option value="">Valitse mikrofoni…</option></select>
+      </label>
+      <button id="audioRefreshBtn" class="action gray full">PÄIVITÄ MIKROFONILISTA</button>
+      <div id="audioDeviceHint" class="statusbox full">Valitse testerissä toimiva kuulokemikrofoni. iPhone-mikrofonia ei hyväksytä BT RPM -lähteeksi.</div>
+      <label>Audio min RPM<input id="micMin" type="number" value="3000"></label><label>Audio max RPM<input id="micMax" type="number" value="12500"></label>
+      <label>Audio korkea luottamus<input id="audioHighConf" type="number" value=".62" min=".3" max=".95" step=".01"></label><label>Audio min luottamus<input id="audioMidConf" type="number" value=".34" min=".1" max=".8" step=".01"></label>
+      <label>Kytkinluisto raja<input id="slipThreshold" type="number" value=".18" min=".08" max=".5" step=".01"></label><label>Speed RPM min km/h<input id="speedRpmMinKmh" type="number" value="12" min="3" max="80" step="1"></label>
+      <button id="btTestBtn" class="action full">TESTAA BT-AUDIOTULO</button>
+    </div>
+    <div id="btRouteStatus" class="statusbox">BT-audiotulo ei ole käynnissä.</div>
+  </div>
+
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧠</span> OPPIVA DATA­PANKKI</div><span class="tiny">Raakadata talteen myös vetojen välillä</span></div>
+    <div class="statusbox">Kun päällä, MotoLab tallentaa jatkuvasti GPS-, RPM-, audio/fingerprint-, vaihde-, kiihtyvyys-, confidence- ja anturitietoa myös vetojen välillä. Alkuperäiset havainnot säilytetään erillään johdetuista RPM-arvoista, jotta vanha data voidaan käsitellä myöhemmin uudella algoritmilla.</div>
+    <div class="switchrow"><div><b style="font-size:9px">JATKUVA OPPIMISDATA</b><div class="tiny">Oletus: päällä</div></div><button id="learningDataToggle" class="switch on"></button></div>
+    <div class="grid2">
+      <div class="card"><span>Tämän session näytteet</span><b id="learningSampleCount">0</b></div>
+      <div class="card"><span>Tallennetut jaksot</span><b id="learningChunkCount">0</b></div>
+      <div class="card"><span>Session kesto</span><b id="learningDuration">0 s</b></div>
+      <div class="card"><span>Tila</span><b id="learningState">ODOTTAA ANTURIA</b></div>
+    </div>
+    <button id="exportLearningBtn" class="action full">VIE OPPIMISDATA JSON</button>
+    <button id="markTruthBtn" class="action gray full">MERKITSE NYKYINEN PISTE REFERENSSIKSI</button>
+    <div id="learningStatus" class="statusbox">Dataa ei vielä kerätty tässä käynnistyksessä.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">📱</span> SOVELLUS</div><span class="tiny">Asennettava puhelinnäkymä</span></div>
+    <div class="statusbox">Julkaise HTTPS-osoitteeseen. iPhone: Safari → Jaa → Lisää Koti-valikkoon. Android: selaimen Asenna sovellus -toiminto, jos tarjolla.</div>
+    <div class="grid2"><button id="installBtn" class="action">ASENNA / OHJE</button><button id="fullscreenBtn" class="action gray">KOKO NÄYTTÖ</button></div>
+    <div id="installStatus" class="statusbox">Selain-tila.</div>
+  </div>
+
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧬</span> RAW AUDIO FINGERPRINT</div><span class="tiny">Kerätty referenssidata käytössä</span></div>
+    <div class="statusbox">Live-mikrofoni pisteytetään kerättyä raakadataa vasten ennen RPM Fusionia. Referenssin RPM-arvoina käytetään testidatan rpm_reference-arvoja, ei testialgoritmin omia RPM-arvioita.</div>
+    <div id="rawFpStatus" class="statusbox"></div>
+  </div>
+<div class="panel"><div class="phead"><div class="ptitle"><span class="r">🎤</span> MIC CALIBRATION</div><span class="tiny">3 pisteen ääni-RPM kalibrointi</span></div>
+    <div class="statusbox">Kytke BT KUULOKE päälle. Pidä moottori tasaisella tunnetulla kierrosluvulla, syötä oikea RPM ja paina TALLENNA.</div>
+    <div class="form">
+      <label>Piste 1 RPM<input id="micCalTarget1" type="number" value="3000"></label><button id="micCalBtn1" class="action">TALLENNA 1</button>
+      <label>Piste 2 RPM<input id="micCalTarget2" type="number" value="6000"></label><button id="micCalBtn2" class="action">TALLENNA 2</button>
+      <label>Piste 3 RPM<input id="micCalTarget3" type="number" value="9000"></label><button id="micCalBtn3" class="action">TALLENNA 3</button>
+      <button id="micCalClearBtn" class="action gray full">TYHJENNÄ MIC-KALIBROINTI</button>
+    </div>
+    <div id="micCalStatus" class="statusbox">Ei kalibrointipisteitä.</div>
+  </div>
+  <div class="panel"><div class="phead"><div class="ptitle"><span class="r">🧪</span> JÄRJESTELMÄTESTI</div></div>
+    <div class="grid2"><div class="card"><span>Secure context</span><b id="diagSecure">–</b></div><div class="card"><span>Worker</span><b id="diagWorker">–</b></div><div class="card"><span>GPS API</span><b id="diagGps">–</b></div><div class="card"><span>Media API</span><b id="diagMedia">–</b></div><div class="card"><span>AudioWorklet</span><b id="diagAudio">–</b></div><div class="card"><span>Wake Lock</span><b id="diagWake">–</b></div></div>
+    <div class="grid2"><button id="selfTestBtn" class="action">AJA TESTIT</button><button id="resetBtn" class="action gray">RESET DATA</button></div><div id="diagLog" class="statusbox">MotoLab käynnistyy • mittaus + knowledge base + oppiva datapankki.</div>
+  </div>
+ </section>
+
+ <nav class="bottomNav">
+  <button class="nav active" data-screen="measure"><div class="ico">⏱</div><div class="txt">MITTAUS</div></button>
+  <button class="nav" data-screen="runs"><div class="ico">🏁</div><div class="txt">VEDOT</div></button>
+  <button class="nav" data-screen="analysis"><div class="ico">📉</div><div class="txt">ANALYYSI</div></button>
+  <button class="nav devOnly" data-screen="autotune"><div class="ico">💾</div><div class="txt">AUTOTUNE</div></button>
+  <button class="nav" data-screen="settings"><div class="ico">⚙</div><div class="txt">ASETUKSET</div></button>
+ </nav>
+</div>
+
+<div id="infoModal" class="modal"><div class="sheet"><h3 id="infoTitle">Info</h3><p id="infoText"></p><button id="closeInfo" class="action">SULJE</button></div></div>
+<div id="runModal" class="modal"><div class="sheet">
+<h3 id="runTitle">Veto</h3>
+<div id="runDetails"></div>
+<div class="dynoSheet">
+  <div class="dynoChartShell"><canvas id="runChart" class="chart" width="900" height="520"></canvas></div>
+  <div class="dynoLegend"><span><i class="legendLine"></i>TEHO (hv)</span><span><i class="legendLine tq"></i>VÄÄNTÖ (Nm)</span></div>
+  <div class="dynoFoot"><span>RPM →</span><span>Ristikko valittavissa Asetuksista</span></div>
+</div>
+<button id="openRunFull" class="action">AVAA KÄYRÄ KOKO NÄYTÖLLE</button>
+<button id="deleteRunBtn" class="action gray">POISTA VETO</button>
+<button id="closeRun" class="action">SULJE</button>
+</div></div>
+<div id="profileModal" class="modal"><div class="sheet"><h3 id="profilePromptTitle">Profiili</h3><p id="profilePromptText"></p><button id="createSuggestedProfile" class="action">TEE UUSI PROFIILI</button><button id="keepCurrentProfile" class="action gray">PIDÄ NYKYINEN</button></div></div>
+
+<div id="fullChart" class="fullchart">
+ <div class="fcTop"><div><h3 id="fcTitle">Dynokäyrä</h3><div class="tiny">Teho paksu • vääntö ohut • RPM alhaalla</div></div><button id="closeFullChart" class="action" style="width:auto">SULJE</button></div>
+ <div id="pointRead" class="pointread">Napauta käyrää nähdäksesi tarkan pisteen.</div>
+ <div class="fcCanvasWrap"><canvas id="fullChartCanvas" width="900" height="1100"></canvas></div>
+ <div class="fcControls"><button id="zoomOut" class="action gray">−</button><button id="zoomReset" class="action gray">RESET</button><button id="zoomIn" class="action gray">+</button><button id="toggleTorque" class="action">HP + Nm</button></div>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const APP_VERSION=globalThis.MOTOLAB_RELEASE?.version||"32.4";
+const ALGORITHM_VERSION={rpm:"rpm-v31-candidate-gap",fusion:"fusion-v31-integrity",learning:"learning-raw-v2"};
+const DEV_MODE_KEY="motolab_dev_mode";
+const RAW_AUDIO_FINGERPRINT={"name":"VÄNÄ MotoLab raw reference fingerprint","source":"VANA_MotoLab_test_1786803700939.json","project":"DT testimoottori","created_from":"2026-08-15T14:21:40.939Z","reference_note":"rpm_reference labels are used as truth; measured rpm estimates are not used as labels","points":[{"rpm":1800,"f0_hz":41.0,"f0_p20":40.0,"f0_p80":41.5,"conf_median":30.0,"harm_rel_db":[-38.68,-35.49,-28.87,-17.62,0.0,-8.49],"samples":894,"places":["Paisarin loppu / stingerin alku"]},{"rpm":3000,"f0_hz":64.0,"f0_p20":54.5,"f0_p80":75.0,"conf_median":34.0,"harm_rel_db":[-35.96,-23.14,-8.84,-4.82,-5.43,-1.11],"samples":7122,"places":["Mikrofoni suoraan pinnapulttiin","Paisarin loppu / stingerin alku","Pinnapultti + lyhyt jäykkä letku","Tulpan metalliosa","Vapaa mikrofoni 0,5 m moottorista","Vapaa mikrofoni 0,5 m pakoputkesta"]},{"rpm":5000,"f0_hz":89.333,"f0_p20":45.833,"f0_p80":99.833,"conf_median":30.0,"harm_rel_db":[-25.22,-2.66,-5.66,0.0,-6.21,-10.05],"samples":1782,"places":["Paisarin loppu / stingerin alku","Vapaa mikrofoni 0,5 m pakoputkesta"]}]};
+const SETTINGS_KEY="motolab_v26_settings",PROFILES_KEY="motolab_v26_profiles",FALLBACK_RUNS="motolab_v26_runs",MIC_CAL_KEY="motolab_v26_mic_cal";
+let gpsWatch=null,gpsOn=false,imuOn=false,phoneMicOn=false,extMicOn=false,wakeLock=null;
+let motionHandlerRef=null,orientationHandlerRef=null;
+let audioSessions={phone:null,ext:null},audioDeviceList=[];
+let runs=[],selectedRunIds=new Set(),showFailed=true,currentRunModalId=null,currentChartRuns=[],fullChartState={zoom:1,center:7000,showTorque:true};
+let demoTimer=null,lastUi={rpm:0,kmh:0,hp:0,nm:0,g:0,conf:0,source:"NO SIGNAL",gear:null,quality:0,audioRpm:0,audioRawRpm:0,audioConf:0};
+let db=null,useFallback=false;
+const LEARNING_DATA_KEY="motolab_v29_learning_enabled";
+let learningEnabled=localStorage.getItem(LEARNING_DATA_KEY)!=="0";
+let learningSessionId=null,learningSessionStart=0,learningBuffer=[],learningSampleCount=0,learningChunkCount=0,learningLastStore=0;
+let learningEvents=[],lastLearningUiAt=0,learningFlushBusy=false;
+
+const infoDefs={
+ sensors:"ANTURIT kytkee GPS:n ja IMU:n yhdessä. Yläreunan GPS- ja IMU-painikkeilla ne voi kytkeä myös erikseen. Toinen painallus sammuttaa.",
+ mic:"BT-kuulokemikrofoni valitaan Asetuksista. MotoLab käyttää valitun laitteen tarkkaa deviceId:tä eikä hyväksy iPhone-mikrofonia hiljaisena varalähteenä. GPS ONLY ei avaa mikrofonia.",
+ ext:"BT / EXT MIC käyttää valittua ulkoista audiotuloa, jos selain ja iPhone sallivat sen reitityksen. Toinen painallus pysäyttää streamin ja vapauttaa laitteen.",
+ arm:"ARM AUTO odottaa kiihtyvyyttä ja RPM:ää. Mittausmoottori toimii Workerissa, käyttöliittymä päivittyy harvemmin.",
+ manual:"Manuaalinen veto käynnistyy heti ja päättyy vain STOP-painikkeella.",
+ stop:"STOP lopettaa manuaalivedon tai käynnissä olevan AutoRide-vedon. Liian lyhyttä vetoa ei tallenneta."
+};
+
+function log(msg){const d=$("diagLog");if(d)d.textContent=new Date().toLocaleTimeString("fi-FI")+"  "+msg+"\n"+d.textContent.slice(0,3500)}
+window.addEventListener("error",e=>log("JS: "+e.message));window.addEventListener("unhandledrejection",e=>log("PROMISE: "+(e.reason?.message||e.reason)));
+
+const measurementWorkerSource=`
+"use strict";
+let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[],rpmSourceMode:"fusion",selectedGear:3,gpsCalibrations:[],audioMaxRpm:12500};
+let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={ext:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,level:0,conf:0,candidateGap:0,runnerRpm:0,t:0}};
+let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[],autoSession=false,rearmPending=false,rearmReadyAt=0;
+let lastGear=null,lastGearConf=0,lastFusionRpm=0;
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function nearestGearFromRatio(ratio){
+ const ratios=[...(cfg.gearRatios||[])].sort((a,b)=>b.ratio-a.ratio);
+ if(!ratio||!ratios.length)return {gear:null,gearConf:0,gearRatio:0};
+ let best=null;
+ ratios.forEach((r,i)=>{const err=Math.abs(ratio-r.ratio)/Math.max(r.ratio,1e-9);if(!best||err<best.err)best={gear:i+1,err,r}});
+ if(best&&best.err<.13)return {gear:best.gear,gearConf:clamp(1-best.err/.13,0,1),gearRatio:best.r.ratio};
+ return {gear:null,gearConf:0,gearRatio:0};
+}
+
+function calibratedAudioRpm(raw){
+ const pts=(cfg.micCal||[]).filter(p=>p&&p.raw>0&&p.target>0).sort((a,b)=>a.raw-b.raw);
+ if(!raw||!pts.length)return raw||0;
+ if(pts.length===1)return raw*(pts[0].target/pts[0].raw);
+ if(raw<=pts[0].raw)return raw*(pts[0].target/pts[0].raw);
+ if(raw>=pts[pts.length-1].raw){
+   const p=pts[pts.length-1];return raw*(p.target/p.raw);
+ }
+ for(let i=0;i<pts.length-1;i++){
+   const a=pts[i],b=pts[i+1];
+   if(raw>=a.raw&&raw<=b.raw){
+     const u=(raw-a.raw)/Math.max(1e-9,b.raw-a.raw);
+     return a.target+u*(b.target-a.target);
+   }
+ }
+ return raw;
+}
+function audioEstimate(){
+ const now=Date.now(),s=rpmSources.ext;
+ if(!s||s.rpm<cfg.fusionMinRpm||s.conf<.12||now-s.t>=1100)return {rpm:0,rawRpm:0,fpScore:s?.fpScore||0,observedF0:s?.observedF0||0,level:s?.level||0,conf:0,source:"NO BT AUDIO"};
+ return {rpm:calibratedAudioRpm(s.rpm),rawRpm:s.rawRpm||s.rpm,fpScore:s.fpScore||0,observedF0:s.observedF0||0,level:s.level||0,conf:s.conf,candidateGap:s.candidateGap||0,runnerRpm:s.runnerRpm||0,source:"BT MIC"};
+}
+function fuseRpm(){
+ const a=audioEstimate();
+ let gear=null,gearConf=0,gearRatio=0;
+ if(a.rpm>0&&gps.kmh>=cfg.speedRpmMinKmh){
+   const g=nearestGearFromRatio(a.rpm/gps.kmh);
+   gear=g.gear;gearConf=g.gearConf;gearRatio=g.gearRatio;
+   if(gear&&gearConf>.55){lastGear=gear;lastGearConf=gearConf}
+ }
+ const sorted=[...(cfg.gearRatios||[])].sort((x,y)=>y.ratio-x.ratio);
+ const selectedCal=(cfg.gpsCalibrations||[]).find(x=>+x.gear===+cfg.selectedGear&&x.ratio>0);
+ if(!gear&&lastGear&&sorted[lastGear-1]){gear=lastGear;gearConf=Math.max(.35,lastGearConf*.92);gearRatio=sorted[lastGear-1].ratio}
+ if(selectedCal&&(!gearRatio||cfg.rpmSourceMode==="gps")){gear=+cfg.selectedGear||selectedCal.gear;gearConf=.96;gearRatio=selectedCal.ratio}
+ let speedRpm=0,speedConf=0;
+ if(gps.kmh>=cfg.speedRpmMinKmh){
+   if(gearRatio>0){speedRpm=gps.kmh*gearRatio;speedConf=selectedCal?.ratio===gearRatio?.82:clamp(.48+.42*gearConf,0,.92)}
+   else if(cfg.manualRatio>0){speedRpm=gps.kmh*cfg.manualRatio;speedConf=.58}
+ }
+ const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioFpScore=a.fpScore||0,audioObservedF0=a.observedF0||0,audioLevel=a.level||0,audioConf=a.conf||0,audioCandidateGap=a.candidateGap||0,audioRunnerRpm=a.runnerRpm||0;
+ let slip=false,agreement=0;
+ if(audioRpm&&speedRpm){
+   agreement=Math.abs(audioRpm-speedRpm)/Math.max(audioRpm,speedRpm,1);
+   slip=agreement>cfg.slipThreshold&&audioConf>=cfg.audioMidConf;
+ }
+ let rpm=0,conf=0,source="NO SIGNAL",fusionMode="NO SIGNAL";
+ const validAudio=(audioRpm>=cfg.fusionMinRpm && audioRpm<=cfg.audioMaxRpm);
+ if(cfg.rpmSourceMode==="gps"){
+   if(speedRpm){rpm=speedRpm;conf=speedConf;source=selectedCal?"GPS • G"+(cfg.selectedGear||gear):"GPS • SPEED";fusionMode="GPS ONLY"}
+ }else if(cfg.rpmSourceMode==="bt"){
+   if(validAudio&&audioConf>=cfg.audioMidConf){rpm=audioRpm;conf=audioConf;source="BT MIC";fusionMode="BT ONLY"}
+ }else if(validAudio&&audioConf>=cfg.audioHighConf){
+   if(speedRpm&&!slip&&agreement<.12){
+     rpm=audioRpm*.78+speedRpm*.22;conf=clamp(audioConf*.78+speedConf*.22+.06,0,1);source="AUDIO + SPEED";fusionMode="AUDIO DOM";
+   }else{
+     rpm=audioRpm;conf=audioConf;source=slip?"AUDIO • SLIP":"AUDIO";fusionMode=slip?"SLIP AUDIO":"AUDIO";
+   }
+ }else if(speedRpm&&validAudio&&audioConf>=cfg.audioMidConf&&!slip){
+   const wa=clamp((audioConf-cfg.audioMidConf)/Math.max(.01,cfg.audioHighConf-cfg.audioMidConf),0,1);
+   const audioWeight=.25+.45*wa;
+   rpm=audioRpm*audioWeight+speedRpm*(1-audioWeight);
+   conf=clamp(audioConf*audioWeight+speedConf*(1-audioWeight),0,1);source="AUDIO + SPEED";fusionMode="BLEND";
+ }else if(speedRpm&&!slip){
+   rpm=speedRpm;conf=speedConf;source=gearRatio>0?"SPEED • GEAR":"SPEED CAL";fusionMode="SPEED";
+ }else if(validAudio&&audioConf>=cfg.audioMidConf){
+   rpm=audioRpm;conf=audioConf*.86;source=slip?"AUDIO • SLIP":"AUDIO";fusionMode=slip?"SLIP AUDIO":"AUDIO WEAK";
+ }
+ if(rpm&&lastFusionRpm&&Math.abs(rpm-lastFusionRpm)/Math.max(lastFusionRpm,1)>.32&&conf<.72){conf*=.72}
+ if(rpm)lastFusionRpm=lastFusionRpm?lastFusionRpm*.72+rpm*.28:rpm;
+ if(rpm&&conf<.28){rpm=0;source="NO SIGNAL";fusionMode="REJECTED"}
+ const ratio=(audioRpm&&audioConf>=cfg.audioHighConf&&gps.kmh>=cfg.speedRpmMinKmh&&!slip)?audioRpm/gps.kmh:0;
+ return {rpm,conf,source,fusionMode,gear,gearConf,ratio,audioRpm,audioRawRpm,audioFpScore,audioObservedF0,audioLevel,audioConf,audioCandidateGap,audioRunnerRpm,speedRpm,speedConf,slip,agreement}
+}
+function learnGear(f){
+ if(!cfg.gearLearn||f.audioConf<cfg.audioHighConf||gps.kmh<cfg.speedRpmMinKmh||!f.ratio||f.slip)return;
+ const r=f.ratio;if(r<15||r>1000)return;
+ let best=null;gearClusters.forEach(c=>{const e=Math.abs(r-c.ratio)/c.ratio;if(!best||e<best.e)best={c,e}});
+ if(best&&best.e<.055){best.c.ratio=best.c.ratio*.96+r*.04;best.c.count=Math.min(500,best.c.count+1)}
+ else if(gearClusters.length<7)gearClusters.push({ratio:r,count:1});
+ gearClusters=gearClusters.filter(c=>c.count>=1).sort((a,b)=>b.ratio-a.ratio);
+ const stable=gearClusters.filter(c=>c.count>=8).slice(0,6);
+ if(stable.length)postMessage({type:"gearModel",ratios:stable});
+}
+function quality(f,g){
+ let q=100;if(gps.acc>15)q-=Math.min(25,(gps.acc-15)*1.5);if(f.conf<.4)q-=25;if(f.conf<.2)q-=20;if(!f.gear)q-=8;if(Math.abs(g)<.04)q-=12;if(f.slip)q-=18;
+ return Math.round(clamp(q,0,100))
+}
+function sample(){
+ const f=fuseRpm(),v=gps.kmh/3.6,g=accel/9.80665,m=cfg.mass||190;
+ const force=m*accel+.5*(cfg.rho||1.225)*(cfg.cda||.55)*v*v+(cfg.crr||.015)*m*9.80665;
+ const watts=Math.max(0,force*v),hp=watts/735.49875,nm=f.rpm>200?watts/(f.rpm*2*Math.PI/60):0,q=quality(f,g);
+ const s={t:Date.now(),rpm:f.rpm,kmh:gps.kmh,hp,nm,g,a:accel,source:f.source,conf:f.conf,gear:f.gear,gearConf:f.gearConf,ratio:f.ratio,quality:q,gpsAcc:gps.acc,
+   audioRpm:f.audioRpm,audioRawRpm:f.audioRawRpm,audioFpScore:f.audioFpScore,audioObservedF0:f.audioObservedF0,audioLevel:f.audioLevel,audioConf:f.audioConf,audioCandidateGap:f.audioCandidateGap,audioRunnerRpm:f.audioRunnerRpm,speedRpm:f.speedRpm,speedConf:f.speedConf,fusionRpm:f.rpm,fusionMode:f.fusionMode,slip:f.slip,agreement:f.agreement,motionMag:motion.mag||0,motionAgeMs:motion.t?Math.max(0,Date.now()-motion.t):null};
+ pre.push(s);while(pre.length&&s.t-pre[0].t>5000)pre.shift();
+ learnGear(f);
+ if(armed&&!recording&&rearmPending&&Date.now()>=rearmReadyAt&&(g<.03||f.rpm<cfg.stopRpm*.92)){rearmPending=false;pre=[];postMessage({type:"state",state:"ARMED"})}
+ if(armed&&!recording&&!rearmPending&&f.rpm>=cfg.recordFrom&&g>=cfg.autoSensitivity){recording=true;mode="auto";run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})}
+ if(recording){
+   run.push(s);
+   if(mode==="auto"){
+     if(g<.03){if(!accelEnd)accelEnd=s.t}else accelEnd=0;
+     if(f.rpm>=cfg.stopRpm||(accelEnd&&s.t-accelEnd>=cfg.autoStopDelay*1000))finish("Auto stop");
+   }
+ }
+ const now=Date.now();if(now-lastUi>=100){lastUi=now;postMessage({type:"ui",data:s,recording,armed,mode})}
+}
+function finish(reason){
+ if(!recording){postMessage({type:"state",state:"NO RUN"});return}
+ const completedMode=mode,keepAuto=completedMode==="auto"&&autoSession&&reason!=="STOP";
+ const data=run.slice();recording=false;mode="none";run=[];accelEnd=0;
+ if(keepAuto){armed=true;rearmPending=true;rearmReadyAt=Date.now()+450}else{armed=false;rearmPending=false;rearmReadyAt=0}
+ if(data.length<12){postMessage({type:"state",state:"TOO SHORT"});return}
+ const maxHp=Math.max(...data.map(x=>x.hp||0)),maxNm=Math.max(...data.map(x=>x.nm||0)),maxRpm=Math.max(...data.map(x=>x.rpm||0));
+ const quality=Math.round(data.reduce((a,b)=>a+(b.quality||0),0)/data.length);
+ const ratios=data.map(x=>x.ratio).filter(x=>x>0),gearRatioMedian=ratios.length?ratios.sort((a,b)=>a-b)[Math.floor(ratios.length/2)]:0;
+ const gears=data.map(x=>x.gear).filter(Boolean),gear=gears.length?gears.sort((a,b)=>gears.filter(v=>v===a).length-gears.filter(v=>v===b).length).pop():null;
+ const slipPct=Math.round(100*data.filter(x=>x.slip).length/Math.max(1,data.length));
+ postMessage({type:"runComplete",reason,run:{id:Date.now()+"-"+Math.random().toString(16).slice(2),date:new Date().toISOString(),mode:completedMode==="auto"?"AUTO RIDE":"MANUAL",quality,status:quality>=78?"good":quality>=55?"warn":"bad",maxHp,maxNm,maxRpm,gear,gearRatioMedian,slipPct,data}});postMessage({type:"state",state:keepAuto?"ARMED":"READY"});
+}
+onmessage=e=>{
+ const m=e.data;
+ if(m.type==="config"){cfg={...cfg,...m.config};gearClusters=(cfg.gearRatios||[]).map(x=>({...x}))}
+ if(m.type==="gps"){const now=m.t||Date.now(),v=m.kmh/3.6;if(lastGps&&now-lastGps.t>120){const raw=(v-lastGps.v)/((now-lastGps.t)/1000);if(Number.isFinite(raw))accel=accel*.76+raw*.24}lastGps={v,t:now};gps={kmh:m.kmh||0,acc:m.acc||999,t:now}}
+ if(m.type==="motion")motion={mag:m.mag||0,t:m.t||Date.now()}
+ if(m.type==="rpm")if(m.source==="ext")rpmSources.ext={rpm:m.rpm||0,rawRpm:m.rawRpm||0,fpScore:m.fpScore||0,observedF0:m.observedF0||0,level:m.level||0,conf:m.conf||0,candidateGap:m.candidateGap||0,runnerRpm:m.runnerRpm||0,t:m.t||Date.now()}
+ if(m.type==="arm"){autoSession=true;armed=true;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];pre=[];postMessage({type:"state",state:"ARMED"})}
+ if(m.type==="manual"){autoSession=false;armed=false;rearmPending=false;rearmReadyAt=0;recording=true;mode="manual";run=[];pre=[];postMessage({type:"state",state:"MANUAL RUN"})}
+ if(m.type==="stop"){autoSession=false;rearmPending=false;rearmReadyAt=0;if(recording)finish("STOP");else{armed=false;mode="none";run=[];postMessage({type:"state",state:"STOPPED"})}}
+ if(m.type==="cancel"){autoSession=false;armed=false;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];postMessage({type:"state",state:"CANCELLED"})}
+};
+setInterval(sample,50);
+`
+const measurementWorker=new Worker(URL.createObjectURL(new Blob([measurementWorkerSource],{type:"text/javascript"})));
+
+const rpmWorkerSource=`
+"use strict";
+let minR=3000,maxR=12500,last={phone:0,ext:0},fingerprint=[];
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function interpExpectedF0(rpm){
+ const p=fingerprint.filter(x=>x.rpm>=3000).sort((a,b)=>a.rpm-b.rpm);
+ if(!p.length)return rpm/60;
+ if(p.length===1)return p[0].f0_hz*(rpm/p[0].rpm);
+ if(rpm<=p[0].rpm)return p[0].f0_hz*(rpm/p[0].rpm);
+ if(rpm>=p[p.length-1].rpm){
+   const a=p[p.length-2],b=p[p.length-1];
+   const slope=(b.f0_hz-a.f0_hz)/Math.max(1,b.rpm-a.rpm);
+   return b.f0_hz+(rpm-b.rpm)*slope;
+ }
+ for(let i=0;i<p.length-1;i++){
+   const a=p[i],b=p[i+1];
+   if(rpm>=a.rpm&&rpm<=b.rpm){
+     const u=(rpm-a.rpm)/(b.rpm-a.rpm);
+     return a.f0_hz+u*(b.f0_hz-a.f0_hz);
+   }
+ }
+ return rpm/60;
+}
+function rpmFromObservedF0(f){
+ const p=fingerprint.filter(x=>x.rpm>=3000).sort((a,b)=>a.f0_hz-b.f0_hz);
+ if(!p.length)return f*60;
+ if(p.length===1)return f*(p[0].rpm/p[0].f0_hz);
+ if(f<=p[0].f0_hz)return f*(p[0].rpm/p[0].f0_hz);
+ if(f>=p[p.length-1].f0_hz){
+   const a=p[p.length-2],b=p[p.length-1];
+   const slope=(b.rpm-a.rpm)/Math.max(.001,b.f0_hz-a.f0_hz);
+   return b.rpm+(f-b.f0_hz)*slope;
+ }
+ for(let i=0;i<p.length-1;i++){
+   const a=p[i],b=p[i+1];
+   if(f>=a.f0_hz&&f<=b.f0_hz){
+     const u=(f-a.f0_hz)/(b.f0_hz-a.f0_hz);
+     return a.rpm+u*(b.rpm-a.rpm);
+   }
+ }
+ return f*60;
+}
+function goertzel(x,fs,f){
+ if(f<=0||f>=fs/2)return -120;
+ const w=2*Math.PI*f/fs,cos=Math.cos(w),coeff=2*cos;let s0=0,s1=0,s2=0;
+ for(let i=0;i<x.length;i++){s0=x[i]+coeff*s1-s2;s2=s1;s1=s0}
+ const power=s1*s1+s2*s2-coeff*s1*s2;
+ return 10*Math.log10(Math.max(1e-12,power/(x.length*x.length)));
+}
+function nearestTemplate(rpm){
+ let best=null;
+ for(const p of fingerprint){
+   if(p.rpm<3000)continue;
+   const e=Math.abs(p.rpm-rpm);
+   if(!best||e<best.e)best={p,e};
+ }
+ return best?.p||null;
+}
+function spectralScore(x,fs,rpm){
+ const f0=interpExpectedF0(rpm),tpl=nearestTemplate(rpm);
+ if(!tpl||!tpl.harm_rel_db)return .5;
+ const db=[];for(let h=1;h<=6;h++)db.push(goertzel(x,fs,f0*h));
+ const mx=Math.max(...db),rel=db.map(v=>v-mx);
+ let err=0,n=0;
+ for(let i=0;i<6;i++){
+   const t=tpl.harm_rel_db[i];
+   if(t==null)continue;
+   err+=Math.min(35,Math.abs(rel[i]-t));n++;
+ }
+ if(!n)return .5;
+ return clamp(1-(err/n)/28,0,1);
+}
+function estimate(arr,sr,source){
+ const ds=Math.max(1,Math.round(sr/8000)),n=Math.floor(arr.length/ds),x=new Float32Array(n);let mean=0;
+ for(let i=0;i<n;i++){let v=arr[i*ds];x[i]=v;mean+=v}mean/=n;
+ let rms=0;for(let i=0;i<n;i++){x[i]-=mean;rms+=x[i]*x[i]}rms=Math.sqrt(rms/n);if(rms<.0015)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
+ const fs=sr/ds;
+ // Wide frequency search: collected reference f0 does not equal RPM/60 exactly.
+ const minF=35,maxF=Math.min(260,fs/3),minLag=Math.max(2,Math.floor(fs/maxF)),maxLag=Math.min(n-4,Math.ceil(fs/minF));
+ let candidates=[];
+ function corr(lag){let c=0,e1=0,e2=0;for(let i=0;i<n-lag;i+=2){const a=x[i],b=x[i+lag];c+=a*b;e1+=a*a;e2+=b*b}return c/Math.sqrt(Math.max(1e-12,e1*e2))}
+ for(let lag=minLag;lag<=maxLag;lag++){
+   const q=corr(lag);
+   if(q<.12)continue;
+   if(candidates.length<12||q>candidates[candidates.length-1].q){
+     candidates.push({lag,q});candidates.sort((a,b)=>b.q-a.q);if(candidates.length>12)candidates.pop();
+   }
+ }
+ if(!candidates.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
+ const prev=last[source]||0;
+ let scored=[];
+ for(const c of candidates){
+   const f=fs/c.lag;
+   let rpm=rpmFromObservedF0(f);
+   for(const mult of [1,.5,2]){
+     const rr=rpm*mult;if(rr<minR||rr>maxR)continue;
+     const fp=spectralScore(x,fs,rr);
+     const continuity=prev?clamp(1-Math.abs(rr-prev)/Math.max(prev,1),0,1):.65;
+     const score=c.q*.48+fp*.37+continuity*.15;
+     scored.push({rpm:rr,rawRpm:f*60,q:c.q,fp,score,f,mult});
+   }
+ }
+ if(!scored.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
+ scored.sort((a,b)=>b.score-a.score);const allCandidates=scored.map(x=>[Math.round(x.rpm*10)/10,Math.round(x.f*100)/100,Math.round(x.rawRpm*10)/10,Math.round(x.q*10000)/10000,Math.round(x.fp*10000)/10000,Math.round(x.score*10000)/10000,x.mult]);const b=scored[0];
+ const runner=scored.find(x=>Math.abs(x.rpm-b.rpm)/Math.max(1,b.rpm)>.06)||null;
+ const candidateGap=runner?clamp((b.score-runner.score)/Math.max(.01,Math.abs(b.score)),0,1):1;
+ let conf=clamp((b.q-.10)/.55,0,1)*.50+b.fp*.35+candidateGap*.15;
+ if(b.fp<.22)conf*=.55;
+ if(candidateGap<.08)conf*=.62;else if(candidateGap<.15)conf*=.80;
+ if(conf<.14)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
+ last[source]=prev?prev*.68+b.rpm*.32:b.rpm;
+ return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
+}
+onmessage=e=>{
+ const m=e.data;
+ if(m.type==="config"){minR=m.min||3000;maxR=m.max||12500;fingerprint=m.fingerprint||fingerprint}
+ if(m.type==="pcm"){
+   const a=new Float32Array(m.buffer),r=estimate(a,m.sampleRate||48000,m.source);
+   postMessage({type:"rpm",source:"ext",rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,level:r.level||0,candidateGap:r.candidateGap||0,runnerRpm:r.runnerRpm||0,candidates:r.candidates||[],t:Date.now()})
+ }
+};
+`;
+const rpmWorker=new Worker(URL.createObjectURL(new Blob([rpmWorkerSource],{type:"text/javascript"})));
+rpmWorker.onmessage=e=>{if(e.data.type==="rpm"){globalThis.MOTOLAB_AUDIO_LAST=e.data;window.dispatchEvent(new CustomEvent("motolab-audio-candidates",{detail:e.data}));const {candidates,...core}=e.data;measurementWorker.postMessage(core)}};
+
+const workletSource=`
+class MotoTap extends AudioWorkletProcessor{
+ constructor(){super();this.buf=new Float32Array(4096);this.pos=0;this.hop=0;this.port.onmessage=e=>{if(e.data&&e.data.source)this.source=e.data.source}}
+ process(inputs){
+  const ch=inputs[0]&&inputs[0][0];if(!ch)return true;
+  for(let i=0;i<ch.length;i++){this.buf[this.pos++]=ch[i];if(this.pos>=this.buf.length)this.pos=0}
+  this.hop+=ch.length;if(this.hop>=4096){this.hop=0;const out=new Float32Array(this.buf.length);let p=this.pos;for(let i=0;i<out.length;i++)out[i]=this.buf[(p+i)%this.buf.length];this.port.postMessage({type:"pcm",source:"ext",sampleRate,buffer:out.buffer},[out.buffer])}
+  return true
+ }}
+registerProcessor("mototap",MotoTap);
+`;
+
+measurementWorker.onmessage=e=>{
+ const m=e.data;
+ if(m.type==="ui"){lastUi=m.data;collectLearningSample(m.data);renderLive(m.data,m)}
+ if(m.type==="state")handleEngineState(m.state)
+ if(m.type==="runComplete")handleRunComplete(m.run,m.reason)
+ if(m.type==="gearModel"){updateLearnedGears(m.ratios)}
+};
+
+function getGpsCalibrations(){const p=getCurrentProfile();return Array.isArray(p?.gpsCalibrations)?p.gpsCalibrations:[]}
+function currentSettings(){
+ const p=getCurrentProfile();
+ return {mass:+$("mass").value||190,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,manualRatio:+localStorage.getItem("motolab_v26_ratio")||0,gearLearn:$("gearLearnToggle").classList.contains("on"),gearRatios:p?.gearRatios||[],fusionMinRpm:+$("micMin").value||3000,audioMaxRpm:+$("micMax").value||12500,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,micCal:getMicCalPoints(),rpmSourceMode:$("rpmSourceMode")?.value||"fusion",selectedGear:+$("manualGear")?.value||3,gpsCalibrations:getGpsCalibrations()}
+}
+function pushConfig(){measurementWorker.postMessage({type:"config",config:currentSettings()});rpmWorker.postMessage({type:"config",min:+$("micMin").value||3000,max:+$("micMax").value||12500,fingerprint:RAW_AUDIO_FINGERPRINT.points})}
+
+async function openStorage(){
+ try{
+  db=await new Promise((resolve,reject)=>{
+   const r=indexedDB.open("VanaMotoLab",2);
+   r.onupgradeneeded=()=>{
+     const d=r.result;
+     if(!d.objectStoreNames.contains("runs"))d.createObjectStore("runs",{keyPath:"id"});
+     if(!d.objectStoreNames.contains("rawChunks")){const s=d.createObjectStore("rawChunks",{keyPath:"id"});s.createIndex("sessionId","sessionId",{unique:false});s.createIndex("created","created",{unique:false})}
+     if(!d.objectStoreNames.contains("rawSessions"))d.createObjectStore("rawSessions",{keyPath:"id"});
+   };
+   r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)
+  });
+ }catch(e){useFallback=true;log("IndexedDB fallback: "+e.message)}
+}
+async function loadRuns(){
+ if(useFallback||!db){try{runs=JSON.parse(localStorage.getItem(FALLBACK_RUNS)||"[]")}catch{runs=[]};return}
+ runs=await new Promise((resolve,reject)=>{const tx=db.transaction("runs","readonly"),r=tx.objectStore("runs").getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)});
+ runs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+}
+async function saveRun(run){
+ if(useFallback||!db){runs.unshift(run);localStorage.setItem(FALLBACK_RUNS,JSON.stringify(runs.slice(0,80)));return}
+ await new Promise((resolve,reject)=>{const tx=db.transaction("runs","readwrite");tx.objectStore("runs").put(run);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});runs.unshift(run)
+}
+async function deleteRun(id){
+ if(useFallback||!db){runs=runs.filter(r=>r.id!==id);localStorage.setItem(FALLBACK_RUNS,JSON.stringify(runs));return}
+ await new Promise((resolve,reject)=>{const tx=db.transaction("runs","readwrite");tx.objectStore("runs").delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});runs=runs.filter(r=>r.id!==id)
+}
+
+
+function stableSetupSignature(profile=getCurrentProfile?.()||{}){const data={engineType:profile.engineType||null,knowledge:profile.knowledge||null,carb:profile.carb||null};const str=JSON.stringify(data);let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return "s"+(h>>>0).toString(16).padStart(8,"0")}
+function learningProfileSnapshot(){
+ const p=getCurrentProfile?.()||{};
+ const s=currentSettings?.()||{};
+ return {
+   profileId:p.id||null,profileName:p.name||null,engineType:p.engineType||null,appVersion:APP_VERSION,algorithmVersion:ALGORITHM_VERSION,knowledge:p.knowledge||emptyKnowledge(),
+   gearRatios:p.gearRatios||[],gpsCalibrations:p.gpsCalibrations||[],
+   rpmSourceMode:s.rpmSourceMode||null,selectedGear:s.selectedGear||null,
+   mass:s.mass||null,cda:s.cda||null,crr:s.crr||null,rho:s.rho||null,
+   micMin:s.fusionMinRpm||null,micMax:s.audioMaxRpm||null,
+   audioHighConf:s.audioHighConf||null,audioMidConf:s.audioMidConf||null,
+   audioDevice:selectedAudioInfo?.()?.label||null,
+   fingerprintSource:RAW_AUDIO_FINGERPRINT.source,setupSignature:stableSetupSignature(p)
+ };
+}
+function ensureLearningSession(){
+ if(learningSessionId)return;
+ learningSessionStart=Date.now();
+ learningSessionId="learn-"+learningSessionStart+"-"+Math.random().toString(16).slice(2);
+ learningBuffer=[];learningEvents=[];learningSampleCount=0;learningChunkCount=0;learningLastStore=Date.now();
+ learningEvents.push({t:Date.now(),type:"session_start",profile:learningProfileSnapshot()});
+ updateLearningUi();
+}
+function addLearningEvent(type,data={}){
+ if(!learningEnabled)return;
+ ensureLearningSession();
+ learningEvents.push({t:Date.now(),type,...data});
+ if(learningEvents.length>500)learningEvents=learningEvents.slice(-500);
+}
+function learningSensorsActive(){return !!(gpsOn||imuOn||extMicOn)}
+function collectLearningSample(s){
+ if(!learningEnabled||!learningSensorsActive()||!s)return;
+ ensureLearningSession();
+ const row={
+   t:s.t||Date.now(),
+   profileId:getCurrentProfile?.()?.id||null,
+   rpmSourceMode:$("rpmSourceMode")?.value||"fusion",
+   selectedGear:+$("manualGear")?.value||null,
+   // Raw / source-specific values are retained separately from fused values.
+   audioRawRpm:Number.isFinite(s.audioRawRpm)?s.audioRawRpm:null,
+   audioRpm:Number.isFinite(s.audioRpm)?s.audioRpm:null,
+   audioConf:Number.isFinite(s.audioConf)?s.audioConf:null,
+   observedF0Hz:Number.isFinite(s.audioObservedF0)?s.audioObservedF0:null,
+   fingerprintScore:Number.isFinite(s.audioFpScore)?s.audioFpScore:null,
+   candidateGap:Number.isFinite(s.audioCandidateGap)?s.audioCandidateGap:null,
+   runnerRpm:Number.isFinite(s.audioRunnerRpm)?s.audioRunnerRpm:null,
+   audioLevel:Number.isFinite(s.audioLevel)?s.audioLevel:null,
+   speedRpm:Number.isFinite(s.speedRpm)?s.speedRpm:null,
+   speedConf:Number.isFinite(s.speedConf)?s.speedConf:null,
+   fusedRpm:Number.isFinite(s.fusionRpm)?s.fusionRpm:null,
+   fusedConf:Number.isFinite(s.conf)?s.conf:null,
+   source:s.source||null,fusionMode:s.fusionMode||null,
+   gpsKmh:Number.isFinite(s.kmh)?s.kmh:null,
+   gpsAccuracyM:Number.isFinite(s.gpsAcc)?s.gpsAcc:null,
+   accelerationMps2:Number.isFinite(s.a)?s.a:null,
+   accelerationG:Number.isFinite(s.g)?s.g:null,
+   motionMag:Number.isFinite(s.motionMag)?s.motionMag:null,
+   motionAgeMs:Number.isFinite(s.motionAgeMs)?s.motionAgeMs:null,
+   gear:s.gear||null,gearConf:Number.isFinite(s.gearConf)?s.gearConf:null,
+   rpmPerKmh:Number.isFinite(s.ratio)?s.ratio:null,
+   slip:!!s.slip,agreement:Number.isFinite(s.agreement)?s.agreement:null,
+   estimatedHp:Number.isFinite(s.hp)?s.hp:null,estimatedNm:Number.isFinite(s.nm)?s.nm:null,
+   sampleQuality:Number.isFinite(s.quality)?s.quality:null
+ };
+ learningBuffer.push(row);learningSampleCount++;
+ if(learningBuffer.length>=250||Date.now()-learningLastStore>30000)flushLearningChunk();
+ if(Date.now()-lastLearningUiAt>500){lastLearningUiAt=Date.now();updateLearningUi()}
+}
+async function putRawChunk(chunk){
+ if(!db||useFallback){
+   try{
+    const key="motolab_v29_raw_fallback";
+    const a=JSON.parse(localStorage.getItem(key)||"[]");a.push(chunk);
+    localStorage.setItem(key,JSON.stringify(a.slice(-8)));
+   }catch(e){log("Raw fallback full: "+e.message)}
+   return;
+ }
+ await new Promise((resolve,reject)=>{
+   const tx=db.transaction("rawChunks","readwrite");tx.objectStore("rawChunks").put(chunk);
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)
+ });
+}
+async function putRawSession(meta){
+ if(!db||useFallback)return;
+ await new Promise((resolve,reject)=>{
+   const tx=db.transaction("rawSessions","readwrite");tx.objectStore("rawSessions").put(meta);
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)
+ });
+}
+async function flushLearningChunk(force=false){
+ if(learningFlushBusy||!learningSessionId||(!learningBuffer.length&&!force))return false;
+ const samples=learningBuffer.splice(0,learningBuffer.length);
+ const events=learningEvents.splice(0,learningEvents.length);
+ if(!samples.length&&!events.length)return false;
+ learningFlushBusy=true;learningLastStore=Date.now();
+ const chunk={
+   id:learningSessionId+"-"+Date.now()+"-"+learningChunkCount,
+   sessionId:learningSessionId,created:new Date().toISOString(),
+   app:"VÄNÄ MotoLab "+APP_VERSION,schema:"learning_raw_v2",algorithmVersion:ALGORITHM_VERSION,
+   profile:learningProfileSnapshot(),events,samples
+ };
+ try{await putRawChunk(chunk);learningChunkCount++;await putRawSession({id:learningSessionId,started:new Date(learningSessionStart).toISOString(),updated:new Date().toISOString(),ended:null,sampleCount:learningSampleCount,chunkCount:learningChunkCount,profile:learningProfileSnapshot(),appVersion:APP_VERSION,algorithmVersion:ALGORITHM_VERSION});updateLearningUi();return true}catch(e){learningBuffer.unshift(...samples);learningEvents.unshift(...events);log("Raw chunk: "+e.message);return false}finally{learningFlushBusy=false}
+}
+async function finishLearningSession(reason="app"){
+ if(!learningSessionId)return;
+ addLearningEvent("session_end",{reason});
+ await flushLearningChunk(true);
+ try{await putRawSession({id:learningSessionId,started:new Date(learningSessionStart).toISOString(),ended:new Date().toISOString(),sampleCount:learningSampleCount,chunkCount:learningChunkCount,profile:learningProfileSnapshot()})}catch(e){}
+}
+async function getLearningChunks(sessionOnly=false){
+ let out=[];
+ if(db&&!useFallback&&db.objectStoreNames.contains("rawChunks")){
+   out=await new Promise((resolve,reject)=>{
+     const tx=db.transaction("rawChunks","readonly"),store=tx.objectStore("rawChunks");
+     const req=sessionOnly&&learningSessionId?store.index("sessionId").getAll(learningSessionId):store.getAll();
+     req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)
+   });
+ }else{
+   try{out=JSON.parse(localStorage.getItem("motolab_v29_raw_fallback")||"[]")}catch{out=[]}
+   if(sessionOnly&&learningSessionId)out=out.filter(x=>x.sessionId===learningSessionId)
+ }
+ return out.sort((a,b)=>new Date(a.created)-new Date(b.created));
+}
+async function exportLearningData(){
+ await flushLearningChunk(true);
+ const chunks=await getLearningChunks(false);
+ const payload={
+   app:"VÄNÄ MotoLab "+APP_VERSION,exported:new Date().toISOString(),schema:"learning_export_v2",algorithmVersion:ALGORITHM_VERSION,
+   purpose:"future RPM/audio/GPS/gear calibration and algorithm reprocessing",
+   note:"Raw/source-specific fields are kept separately from fused/derived fields. Do not use fused RPM as truth unless separately referenced.",
+   currentProfile:learningProfileSnapshot(),
+   fingerprint:RAW_AUDIO_FINGERPRINT,
+   chunks
+ };
+ const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="VANA_MotoLab_learning_data_"+Date.now()+".json";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+ $("learningStatus").textContent=`Viety ${chunks.length} jaksoa / ${chunks.reduce((n,c)=>n+(c.samples?.length||0),0)} näytettä.`;
+}
+function markCurrentTruth(){
+ if(!learningEnabled){$("learningStatus").textContent="Kytke jatkuva oppimisdata ensin päälle.";return}
+ ensureLearningSession();
+ const rpm=prompt("Anna tämän hetken VARMISTETTU RPM. Jätä tyhjäksi, jos RPM ei ole oikeasti tiedossa.");
+ if(rpm===null||rpm.trim()==="")return;
+ const n=+rpm;if(!Number.isFinite(n)||n<=0){$("learningStatus").textContent="Virheellinen RPM.";return}
+ addLearningEvent("truth_reference",{truthRpm:n,truthSource:"user_confirmed",snapshot:{...lastUi}});
+ $("learningStatus").textContent=`Referenssipiste merkitty: ${Math.round(n)} rpm.`;
+}
+function updateLearningUi(){
+ if(!$("learningSampleCount"))return;
+ $("learningDataToggle").classList.toggle("on",learningEnabled);
+ $("learningSampleCount").textContent=learningSampleCount;
+ $("learningChunkCount").textContent=learningChunkCount;
+ $("learningDuration").textContent=learningSessionStart?Math.round((Date.now()-learningSessionStart)/1000)+" s":"0 s";
+ $("learningState").textContent=!learningEnabled?"POIS":learningSensorsActive()?"KERÄÄ DATAA":"ODOTTAA ANTURIA";
+}
+function emptyKnowledge(){return {schema:"vehicle_engine_kb_v1",engine:{displacementCc:null,cylinders:1,boreMm:null,strokeMm:null,cylinderKit:"",squishMm:null,chamberCc:null},intake:{carbSizeMm:null},exhaust:{system:""},ignition:{controller:""},drivetrain:{frontSprocket:null,rearSprocket:null,wheelCircMm:null},setupTag:"",notes:""}}
+function normalizeProfile(p={}){const base=emptyKnowledge(),kb=p.knowledge||base,e=kb.engine||{},i=kb.intake||{},x=kb.exhaust||{},ig=kb.ignition||{},d=kb.drivetrain||{};return {...p,id:p.id||("p"+Date.now()),name:p.name||"Oma pyörä",engineType:p.engineType||"2T",gearRatios:Array.isArray(p.gearRatios)?p.gearRatios:[],gpsCalibrations:Array.isArray(p.gpsCalibrations)?p.gpsCalibrations:[],carb:p.carb||{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:p.baselineHp??null,knowledge:{schema:"vehicle_engine_kb_v1",engine:{...base.engine,...e},intake:{...base.intake,...i},exhaust:{...base.exhaust,...x},ignition:{...base.ignition,...ig},drivetrain:{...base.drivetrain,...d},setupTag:kb.setupTag||"",notes:kb.notes||""}}}
+function defaultProfiles(){return [normalizeProfile({id:"p1",name:"Oma pyörä",engineType:"2T"})]}
+function getProfiles(){try{const raw=JSON.parse(localStorage.getItem(PROFILES_KEY)||"null")||defaultProfiles();return raw.map(normalizeProfile)}catch{return defaultProfiles()}}
+function setProfiles(p){localStorage.setItem(PROFILES_KEY,JSON.stringify((p||[]).map(normalizeProfile)))}
+function getCurrentProfile(){const ps=getProfiles(),id=localStorage.getItem("motolab_v26_profile")||ps[0].id;return ps.find(p=>p.id===id)||ps[0]}
+function saveCurrentProfile(patch){const ps=getProfiles(),cur=getCurrentProfile(),i=ps.findIndex(x=>x.id===cur.id);ps[i]={...cur,...patch};setProfiles(ps);renderProfiles();pushConfig()}
+function knowledgeFromUi(){return {schema:"vehicle_engine_kb_v1",engine:{displacementCc:numOrNull("kbDisplacement"),cylinders:numOrNull("kbCylinders")||1,boreMm:numOrNull("kbBore"),strokeMm:numOrNull("kbStroke"),cylinderKit:$("kbCylinderKit")?.value.trim()||"",squishMm:numOrNull("kbSquish"),chamberCc:numOrNull("kbChamberCc")},intake:{carbSizeMm:numOrNull("kbCarbSize")},exhaust:{system:$("kbExhaust")?.value.trim()||""},ignition:{controller:$("kbIgnition")?.value.trim()||""},drivetrain:{frontSprocket:numOrNull("kbFrontSprocket"),rearSprocket:numOrNull("kbRearSprocket"),wheelCircMm:numOrNull("kbWheelCirc")},setupTag:$("kbSetupTag")?.value.trim()||"",notes:$("kbNotes")?.value.trim()||""}}
+function numOrNull(id){const el=$(id),v=el?.value;if(v==null||String(v).trim()==="")return null;const n=+v;return Number.isFinite(n)?n:null}
+function renderKnowledge(kb){const base=emptyKnowledge();kb=kb||base;const e={...base.engine,...(kb.engine||{})},i={...base.intake,...(kb.intake||{})},x={...base.exhaust,...(kb.exhaust||{})},ig={...base.ignition,...(kb.ignition||{})},d={...base.drivetrain,...(kb.drivetrain||{})};const vals={kbDisplacement:e.displacementCc,kbCylinders:e.cylinders,kbBore:e.boreMm,kbStroke:e.strokeMm,kbCylinderKit:e.cylinderKit,kbSquish:e.squishMm,kbChamberCc:e.chamberCc,kbCarbSize:i.carbSizeMm,kbExhaust:x.system,kbIgnition:ig.controller,kbFrontSprocket:d.frontSprocket,kbRearSprocket:d.rearSprocket,kbWheelCirc:d.wheelCircMm,kbSetupTag:kb.setupTag,kbNotes:kb.notes};for(const [id,v] of Object.entries(vals))if($(id))$(id).value=v??""}
+function exportCurrentProfile(){const p=normalizeProfile(getCurrentProfile());const payload={app:"VÄNÄ MotoLab "+APP_VERSION,exported:new Date().toISOString(),schema:"motolab_profile_export_v1",algorithmVersion:ALGORITHM_VERSION,profile:p};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="VANA_MotoLab_profile_"+(p.name||"bike").replace(/[^a-z0-9_-]+/gi,"_")+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);if($("kbStatus"))$("kbStatus").textContent="Profiili + Knowledge Base viety JSON-tiedostoksi."}
+function renderProfiles(){
+ const ps=getProfiles(),cur=getCurrentProfile();$("profileSelect").innerHTML=ps.map(p=>`<option value="${p.id}" ${p.id===cur.id?"selected":""}>${escapeHtml(p.name)}</option>`).join("");
+ $("profileName").value=cur.name;$("engineType").value=cur.engineType||"2T";renderKnowledge(cur.knowledge);const c=cur.carb||{};$("mainJet").value=c.mainJet||165;$("pilotJet").value=c.pilotJet||45;$("needleType").value=c.needleType||"X7";$("needleClip").value=String(c.needleClip||3);$("airScrew").value=c.airScrew||1.5;$("slide").value=c.slide||40;
+ $("profileInfo").textContent=`${cur.gearRatios?.length||0} opittua vaihdesuhdetta • ${runs.filter(r=>r.profileId===cur.id).length} vetoa${cur.knowledge?.setupTag?" • "+cur.knowledge.setupTag:""}`
+}
+function updateLearnedGears(ratios){
+ const cur=getCurrentProfile();const old=cur.gearRatios||[];
+ const significant=ratios.some((r,i)=>!old[i]||Math.abs(r.ratio-old[i].ratio)/r.ratio>.01||r.count>old[i].count);
+ if(significant){saveCurrentProfile({gearRatios:ratios});$("learnState").textContent=`OPITTU ${ratios.length} VAIHDETTA`}
+}
+
+
+
+function renderRawFingerprint(){
+ const p=RAW_AUDIO_FINGERPRINT.points||[];
+ if($("rawFpMain"))$("rawFpMain").textContent=p.length+" REF PISTETTÄ";
+ if($("rawFpStatus"))$("rawFpStatus").innerHTML=
+   "Lähde: <b>"+RAW_AUDIO_FINGERPRINT.project+"</b><br>"+
+   p.map(x=>x.rpm+" rpm: f0≈"+Math.round(x.f0_hz*10)/10+" Hz • "+x.samples+" näytettä").join("<br>");
+}
+function getMicCalPoints(){
+ try{
+   const pts=JSON.parse(localStorage.getItem(MIC_CAL_KEY)||"[]");
+   return Array.isArray(pts)?pts.filter(p=>p&&p.raw>0&&p.target>0).slice(0,3):[];
+ }catch{return []}
+}
+function renderMicCalibration(){
+ const pts=getMicCalPoints();
+ if($("micCalMain"))$("micCalMain").textContent=pts.length+" pistettä";
+ if(!$("micCalStatus"))return;
+ $("micCalStatus").innerHTML=pts.length?pts.map((p,i)=>`P${i+1}: mitattu ${Math.round(p.raw)} → oikea ${Math.round(p.target)} rpm`).join("<br>"):"Ei kalibrointipisteitä.";
+}
+function setMicCalPoints(pts){
+ localStorage.setItem(MIC_CAL_KEY,JSON.stringify(pts.slice(0,3)));
+ renderMicCalibration();
+ pushConfig();
+}
+function captureMicCalibration(targetId,slot){
+ const target=+$(targetId).value||0;
+ const raw=+(lastUi.audioRawRpm||lastUi.audioRpm||0);
+ const conf=+(lastUi.audioConf||0);
+ if(target<1000){$("micCalStatus").textContent="Anna oikea referenssi-RPM.";return}
+ if(raw<1000||conf<.25){$("micCalStatus").textContent="Ei riittävän varmaa audio-RPM:ää. Pidä kierrokset tasaisina ja varmista BT KUULOKE.";return}
+ const pts=getMicCalPoints();
+ pts[slot]={raw,target,conf,t:Date.now()};
+ setMicCalPoints(pts.filter(Boolean));
+ $("micCalStatus").textContent=`Tallennettu: ääni ${Math.round(raw)} rpm → referenssi ${Math.round(target)} rpm (${Math.round(conf*100)} %).`;
+}
+function syncRideControls(fromRide=false){const pairs=[["rideAutoSensitivity","autoSensitivity"],["rideAutoStopDelay","autoStopDelay"],["rideRecordFrom","recordFrom"],["rideStopRpm","stopRpm"]];for(const [ride,settings] of pairs){if(!$(ride)||!$(settings))continue;if(fromRide)$(settings).value=$(ride).value;else $(ride).value=$(settings).value}}
+function loadSettings(){
+ let d={};try{d=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}catch{}
+ const map={mass:"mass",manualGear:"manualGear",calSpeed:"calSpeed",calRpm:"calRpm",calGear:"calGear",calTargetRpm:"calTargetRpm",calStableSec:"calStableSec",calToleranceKmh:"calToleranceKmh",calMode:"calMode",rpmSourceMode:"rpmSourceMode",micMin:"micMin",micMax:"micMax",cda:"cda",crr:"crr",rho:"rho",audioHighConf:"audioHighConf",audioMidConf:"audioMidConf",slipThreshold:"slipThreshold",speedRpmMinKmh:"speedRpmMinKmh",autoSensitivity:"autoSensitivity",autoStopDelay:"autoStopDelay",recordFrom:"recordFrom",stopRpm:"stopRpm"};
+ for(const [k,id] of Object.entries(map))if(d[k]!=null&&$(id))$(id).value=d[k];
+ setSwitch("gearLearnToggle",d.gearLearn!==false);setSwitch("gridToggle",d.gridOn!==false);setSwitch("infoToggle",d.infoButtons!==false);document.body.classList.toggle("info-off",d.infoButtons===false);setSwitch("wakeToggle",d.wakeOn!==false);
+ updateSourceModeUI();renderGearCalibrations();syncRideControls(false);
+}
+function saveSettings(){
+ const d={mass:+$("mass").value||190,manualGear:+$("manualGear").value||3,calSpeed:+$("calSpeed").value||60,calRpm:+$("calRpm").value||6000,calGear:+$("calGear").value||3,calTargetRpm:+$("calTargetRpm").value||3000,calStableSec:+$("calStableSec").value||3,calToleranceKmh:+$("calToleranceKmh").value||1,calMode:$("calMode").value,rpmSourceMode:$("rpmSourceMode").value,micMin:+$("micMin").value||3000,micMax:+$("micMax").value||12500,cda:+$("cda").value||.55,crr:+$("crr").value||.015,rho:+$("rho").value||1.225,audioHighConf:+$("audioHighConf").value||.62,audioMidConf:+$("audioMidConf").value||.34,slipThreshold:+$("slipThreshold").value||.18,speedRpmMinKmh:+$("speedRpmMinKmh").value||12,autoSensitivity:+$("autoSensitivity").value||.28,autoStopDelay:+$("autoStopDelay").value||.7,recordFrom:+$("recordFrom").value||1500,stopRpm:+$("stopRpm").value||10500,gearLearn:$("gearLearnToggle").classList.contains("on"),gridOn:$("gridToggle").classList.contains("on"),infoButtons:$("infoToggle").classList.contains("on"),wakeOn:$("wakeToggle").classList.contains("on")};
+ localStorage.setItem(SETTINGS_KEY,JSON.stringify(d));saveCurrentProfile({name:$("profileName").value.trim()||"Pyörä",engineType:$("engineType").value,knowledge:knowledgeFromUi()});$("settingsStatus").textContent=APP_VERSION+" asetukset + Knowledge Base tallennettu.";updateSourceModeUI();pushConfig()
+}
+let gpsCalTimer=null,gpsCalStarted=0,gpsCalSamples=[];
+function updateSourceModeUI(){
+ const mode=$("rpmSourceMode")?.value||"fusion",txt=mode==="gps"?"GPS ONLY: RPM lasketaan valitun vaihteen GPS-kalibroinnista. BT ei vaikuta RPM:ään.":mode==="bt"?"BT MIC ONLY: RPM tulee vain BT-kuulokkeen audiosta. GPS mittaa edelleen nopeuden ja tehon.":"AUTO FUSION: BT-RPM + GPS/nopeus tukevat toisiaan.";
+ if($("sourceModeStatus"))$("sourceModeStatus").textContent=txt;
+ pushConfig?.();
+}
+function renderGearCalibrations(){
+ if(!$("gearCalList"))return;const a=getGpsCalibrations().slice().sort((x,y)=>x.gear-y.gear);
+ $("gearCalList").innerHTML=a.length?a.map(x=>`G${x.gear}: ${Math.round(x.rpm)} rpm @ ${x.kmh.toFixed(1)} km/h → ${x.ratio.toFixed(2)} rpm/km/h${x.mode?" • "+x.mode:""}`).join("<br>"):"Ei GPS-vaihdekalibrointeja.";
+}
+function storeGearCalibration(gear,rpm,kmh,mode){
+ gear=+gear;rpm=+rpm;kmh=+kmh;if(!(gear>0&&rpm>0&&kmh>1))return false;
+ const p=getCurrentProfile(),arr=Array.isArray(p.gpsCalibrations)?p.gpsCalibrations.slice():[],ratio=rpm/kmh,rec={gear,rpm,kmh,ratio,mode:mode||"manual",t:Date.now()};
+ const i=arr.findIndex(x=>+x.gear===gear);if(i>=0)arr[i]=rec;else arr.push(rec);
+ saveCurrentProfile({gpsCalibrations:arr});localStorage.setItem("motolab_v26_ratio",String(ratio));renderGearCalibrations();pushConfig();return rec;
+}
+function stopAutoCalibration(msg){if(gpsCalTimer){clearInterval(gpsCalTimer);gpsCalTimer=null}gpsCalStarted=0;gpsCalSamples=[];if(msg&&$("gearCalStatus"))$("gearCalStatus").textContent=msg;if($("autoCalBtn"))$("autoCalBtn").textContent="ALOITA AUTOMAATTINEN KALIBROINTI"}
+async function startAutoCalibration(){
+ if(gpsCalTimer){stopAutoCalibration("Kalibrointi keskeytetty.");return}
+ const gear=+$("calGear").value||3,target=+$("calTargetRpm").value||3000,need=Math.max(1,+$("calStableSec").value||3),tol=Math.max(.2,+$("calToleranceKmh").value||1);
+ if(!gpsOn){const ok=await startGPS();if(!ok)return}
+ gpsCalSamples=[];gpsCalStarted=0;$("autoCalBtn").textContent="KESKEYTÄ KALIBROINTI";$("gearCalStatus").textContent=`G${gear} • pidä ${Math.round(target)} rpm tasaisena. Odottaa vakaata GPS-nopeutta…`;
+ gpsCalTimer=setInterval(()=>{
+   const v=+(lastUi.kmh||0),now=Date.now();if(v<5){gpsCalSamples=[];gpsCalStarted=0;$("gearCalStatus").textContent=`G${gear} • ${Math.round(target)} rpm • odottaa liikettä…`;return}
+   gpsCalSamples.push({t:now,v});gpsCalSamples=gpsCalSamples.filter(x=>now-x.t<=need*1000+800);
+   const windowStart=now-need*1000,win=gpsCalSamples.filter(x=>x.t>=windowStart),vals=win.map(x=>x.v),range=vals.length?Math.max(...vals)-Math.min(...vals):999;
+   if(range<=tol&&win.length>=Math.max(5,need*5)){
+     if(!gpsCalStarted)gpsCalStarted=now;const stable=(now-gpsCalStarted)/1000;$("gearCalStatus").textContent=`VAKAA ${Math.min(need,stable).toFixed(1)} / ${need.toFixed(1)} s • ${v.toFixed(1)} km/h`;
+     if(stable>=need){const avg=win.reduce((a,b)=>a+b.v,0)/win.length,rec=storeGearCalibration(gear,target,avg,"AUTO "+need+" s");stopAutoCalibration(`TALLENNETTU • G${gear} • ${Math.round(target)} rpm • ${avg.toFixed(1)} km/h • ${rec.ratio.toFixed(2)} rpm/km/h`)}
+   }else{gpsCalStarted=0;$("gearCalStatus").textContent=`ODOTTAA VAKAATA • ${v.toFixed(1)} km/h • vaihtelu ${range===999?"–":range.toFixed(1)} / ${tol.toFixed(1)} km/h`}
+ },200)
+}
+function clearSelectedGearCalibration(){const gear=+$("calGear").value||3,p=getCurrentProfile(),arr=(p.gpsCalibrations||[]).filter(x=>+x.gear!==gear);saveCurrentProfile({gpsCalibrations:arr});renderGearCalibrations();$("gearCalStatus").textContent=`G${gear} kalibrointi poistettu.`;pushConfig()}
+
+function setSwitch(id,on){$(id).classList.toggle("on",!!on)}
+
+async function requestWake(){if(!$("wakeToggle").classList.contains("on")||!("wakeLock" in navigator))return;try{if(!wakeLock||wakeLock.released)wakeLock=await navigator.wakeLock.request("screen")}catch(e){log("WakeLock: "+e.message)}}
+async function releaseWake(){try{if(wakeLock&&!wakeLock.released)await wakeLock.release()}catch{}wakeLock=null}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")requestWake()});
+
+async function startGPS(){
+ if(gpsOn)return true;if(!navigator.geolocation){$("measureStatus").textContent="GPS API ei käytettävissä.";return false}
+ try{
+  gpsWatch=navigator.geolocation.watchPosition(p=>{const kmh=Math.max(0,(Number.isFinite(p.coords.speed)?p.coords.speed:0)*3.6);measurementWorker.postMessage({type:"gps",kmh,acc:p.coords.accuracy||999,t:p.timestamp||Date.now()});$("gpsAccuracy").textContent=(p.coords.accuracy||0).toFixed(0)+" m"},e=>$("measureStatus").textContent="GPS: "+e.message,{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+  gpsOn=true;addLearningEvent("gps_on");syncSensorUI();return true
+ }catch(e){$("measureStatus").textContent="GPS: "+e.message;return false}
+}
+function stopGPS(){if(gpsWatch!=null&&navigator.geolocation)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;gpsOn=false;addLearningEvent("gps_off");measurementWorker.postMessage({type:"gps",kmh:0,acc:999,t:Date.now()});syncSensorUI()}
+async function toggleGPS(){gpsOn?stopGPS():await startGPS()}
+
+function motionHandler(e){let mag=0;if(e.acceleration){const a=e.acceleration;mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2)}measurementWorker.postMessage({type:"motion",mag,t:Date.now()})}
+async function startIMU(){
+ if(imuOn)return true;
+ try{
+  if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){const p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("liikeanturilupaa ei myönnetty")}
+  motionHandlerRef=motionHandler;window.addEventListener("devicemotion",motionHandlerRef,{passive:true});imuOn=true;addLearningEvent("imu_on");syncSensorUI();return true
+ }catch(e){$("measureStatus").textContent="IMU: "+e.message;return false}
+}
+function stopIMU(){if(motionHandlerRef)window.removeEventListener("devicemotion",motionHandlerRef);motionHandlerRef=null;imuOn=false;addLearningEvent("imu_off");syncSensorUI()}
+async function toggleIMU(){imuOn?stopIMU():await startIMU()}
+async function toggleSensors(){if(gpsOn||imuOn){stopGPS();stopIMU()}else{await requestWake();await startGPS();await startIMU()}}
+
+const AUDIO_DEVICE_KEY="motolab_v28_audio_device";
+
+async function ensureAudioPermissionForLabels(){
+ if(!navigator.mediaDevices?.getUserMedia)return false;
+ try{
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});
+  s.getTracks().forEach(t=>t.stop());
+  return true;
+ }catch(e){
+  $("btRouteStatus").textContent="Mikrofoniluvan saanti epäonnistui: "+e.message;
+  return false;
+ }
+}
+
+async function enumerateAudio(requestPermission=false){
+ if(!navigator.mediaDevices?.enumerateDevices)return [];
+ try{
+  if(requestPermission)await ensureAudioPermissionForLabels();
+  const ds=await navigator.mediaDevices.enumerateDevices();
+  audioDeviceList=ds.filter(d=>d.kind==="audioinput");
+  const sel=$("audioDevice");
+  const previous=sel?.value||localStorage.getItem(AUDIO_DEVICE_KEY)||"";
+  if(sel){
+   sel.innerHTML='<option value="">Valitse mikrofoni…</option>'+audioDeviceList.map(d=>`<option value="${d.deviceId}">${escapeHtml(d.label||"Mikrofoni (anna lupa nähdäksesi nimen)")}</option>`).join("");
+   if([...sel.options].some(o=>o.value===previous))sel.value=previous;
+   else if(previous)localStorage.removeItem(AUDIO_DEVICE_KEY);
+  }
+  if($("audioDeviceHint")){
+   const named=audioDeviceList.filter(d=>d.label).length;
+   $("audioDeviceHint").textContent=named
+    ? `${audioDeviceList.length} audiotuloa löytyi. Valitse sama kuulokemikrofoni kuin testerissä.`
+    : "Mikrofonien nimet eivät ole vielä näkyvissä. Paina PÄIVITÄ MIKROFONILISTA ja hyväksy mikrofonilupa.";
+  }
+  return audioDeviceList;
+ }catch(e){log("Audio devices: "+e.message);return []}
+}
+
+function selectedAudioInfo(){
+ const sel=$("audioDevice");
+ if(!sel||!sel.value)return null;
+ const opt=sel.options[sel.selectedIndex];
+ return {deviceId:sel.value,label:(opt?.textContent||"valittu mikrofoni").trim()};
+}
+
+function labelsClearlyMismatch(expected,actual){
+ const norm=s=>(s||"").toLowerCase().replace(/\s+/g," ").trim();
+ const e=norm(expected),a=norm(actual);
+ if(!e||!a)return false;
+ if(/iphone|built[- ]?in|sisäinen/.test(a) && !/iphone|built[- ]?in|sisäinen/.test(e))return true;
+ return false;
+}
+
+async function startAudio(){
+ if(extMicOn)return true;
+ if(!navigator.mediaDevices?.getUserMedia){$("measureStatus").textContent="Media API puuttuu.";return false}
+ const chosen=selectedAudioInfo();
+ if(!chosen){
+  $("measureStatus").textContent="Valitse ensin BT / kuulokemikrofoni Asetuksista.";
+  $("btRouteStatus").textContent="EI KÄYNNISTETTY: mikrofonia ei ole valittu.";
+  return false;
+ }
+ try{
+  await requestWake();
+  const constraints={audio:{
+   deviceId:{exact:chosen.deviceId},
+   echoCancellation:false,
+   noiseSuppression:false,
+   autoGainControl:false,
+   channelCount:1
+  }};
+  const stream=await navigator.mediaDevices.getUserMedia(constraints);
+  const track=stream.getAudioTracks()[0];
+  const actualLabel=(track?.label||"tuntematon audiotulo").trim();
+  const settings=track?.getSettings?.()||{};
+  if(labelsClearlyMismatch(chosen.label,actualLabel)){
+   stream.getTracks().forEach(t=>t.stop());
+   const msg=`HYLÄTTY: valittiin "${chosen.label}", mutta Safari avasi "${actualLabel}".`;
+   $("measureStatus").textContent=msg;
+   $("btRouteStatus").textContent=msg+" RPM ei käynnistynyt.";
+   extMicOn=false;syncSensorUI();
+   return false;
+  }
+
+  const ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume();
+  const blob=URL.createObjectURL(new Blob([workletSource],{type:"text/javascript"}));await ac.audioWorklet.addModule(blob);URL.revokeObjectURL(blob);
+  const node=new AudioWorkletNode(ac,"mototap");
+  node.port.onmessage=e=>{const mm=e.data;if(mm.type==="pcm")rpmWorker.postMessage(mm,[mm.buffer])};
+  const src=ac.createMediaStreamSource(stream),mute=ac.createGain();mute.gain.value=0;
+  src.connect(node);node.connect(mute);mute.connect(ac.destination);
+  audioSessions.ext={stream,ac,node,src,mute,track,chosen};
+  extMicOn=true;
+  addLearningEvent("audio_on",{device:actualLabel,sampleRate:settings.sampleRate||ac.sampleRate});
+  localStorage.setItem(AUDIO_DEVICE_KEY,chosen.deviceId);
+  syncSensorUI();
+  await enumerateAudio(false);
+  const hz=settings.sampleRate||ac.sampleRate;
+  const msg=`BT MIC: ${actualLabel} • ${hz} Hz`;
+  $("measureStatus").textContent=msg;
+  $("btRouteStatus").textContent=msg+" • valinta lukittu";
+  if($("diagLog"))$("diagLog").textContent=msg;
+  return true
+ }catch(e){
+  const msg=(e?.name==="OverconstrainedError"||e?.name==="NotFoundError")
+   ? "Valittu mikrofoni ei ole enää saatavilla. Päivitä mikrofonilista ja valitse kuuloke uudelleen."
+   : "BT MIC: "+e.message;
+  $("measureStatus").textContent=msg;
+  if($("btRouteStatus"))$("btRouteStatus").textContent="VIRHE: "+msg;
+  log("BT start: "+(e?.message||e));
+  return false
+ }
+}
+async function stopAudio(){
+ const s=audioSessions.ext;if(s){try{s.stream.getTracks().forEach(t=>t.stop())}catch{}try{s.node.disconnect();s.src.disconnect();s.mute.disconnect()}catch{}try{await s.ac.close()}catch{}audioSessions.ext=null}
+ extMicOn=false;measurementWorker.postMessage({type:"rpm",source:"ext",rpm:0,conf:0,t:Date.now()});syncSensorUI()
+}
+async function toggleAudio(){extMicOn?await stopAudio():await startAudio()}
+
+function syncSensorUI(){
+ $("gpsDot").classList.toggle("on",gpsOn);$("imuDot").classList.toggle("on",imuOn);$("extDot").classList.toggle("on",extMicOn);
+ $("sensorBtn").classList.toggle("on",gpsOn||imuOn);$("sensorState").textContent=gpsOn||imuOn?(gpsOn&&imuOn?"GPS + IMU":"OSITTAIN"):"POIS";
+ $("extMicBtn").classList.toggle("on",extMicOn);const ai=audioSessions.ext?.track?.label||selectedAudioInfo()?.label||"";$("extState").textContent=extMicOn?(ai?ai.toUpperCase():"AKTIIVINEN"):"POIS"
+}
+
+function renderLive(d,m){lastUi=d;
+ $("rpmMain").textContent=Math.round(d.rpm||0);$("speedMain").textContent=(d.kmh||0).toFixed(0);$("hpMain").textContent=(d.hp||0).toFixed(1);$("nmMain").textContent=(d.nm||0).toFixed(1);$("gMain").textContent=(d.g||0).toFixed(2);$("rpmSource").textContent=d.source||"NO SIGNAL";$("rpmConf").textContent=Math.round((d.conf||0)*100)+"%";
+ $("needle").style.transform=`rotate(${Math.max(-25,Math.min(100,-25+((d.rpm||0)/12000)*125))}deg)`;
+ $("gearMain").textContent=d.gear||"?";$("gearState").textContent=d.gear?(d.gearConf>.7?"AUTO":"ARVIO"):"OPETETAAN";$("qualityMain").textContent=(d.quality||0)+"/100";
+ $("fusionState").textContent=(d.source||"NO SIGNAL")+" "+Math.round((d.conf||0)*100)+"%";
+ $("audioRpmState").textContent=d.audioRpm?Math.round(d.audioRpm)+" • "+Math.round((d.audioConf||0)*100)+"%":"–";
+ $("btLevelState").textContent=d.audioLevel?((d.audioLevel*1000).toFixed(1)+" mFS"):"EI PCM/TASOA";
+ $("btFpState").textContent=d.audioObservedF0?((d.audioObservedF0).toFixed(1)+" Hz • FP "+Math.round((d.audioFpScore||0)*100)+"% • GAP "+Math.round((d.audioCandidateGap||0)*100)+"%"):"–";
+ $("speedRpmState").textContent=d.speedRpm?Math.round(d.speedRpm)+" • "+Math.round((d.speedConf||0)*100)+"%":"–";
+ $("fusionModeState").textContent=d.slip?"KYTKINLUISTO":(d.fusionMode||"–");
+ $("fusionModeState").style.color=d.slip?"var(--yellow)":"";
+ $("learnState").textContent=d.audioConf>.45?(d.gear?"VAIHDE "+d.gear:"OPPII SUHDETTA"):"ODOTTAA AUDIO-RPM:ÄÄ";drawHero(m.recording?null:d)
+}
+function handleEngineState(s){$("engineHealth").textContent=s==="READY"?"OK":s;$("armBtn").classList.toggle("on",s==="ARMED"||s==="AUTO RUN");$("armState").textContent=s==="ARMED"?"ARMED":s==="AUTO RUN"?"VETO":"VALMIS";$("manualBtn").classList.toggle("on",s==="MANUAL RUN");$("manualState").textContent=s==="MANUAL RUN"?"KÄYNNISSÄ":"VALMIS";if(s==="TOO SHORT")$("measureStatus").textContent="Veto liian lyhyt – ei tallennettu."}
+
+async function handleRunComplete(r,reason){
+ addLearningEvent("run_complete",{runId:r.id,reason,quality:r.quality,maxHp:r.maxHp,maxNm:r.maxNm,maxRpm:r.maxRpm,gear:r.gear});await flushLearningChunk(true);
+ const p=getCurrentProfile();r.profileId=p.id;r.profileName=p.name;r.carb=p.carb||{};r.knowledge=p.knowledge||emptyKnowledge();r.setupSignature=stableSetupSignature(p);r.appVersion=APP_VERSION;r.algorithmVersion=ALGORITHM_VERSION;await saveRun(r);renderRuns();renderAnalysis();updateDelta();$("measureStatus").textContent=`${reason}: tallennettu • ${r.maxHp.toFixed(1)} hv • laatu ${r.quality}/100`;suggestProfile(r)
+}
+function comparableRuns(profileId){return runs.filter(r=>r.profileId===profileId&&r.status!=="bad"&&r.quality>=60)}
+function updateDelta(){const p=getCurrentProfile(),rr=comparableRuns(p.id);if(rr.length<2){$("deltaMain").textContent="–";return}const d=rr[0].maxHp-rr[1].maxHp;$("deltaMain").textContent=(d>=0?"+":"")+d.toFixed(1)+" hv"}
+function suggestProfile(r){
+ const p=getCurrentProfile(),good=comparableRuns(p.id).filter(x=>x.id!==r.id).slice(0,5);if(!good.length)return;
+ const base=good.reduce((a,b)=>a+b.maxHp,0)/good.length,drop=(r.maxHp-base)/base*100;
+ let ratioMismatch=false;if(r.gearRatioMedian&&p.gearRatios?.length){const err=Math.min(...p.gearRatios.map(g=>Math.abs(r.gearRatioMedian-g.ratio)/g.ratio));ratioMismatch=err>.14}
+ if(ratioMismatch||drop<-10){$("profilePromptTitle").textContent=ratioMismatch?"Mahdollisesti eri pyörä":"Suorituskyky muuttunut";$("profilePromptText").textContent=ratioMismatch?`Vedon välityssuhde ei vastaa profiilia "${p.name}". Tehdäänkö uusi pyöräprofiili?`:`Veto on ${Math.abs(drop).toFixed(1)} % nykyisen profiilin viime vetojen keskiarvoa alempana. Onko tämä eri pyörä tai uusi kokoonpano?`;$("profileModal").classList.add("show");$("createSuggestedProfile").dataset.runId=r.id}
+}
+
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderRuns(){
+ const list=runs.filter(r=>showFailed||r.status!=="bad");
+ $("runsList").innerHTML=list.length?list.map(r=>`<div class="runCard ${r.status||"warn"}" data-id="${r.id}"><h4>${escapeHtml(r.profileName||"Pyörä")} • ${new Date(r.date).toLocaleString("fi-FI")}</h4><div class="hp">${r.maxHp.toFixed(1)} hv</div><p>${r.mode} • vaihde ${r.gear||"?"} • MJ ${r.carb?.mainJet??"–"} / klipsi ${r.carb?.needleClip??"–"}</p><p><span class="badge ${r.status}">${r.status==="good"?"HYVÄ":r.status==="warn"?"VARAUKSELLA":"HYLÄTTY"}</span> • Laatu ${r.quality}% • ${(r.data||[]).length} näytettä</p><input class="runCheck" type="checkbox" data-check="${r.id}" ${selectedRunIds.has(r.id)?"checked":""}></div>`).join(""):'<div class="statusbox">Ei vetoja.</div>';
+ document.querySelectorAll(".runCard").forEach(el=>el.addEventListener("click",e=>{if(e.target.classList.contains("runCheck"))return;openRun(el.dataset.id)}));
+ document.querySelectorAll(".runCheck").forEach(el=>el.addEventListener("change",e=>{e.target.checked?selectedRunIds.add(e.target.dataset.check):selectedRunIds.delete(e.target.dataset.check)}))
+}
+function openRun(id){
+ const r=runs.find(x=>x.id===id);if(!r)return;
+ currentRunModalId=id;
+ const date=new Date(r.date).toLocaleString("fi-FI"),gear=r.gear||"?";
+ const mainJet=r.carb?.mainJet??"–",needle=r.carb?.needleType??"–",clip=r.carb?.needleClip??"–";
+ const badge=r.status==="good"?"HYVÄ":r.status==="warn"?"VARAUKSELLA":"HYLÄTTY";
+ $("runDetails").innerHTML=`
+   <div class="dynoHeader">
+     <div><div class="dynoTitle">${escapeHtml(r.profileName||"Pyörä")} • DYNO RUN</div>
+     <div class="dynoMeta">${date} • ${(r.mode||"VETO").toUpperCase()} • vaihde ${gear} • laatu ${r.quality}/100 • ${badge}</div></div>
+   </div>
+   <div class="dynoPeaks">
+     <div class="dynoPeak red"><span>HUIPPUTEHO</span><b>${r.maxHp.toFixed(1)}</b><span>hv</span></div>
+     <div class="dynoPeak orange"><span>HUIPPUVÄÄNTÖ</span><b>${r.maxNm.toFixed(1)}</b><span>Nm</span></div>
+     <div class="dynoPeak"><span>MAX RPM</span><b>${Math.round(r.maxRpm||0)}</b><span>rpm</span></div>
+   </div>
+   <div class="dynoSetup">MJ ${mainJet} • neula ${escapeHtml(needle)} • klipsi ${escapeHtml(clip)} • ${r.data?.length||0} näytettä</div>`;
+ drawChart($("runChart"),[r],true);
+ $("runModal").classList.add("show")
+}
+function selectedRuns(){return [...selectedRunIds].map(id=>runs.find(r=>r.id===id)).filter(Boolean)}
+function compareSelected(){const rr=selectedRuns();currentChartRuns=rr;if(!rr.length){$("compareText").textContent="Valitse vähintään yksi veto.";drawChart($("compareChart"),[],true);return}drawChart($("compareChart"),rr,true);$("compareText").textContent=`Vertailussa ${rr.length} vetoa. Mukaan saa ottaa myös hylätyn vedon.`}
+function mergedRun(rr){
+ const bins=new Map();rr.forEach(r=>(r.data||[]).forEach(p=>{if(!p.rpm)return;const b=Math.round(p.rpm/250)*250;if(!bins.has(b))bins.set(b,[]);bins.get(b).push(p)}));const data=[...bins.entries()].sort((a,b)=>a[0]-b[0]).map(([rpm,a])=>({rpm,hp:a.reduce((s,x)=>s+x.hp,0)/a.length,nm:a.reduce((s,x)=>s+x.nm,0)/a.length}));return {id:"merged",profileName:"Yhdistetty referenssi",maxHp:Math.max(0,...data.map(x=>x.hp)),maxNm:Math.max(0,...data.map(x=>x.nm)),data}
+}
+function mergeSelected(){const rr=selectedRuns();if(rr.length<2){$("compareText").textContent="Yhdistämiseen tarvitaan vähintään kaksi vetoa.";return}const mr=mergedRun(rr);currentChartRuns=[mr];drawChart($("compareChart"),[mr],true);$("compareText").textContent=`Yhdistetty ${rr.length} vedosta yhdeksi tasoitetuksi referenssikäyräksi.`}
+
+function niceStep(span,target=7){
+ const raw=span/target,p=Math.pow(10,Math.floor(Math.log10(Math.max(raw,1e-9)))),n=raw/p;
+ return (n<=1?1:n<=2?2:n<=5?5:10)*p;
+}
+function drawGrid(ctx,w,h,plot){
+ ctx.clearRect(0,0,w,h);ctx.fillStyle="#07080a";ctx.fillRect(0,0,w,h);
+ if($("gridToggle")&&!$("gridToggle").classList.contains("on"))return;
+ const {l,t,r,b}=plot;
+ ctx.strokeStyle="rgba(145,155,168,.10)";ctx.lineWidth=1;
+ for(let i=0;i<=20;i++){const x=l+(r-l)*i/20;ctx.beginPath();ctx.moveTo(x,t);ctx.lineTo(x,b);ctx.stroke()}
+ for(let i=0;i<=16;i++){const y=t+(b-t)*i/16;ctx.beginPath();ctx.moveTo(l,y);ctx.lineTo(r,y);ctx.stroke()}
+ ctx.strokeStyle="rgba(170,180,192,.24)";
+ for(let i=0;i<=10;i++){const x=l+(r-l)*i/10;ctx.beginPath();ctx.moveTo(x,t);ctx.lineTo(x,b);ctx.stroke()}
+ for(let i=0;i<=8;i++){const y=t+(b-t)*i/8;ctx.beginPath();ctx.moveTo(l,y);ctx.lineTo(r,y);ctx.stroke()}
+}
+const chartColors=["#ff263f","#35a7ff","#7df08a","#d785ff","#ffc62b","#f58a32"];
+function drawChart(canvas,rr,torque=true,zoom=1,center=7000){
+ const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height,plot={l:66,t:24,r:w-36,b:h-58};
+ drawGrid(ctx,w,h,plot);if(!rr?.length)return;
+ const all=rr.flatMap(r=>r.data||[]).filter(p=>p.rpm>0&&Number.isFinite(p.hp));if(!all.length)return;
+ const baseMin=Math.min(...all.map(p=>p.rpm)),baseMax=Math.max(...all.map(p=>p.rpm)),fullSpan=Math.max(1000,baseMax-baseMin),span=fullSpan/zoom;
+ let minR=Math.max(0,center-span/2),maxR=center+span/2;
+ if(zoom===1){const rs=niceStep(fullSpan,7);minR=Math.floor(baseMin/rs)*rs;maxR=Math.ceil(baseMax/rs)*rs}
+ const filtered=all.filter(p=>p.rpm>=minR&&p.rpm<=maxR),rawMax=Math.max(1,...filtered.map(p=>Math.max(p.hp||0,torque?p.nm||0:0)));
+ const ys=niceStep(rawMax*1.12,6),maxY=Math.ceil(rawMax*1.12/ys)*ys;
+ const sx=r=>plot.l+(r-minR)/Math.max(1,maxR-minR)*(plot.r-plot.l),sy=v=>plot.b-(v/maxY)*(plot.b-plot.t);
+
+ ctx.strokeStyle="rgba(225,230,236,.58)";ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(plot.l,plot.t);ctx.lineTo(plot.l,plot.b);ctx.lineTo(plot.r,plot.b);ctx.stroke();
+
+ rr.forEach((r,ri)=>{
+   const d=(r.data||[]).filter(p=>p.rpm>=minR&&p.rpm<=maxR);
+   const pc=rr.length===1?"#ff263f":chartColors[ri%chartColors.length];
+   ctx.strokeStyle=pc;ctx.lineWidth=rr.length===1?4:3;ctx.lineJoin="round";ctx.lineCap="round";ctx.beginPath();
+   d.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.hp||0)):ctx.moveTo(sx(p.rpm),sy(p.hp||0)));ctx.stroke();
+   if(torque){ctx.strokeStyle=rr.length===1?"#f4a340":pc+"88";ctx.lineWidth=rr.length===1?2.6:1.7;ctx.beginPath();d.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.nm||0)):ctx.moveTo(sx(p.rpm),sy(p.nm||0)));ctx.stroke()}
+ });
+
+ ctx.fillStyle="#aab0b8";ctx.font="13px system-ui,-apple-system,sans-serif";ctx.textAlign="center";ctx.textBaseline="top";
+ const rs=niceStep(maxR-minR,7);
+ for(let rpm=Math.ceil(minR/rs)*rs;rpm<=maxR+1;rpm+=rs)ctx.fillText(String(Math.round(rpm)),sx(rpm),plot.b+12);
+ ctx.textAlign="right";ctx.textBaseline="middle";
+ for(let val=0;val<=maxY+1e-6;val+=ys)ctx.fillText(val.toFixed(val<10?1:0),plot.l-10,sy(val));
+ ctx.save();ctx.translate(18,(plot.t+plot.b)/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#8f96a0";ctx.fillText("hv / Nm",0,0);ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="top";ctx.fillStyle="#8f96a0";ctx.fillText("RPM",(plot.l+plot.r)/2,h-20);
+}
+function drawHero(){const d=measurementTrace.slice(-160);const c=$("heroChart"),ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(255,45,70,.13)";for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,h*i/5);ctx.lineTo(w,h*i/5);ctx.stroke()}if(!d.length)return;const vals=d.filter(x=>x.rpm>0);if(!vals.length)return;const min=Math.min(...vals.map(x=>x.rpm)),max=Math.max(...vals.map(x=>x.rpm)),my=Math.max(1,...vals.map(x=>Math.max(x.hp,x.nm)));const sx=r=>(r-min)/Math.max(1,max-min)*w,sy=v=>h-v/my*(h-4);ctx.strokeStyle="#ff263f";ctx.lineWidth=2.3;ctx.beginPath();vals.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.hp)):ctx.moveTo(sx(p.rpm),sy(p.hp)));ctx.stroke();ctx.strokeStyle="rgba(240,240,240,.6)";ctx.lineWidth=1.2;ctx.beginPath();vals.forEach((p,i)=>i?ctx.lineTo(sx(p.rpm),sy(p.nm)):ctx.moveTo(sx(p.rpm),sy(p.nm)));ctx.stroke()}
+let measurementTrace=[];const _renderLive=renderLive;renderLive=function(d,m){measurementTrace.push(d);if(measurementTrace.length>300)measurementTrace.shift();_renderLive(d,m);drawHero()}
+
+function renderAnalysis(){const r=runs[0];if(!r)return;$("anaHp").textContent=r.maxHp.toFixed(1)+" hv";$("anaNm").textContent=r.maxNm.toFixed(1)+" Nm";$("anaQuality").textContent=r.quality+"/100";$("anaProfile").textContent=r.profileName||"–";const p=getCurrentProfile(),good=comparableRuns(p.id).slice(0,5);if(good.length>=2){const avg=good.reduce((a,b)=>a+b.maxHp,0)/good.length,d=(r.maxHp-avg)/avg*100;$("analysisText").textContent=`Viimeisten vertailukelpoisten vetojen keskiarvo ${avg.toFixed(1)} hv. Viimeisin ${d>=0?"+":""}${d.toFixed(1)} % suhteessa keskiarvoon.`}}
+function saveCarb(){const carb={mainJet:+$("mainJet").value||165,pilotJet:+$("pilotJet").value||45,needleType:$("needleType").value,needleClip:$("needleClip").value,airScrew:+$("airScrew").value||1.5,slide:+$("slide").value||40};saveCurrentProfile({carb});$("carbStatus").textContent=`Tallennettu: MJ ${carb.mainJet}, ${carb.needleType}, klipsi ${carb.needleClip}.`}
+function jetSuggest(){const main=+$("mainJet").value||165,temp=+$("tempC").value||20,press=+$("pressure").value||1013,afr=+$("afr").value,egt=+$("egt").value;let d=0,why=[];const dens=(press/1013)*(293.15/(273.15+temp));if(dens>1.03){d+=2;why.push("tiheä ilma")}if(dens<.97){d-=2;why.push("harva ilma")}if(afr>13.5){d+=3;why.push("AFR laiha")}else if(afr>0&&afr<11.8){d-=3;why.push("AFR rikas")}if(egt>680){d+=2;why.push("EGT korkea")}d=Math.max(-5,Math.min(5,Math.round(d)));$("jetSuggestion").innerHTML=`<b>MJ ${main} → ${main+d}</b><br>${d?"Muutos "+(d>0?"+":"")+d:"Pidä koko ennallaan ja kerää lisää dataa."}<br>${why.join(", ")||"Ei lisäsignaaleja."}`}
+function avgHpAt(data,rpm){const a=data.filter(x=>Math.abs(x.rpm-rpm)<180);return a.length?a.reduce((s,x)=>s+x.hp,0)/a.length:NaN}
+function autoTune(){const p=getCurrentProfile(),rr=comparableRuns(p.id).slice(0,2);if(rr.length<2){$("autoTuneResult").textContent="Tarvitaan kaksi saman profiilin vertailukelpoista vetoa.";return}const out=[],step=+$("rpmStep").value||500,from=+$("analyzeFrom").value||4000,maxStep=Math.abs(+$("maxIgnStep").value||.5);for(let rpm=from;rpm<=+$("stopRpm").value;rpm+=step){const a=avgHpAt(rr[0].data,rpm),b=avgHpAt(rr[1].data,rpm);if(!isFinite(a)||!isFinite(b)||b<=0)continue;const gain=(a-b)/b*100;out.push(`${rpm}: ${gain>1?"+":gain<-1?"-":""}${gain>1||gain<-1?maxStep.toFixed(1):"0.0"}°`)}$("autoTuneResult").textContent=out.length?`Seuraavan testin ehdotus: ${out.join(" • ")}. Ei muutoksia vedon aikana.`:"Ei riittävää päällekkäistä RPM-dataa."}
+
+let devTapTimes=[];
+function applyDevMode(){const on=localStorage.getItem(DEV_MODE_KEY)==="1";document.body.classList.toggle("dev-mode",on);if(!on&&$("screen-autotune")?.classList.contains("active"))switchScreen("measure");return on}
+function toggleDevMode(){const on=localStorage.getItem(DEV_MODE_KEY)!=="1";localStorage.setItem(DEV_MODE_KEY,on?"1":"0");applyDevMode();log("Developer mode "+(on?"ON":"OFF"));if($("settingsStatus"))$("settingsStatus").textContent=on?"Developer mode ON • kokeellinen AUTOTUNE näkyy.":"Developer mode OFF • kokeellinen AUTOTUNE piilotettu."}
+function setupDeveloperUnlock(){const badge=document.querySelector(".ver");if(!badge)return;badge.title="VÄNÄ MotoLab "+APP_VERSION;badge.addEventListener("click",()=>{const now=Date.now();devTapTimes=devTapTimes.filter(t=>now-t<3500);devTapTimes.push(now);if(devTapTimes.length>=7){devTapTimes=[];toggleDevMode()}});applyDevMode()}
+function switchScreen(n){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));$("screen-"+n).classList.add("active");document.querySelector(`.nav[data-screen="${n}"]`).classList.add("active");if(n==="runs")renderRuns();if(n==="analysis")renderAnalysis();if(n==="settings"){renderProfiles();enumerateAudio();updateDiag()}window.scrollTo({top:0,behavior:"smooth"})}
+function updateDiag(){$("diagSecure").textContent=window.isSecureContext?"OK":"EI";$("diagWorker").textContent=typeof Worker!=="undefined"?"OK":"EI";$("diagGps").textContent=navigator.geolocation?"OK":"EI";$("diagMedia").textContent=navigator.mediaDevices?.getUserMedia?"OK":"EI";$("diagAudio").textContent=(window.AudioWorkletNode&&window.AudioContext)?"OK":"EI";$("diagWake").textContent=("wakeLock" in navigator)?"OK":"EI"}
+async function selfTests(){
+ const ids=[...document.querySelectorAll("[id]")].map(x=>x.id),dupes=ids.filter((id,i)=>ids.indexOf(id)!==i);const required=["recordFrom","stopRpm","autoSensitivity","autoStopDelay","audioDevice","learningDataToggle","kbDisplacement"];
+ const checks=[];checks.push(["Worker",typeof Worker!=="undefined"]);checks.push(["Canvas",!!$("heroChart")?.getContext]);checks.push(["GPS API",!!navigator.geolocation]);checks.push(["Media API",!!navigator.mediaDevices?.getUserMedia]);checks.push(["Run storage",Array.isArray(runs)]);checks.push(["5 näkymää",document.querySelectorAll(".screen").length===5]);checks.push(["Uniikit ID:t",dupes.length===0]);checks.push(["Pakolliset kontrollit",required.every(id=>!!$(id))]);checks.push(["Knowledge Base",!!getCurrentProfile()?.knowledge]);$("diagLog").textContent=`VÄNÄ MOTOLAB ${APP_VERSION}\n`+checks.map(([n,o])=>(o?"✓ ":"✗ ")+n).join("\n")+(dupes.length?"\nDuplikaatit: "+[...new Set(dupes)].join(", "):"");$("settingsStatus").textContent=checks.every(x=>x[1])?`Sisäiset ${APP_VERSION}-testit OK.`:"Sisäinen testi löysi tarkistettavaa. Katso Järjestelmätesti."
+}
+function startDemo(){
+ if(demoTimer){clearInterval(demoTimer);demoTimer=null;$("settingsStatus").textContent="Demo pysäytetty.";return}
+ let t=0;demoTimer=setInterval(()=>{t+=.1;const kmh=35+55*Math.max(0,Math.sin(t*.45)),rpm=3500+7200*Math.max(0,Math.sin(t*.45));measurementWorker.postMessage({type:"gps",kmh,acc:4,t:Date.now()});measurementWorker.postMessage({type:"rpm",source:"ext",rpm,conf:.88,t:Date.now()})},100);$("settingsStatus").textContent="Demo/stress-data käynnissä. Paina uudelleen pysäyttääksesi."
+}
+function openFull(rr,title){currentChartRuns=rr;$("fcTitle").textContent=title||"Dynokäyrä";fullChartState={zoom:1,center:7000,showTorque:true};$("fullChart").classList.add("show");setTimeout(redrawFull,30)}
+function redrawFull(){const all=currentChartRuns.flatMap(r=>r.data||[]).filter(x=>x.rpm>0);if(all.length&&fullChartState.center===7000)fullChartState.center=(Math.min(...all.map(x=>x.rpm))+Math.max(...all.map(x=>x.rpm)))/2;drawChart($("fullChartCanvas"),currentChartRuns,fullChartState.showTorque,fullChartState.zoom,fullChartState.center)}
+function chartPoint(e){if(!currentChartRuns.length)return;const c=$("fullChartCanvas"),rect=c.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;const all=currentChartRuns.flatMap(r=>r.data||[]).filter(p=>p.rpm>0);if(!all.length)return;const min=Math.min(...all.map(p=>p.rpm)),max=Math.max(...all.map(p=>p.rpm)),span=(max-min)/fullChartState.zoom,lo=Math.max(min,fullChartState.center-span/2),hi=Math.min(max,fullChartState.center+span/2),target=lo+x*(hi-lo);let best=null;for(const r of currentChartRuns)for(const p of r.data||[]){const d=Math.abs(p.rpm-target);if(!best||d<best.d)best={d,p,r}}if(best)$("pointRead").textContent=`${Math.round(best.p.rpm)} rpm • ${best.p.hp.toFixed(2)} hv • ${best.p.nm.toFixed(2)} Nm • ${best.r.profileName||""}`}
+function createProfileFromSuggestion(){const ps=getProfiles(),src=runs.find(r=>r.id===$("createSuggestedProfile").dataset.runId),id="p"+Date.now();ps.push({id,name:"Uusi pyörä "+(ps.length+1),engineType:$("engineType").value,gearRatios:src?.gearRatioMedian?[{ratio:src.gearRatioMedian,count:8}]:[],gpsCalibrations:[],carb:getCurrentProfile().carb,baselineHp:src?.maxHp||null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);$("profileModal").classList.remove("show");renderProfiles();pushConfig()}
+function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:"Pyörä "+(ps.length+1),engineType:"2T",gearRatios:[],gpsCalibrations:[],carb:{mainJet:165,pilotJet:45,needleType:"X7",needleClip:"3",airScrew:1.5,slide:40},baselineHp:null});setProfiles(ps);localStorage.setItem("motolab_v26_profile",id);renderProfiles();pushConfig()}
+
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>switchScreen(b.dataset.screen));
+document.querySelectorAll(".ib").forEach(b=>b.onclick=e=>{e.stopPropagation();$("infoText").textContent=infoDefs[b.dataset.info]||"";$("infoModal").classList.add("show")});
+$("closeInfo").onclick=()=>$("infoModal").classList.remove("show");$("closeRun").onclick=()=>$("runModal").classList.remove("show");
+$("gpsChip").onclick=toggleGPS;$("imuChip").onclick=toggleIMU;$("extChip").onclick=()=>{$("rpmSourceMode").value==="gps"?$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä. Vaihda RPM-lähde Asetuksista.":toggleAudio()};
+$("sensorBtn").onclick=e=>{if(!e.target.classList.contains("ib"))toggleSensors()};$("extMicBtn").onclick=e=>{if(!e.target.classList.contains("ib")){if($("rpmSourceMode").value==="gps")$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä.";else toggleAudio()}};
+$("armBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();addLearningEvent("arm_auto");measurementWorker.postMessage({type:"arm"})}};$("manualBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();addLearningEvent("manual_run_start");measurementWorker.postMessage({type:"manual"})}};$("stopBtn").onclick=e=>{if(!e.target.classList.contains("ib")){addLearningEvent("stop_pressed");measurementWorker.postMessage({type:"stop"})}};
+$("compareSelectedBtn").onclick=compareSelected;$("mergeSelectedBtn").onclick=mergeSelected;$("showFailedBtn").onclick=()=>{showFailed=!showFailed;$("showFailedBtn").textContent=showFailed?"MYÖS HYLÄTYT":"VAIN HYVÄT";renderRuns()};
+$("openCompareFull").onclick=()=>{if(currentChartRuns.length)openFull(currentChartRuns,"Päällekkäisvertailu")};$("openRunFull").onclick=()=>{const r=runs.find(x=>x.id===currentRunModalId);if(r){$("runModal").classList.remove("show");openFull([r],"Yksittäinen veto")}};
+$("deleteRunBtn").onclick=async()=>{if(currentRunModalId){await deleteRun(currentRunModalId);selectedRunIds.delete(currentRunModalId);$("runModal").classList.remove("show");renderRuns();renderAnalysis()}};
+$("closeFullChart").onclick=()=>$("fullChart").classList.remove("show");$("zoomIn").onclick=()=>{fullChartState.zoom=Math.min(8,fullChartState.zoom*1.5);redrawFull()};$("zoomOut").onclick=()=>{fullChartState.zoom=Math.max(1,fullChartState.zoom/1.5);redrawFull()};$("zoomReset").onclick=()=>{fullChartState.zoom=1;redrawFull()};$("toggleTorque").onclick=()=>{fullChartState.showTorque=!fullChartState.showTorque;$("toggleTorque").textContent=fullChartState.showTorque?"HP + Nm":"VAIN HP";redrawFull()};$("fullChartCanvas").addEventListener("click",chartPoint);
+$("saveCarbBtn").onclick=saveCarb;$("jetSuggestBtn").onclick=jetSuggest;$("autoTuneBtn").onclick=autoTune;
+$("profileSelect").onchange=()=>{localStorage.setItem("motolab_v26_profile",$("profileSelect").value);renderProfiles();pushConfig()};$("newProfileBtn").onclick=newProfile;
+$("rpmSourceMode").onchange=async()=>{updateSourceModeUI();saveSettings();if($("rpmSourceMode").value==="gps"&&extMicOn)await stopAudio()};
+$("manualGear").onchange=()=>{pushConfig();};$("calGear").onchange=renderGearCalibrations;
+$("autoCalBtn").onclick=startAutoCalibration;$("clearGearCalBtn").onclick=clearSelectedGearCalibration;
+$("audioRefreshBtn").onclick=async()=>{await enumerateAudio(true)};
+$("audioDevice").onchange=async()=>{
+ const v=$("audioDevice").value;
+ if(v)localStorage.setItem(AUDIO_DEVICE_KEY,v);else localStorage.removeItem(AUDIO_DEVICE_KEY);
+ if(extMicOn)await stopAudio();
+ const x=selectedAudioInfo();
+ $("btRouteStatus").textContent=x?`Valittu: ${x.label}. Paina TESTAA BT-AUDIOTULO.`:"Valitse kuulokemikrofoni.";
+};
+if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener("devicechange",()=>enumerateAudio(false));
+$("btTestBtn").onclick=async()=>{if(extMicOn){await stopAudio();$("btRouteStatus").textContent="BT-audiotulo pysäytetty."}else await startAudio()};
+$("learningDataToggle").onclick=()=>{
+ learningEnabled=!learningEnabled;localStorage.setItem(LEARNING_DATA_KEY,learningEnabled?"1":"0");
+ if(learningEnabled){ensureLearningSession();addLearningEvent("learning_enabled")}else{addLearningEvent("learning_disabled");flushLearningChunk(true)}
+ updateLearningUi();
+};
+$("exportLearningBtn").onclick=exportLearningData;
+$("markTruthBtn").onclick=markCurrentTruth;
+
+$("gridToggle").onclick=()=>{setSwitch("gridToggle",!$("gridToggle").classList.contains("on"));saveSettings();redrawFull();if(currentChartRuns.length)drawChart($("compareChart"),currentChartRuns,true)};
+$("calMode").onchange=()=>{const m=$("calMode").value;$("gearLearnToggle").classList.toggle("on",m==="learn"||$("gearLearnToggle").classList.contains("on"));$("gearCalStatus").textContent=m==="auto"?"Automaattinen: pidä tavoite-RPM ja vakaa nopeus.":m==="manual"?"Manuaalinen: syötä nopeus + RPM ja tallenna.":"Auto Gear Learn käyttää BT-RPM + GPS -dataa vedon aikana."};
+
+$("micCalBtn1").onclick=()=>captureMicCalibration("micCalTarget1",0);
+$("micCalBtn2").onclick=()=>captureMicCalibration("micCalTarget2",1);
+$("micCalBtn3").onclick=()=>captureMicCalibration("micCalTarget3",2);
+$("micCalClearBtn").onclick=()=>{localStorage.removeItem(MIC_CAL_KEY);renderMicCalibration();pushConfig();$("micCalStatus").textContent="MIC-kalibrointi tyhjennetty.";};
+$("gearLearnToggle").onclick=()=>{setSwitch("gearLearnToggle",!$("gearLearnToggle").classList.contains("on"));saveSettings()};$("infoToggle").onclick=()=>{const on=!$("infoToggle").classList.contains("on");setSwitch("infoToggle",on);document.body.classList.toggle("info-off",!on);saveSettings()};$("wakeToggle").onclick=()=>{const on=!$("wakeToggle").classList.contains("on");setSwitch("wakeToggle",on);on?requestWake():releaseWake();saveSettings()};
+$("calibrateBtn").onclick=()=>{const g=+$("calGear").value||+$("manualGear").value||3,speed=+$("calSpeed").value,rpm=+$("calRpm").value;const rec=storeGearCalibration(g,rpm,speed,"MANUAL");if(rec)$("gearCalStatus").textContent=`TALLENNETTU • G${g} • ${Math.round(rpm)} rpm • ${speed.toFixed(1)} km/h • ${rec.ratio.toFixed(2)} rpm/km/h`;else $("gearCalStatus").textContent="Tarkista vaihde, nopeus ja RPM."};$("saveSettingsBtn").onclick=saveSettings;if($("demoBtn"))$("demoBtn").onclick=startDemo;$("selfTestBtn").onclick=selfTests;if($("exportProfileBtn"))$("exportProfileBtn").onclick=exportCurrentProfile;["rideAutoSensitivity","rideAutoStopDelay","rideRecordFrom","rideStopRpm"].forEach(id=>{if($(id))$(id).onchange=()=>{syncRideControls(true);saveSettings()}});
+$("resetBtn").onclick=()=>{localStorage.removeItem(SETTINGS_KEY);localStorage.removeItem(PROFILES_KEY);localStorage.removeItem(FALLBACK_RUNS);localStorage.removeItem("motolab_v26_ratio");localStorage.removeItem(MIC_CAL_KEY);location.reload()};
+$("createSuggestedProfile").onclick=createProfileFromSuggestion;$("keepCurrentProfile").onclick=()=>$("profileModal").classList.remove("show");
+
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+ e.preventDefault();
+ deferredInstallPrompt=e;
+ if($("installStatus"))$("installStatus").textContent="Asennus on saatavilla tällä laitteella.";
+});
+window.addEventListener("appinstalled",()=>{
+ if($("installStatus"))$("installStatus").textContent="VÄNÄ MOTOLAB on asennettu.";
+});
+function standaloneMode(){
+ return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone===true;
+}
+function updateInstallStatus(){
+ if(!$("installStatus"))return;
+ $("installStatus").textContent=standaloneMode()
+   ?"Sovellus toimii standalone-tilassa."
+   :"Selain-tila. iPhone: Safari → Jaa → Lisää Koti-valikkoon.";
+}
+function setupAppInstall(){
+ if($("installBtn"))$("installBtn").onclick=async()=>{
+   if(deferredInstallPrompt){
+     deferredInstallPrompt.prompt();
+     try{await deferredInstallPrompt.userChoice}catch{}
+     deferredInstallPrompt=null;
+     updateInstallStatus();
+   }else{
+     alert("iPhone: Safari → Jaa → Lisää Koti-valikkoon. Android: selaimen valikko → Asenna sovellus / Lisää aloitusnäyttöön.");
+   }
+ };
+ if($("fullscreenBtn"))$("fullscreenBtn").onclick=async()=>{
+   try{
+     if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();
+     else await document.exitFullscreen?.();
+   }catch{}
+ };
+ updateInstallStatus();
+}
+
+let swReloading=false;
+function showUpdatePrompt(reg){
+ if(document.getElementById("motolabUpdateBar"))return;
+ const bar=document.createElement("div");bar.id="motolabUpdateBar";
+ bar.style.cssText="position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:999999;padding:10px;border:1px solid #ff263f;border-radius:12px;background:#12070a;color:#fff;font:800 11px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.55)";
+ bar.innerHTML='<div style="margin-bottom:7px">UUSI MOTOLAB-VERSIO SAATAVILLA</div><button id="motolabUpdateNow" style="width:100%;padding:10px;border-radius:9px;border:1px solid #ff263f;background:#5f101b;color:#fff;font-weight:900">PÄIVITÄ NYT</button>';
+ document.body.appendChild(bar);
+ document.getElementById("motolabUpdateNow").onclick=()=>{if(reg.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"});else reg.update().catch(()=>{})};
+}
+async function registerServiceWorker(){
+ if(!("serviceWorker" in navigator)||!window.isSecureContext)return false;
+ try{
+  const build=globalThis.MOTOLAB_RELEASE?.build||"2026-08-16f";
+  const reg=await navigator.serviceWorker.register("./sw.js?build="+encodeURIComponent(build),{updateViaCache:"none"});
+  if(reg.waiting)showUpdatePrompt(reg);
+  reg.addEventListener("updatefound",()=>{const w=reg.installing;if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdatePrompt(reg)})});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(swReloading)return;swReloading=true;location.reload()});
+  setInterval(()=>reg.update().catch(()=>{}),60000);
+  log("SW OK • "+(reg.scope||"")+" • "+APP_VERSION);return true
+ }catch(e){log("SW: "+(e?.message||e));return false}
+}
+
+(async function boot(){
+ await openStorage();await loadRuns();loadSettings();setupDeveloperUnlock();renderProfiles();renderRuns();renderAnalysis();updateDelta();renderMicCalibration();setupAppInstall();renderRawFingerprint();pushConfig();syncSensorUI();enumerateAudio(false);
+if(learningEnabled)ensureLearningSession();updateLearningUi();
+updateDiag();requestWake();enumerateAudio();registerServiceWorker();log("Boot "+APP_VERSION)
+})();
+window.addEventListener("pagehide",()=>{if(learningEnabled)flushLearningChunk(true)});
+</script>
+</body>
+</html>

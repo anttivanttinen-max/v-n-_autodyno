@@ -1,0 +1,27 @@
+{
+  "schema":"motolab_vehicle_125_completion_round5",
+  "updated":"2026-08-16",
+  "production":false,
+  "rules":{"probableNeverForcesGear":true,"gpsRpmLearningOverridesCatalog":true,"generationSpecific":true},
+  "gearboxes":{
+    "YAMAHA_TZR125_4FL":{"speeds":6,"primaryRatio":3.227,"ratios":[2.833,1.813,1.368,1.143,1.000,0.917],"confidence":"verified-service-information-copy"},
+    "KAWASAKI_KMX125_A_B":{"speeds":6,"primaryRatio":3.272,"ratios":[3.100,1.928,1.411,1.090,0.916,0.807],"confidence":"verified-service-manual-copy"},
+    "SUZUKI_DR125SM":{"speeds":5,"primaryRatio":3.500,"ratios":[3.000,1.857,1.368,1.142,0.956],"confidence":"verified-service-manual"},
+    "SUZUKI_RG125_92_99":{"speeds":6,"primaryRatio":3.350,"ratios":[2.636,1.857,1.333,1.095,0.916,0.833],"confidence":"verified-service-manual-copy"},
+    "HUSQVARNA_WR125_2008":{"speeds":6,"primaryRatio":3.227,"ratios":[2.357,1.866,1.579,1.350,1.181,1.000],"confidence":"verified-owner-manual"}
+  },
+  "vehicleOverlays":[
+    {"targetId":"yamaha-tzr125","generation":"4FL / 1993 service-info reference","engine":{"displacementCc":125,"cylinders":1,"cycle":"2T","cooling":"liquid","carburetor":"Mikuni TM28SS"},"gearbox":"YAMAHA_TZR125_4FL","status":"verified-generation"},
+    {"targetId":"kawasaki-kmx125","generation":"A/B early family","engine":{"displacementCc":124,"boreMm":54.0,"strokeMm":54.4,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"KAWASAKI_KMX125_A_B","status":"verified-generation"},
+    {"targetId":"suzuki-dr125sm","engine":{"displacementCc":125,"boreMm":57.0,"strokeMm":48.8,"cylinders":1,"cycle":"4T","cooling":"air"},"gearbox":"SUZUKI_DR125SM","status":"verified"},
+    {"targetId":"suzuki-rg125","generation":"1992-1999 service-manual family","engine":{"displacementCc":124,"boreMm":56.0,"strokeMm":50.6,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"SUZUKI_RG125_92_99","status":"verified-generation"},
+    {"targetId":"husqvarna-wr125","generation":"2008 WR reference","engine":{"displacementCc":124.82,"boreMm":54.0,"strokeMm":54.5,"cylinders":1,"cycle":"2T","cooling":"liquid"},"gearbox":"HUSQVARNA_WR125_2008","status":"verified-generation"}
+  ],
+  "sources":[
+    {"title":"Yamaha TZR125 4FL service information","url":"https://www.scribd.com/document/687266603/TZR125-93-4FL-SE1-Service-Info-ENG"},
+    {"title":"Kawasaki KMX125 service manual copy","url":"https://ru.scribd.com/document/436423642/Kawasaki-KMX-125-pdf"},
+    {"title":"Suzuki DR125SM service manual","url":"https://www.manualslib.es/manual/166965/Suzuki-Dr125Sm.html?page=12"},
+    {"title":"Suzuki RG125 1992-1999 service manual copy","url":"https://www.scribd.com/document/486000645/Suzuki-RG125%25CE%2593-92-99-service-manual"},
+    {"title":"Husqvarna WR125 2008 owner manual","url":"https://www.manualslib.com/manual/1129841/Husqvarna-Wr-125-2008.html"}
+  ]
+}

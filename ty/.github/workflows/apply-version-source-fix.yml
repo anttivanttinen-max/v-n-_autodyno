@@ -1,0 +1,66 @@
+name: Validate MotoLab release identity
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check release source and Service Worker syntax
+        run: |
+          node --check version.js
+          node --check sw.js
+      - name: Check inline application JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess, tempfile
+          html=Path('index.html').read_text()
+          scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',html,re.S|re.I)
+          if not scripts:
+              raise SystemExit('No inline application scripts found')
+          for script in scripts:
+              with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False) as f:
+                  f.write(script)
+                  name=f.name
+              subprocess.run(['node','--check',name],check=True)
+          print(f'Checked {len(scripts)} inline script block(s)')
+          PY
+      - name: Verify single release identity and update flow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          idx=Path('index.html').read_text()
+          sw=Path('sw.js').read_text()
+          ver=Path('version.js').read_text()
+          vm=re.search(r'version:"([^"]+)",label:"(v[^"]+)",build:"([^"]+)"',ver)
+          if not vm:
+              raise SystemExit('Cannot parse MOTOLAB_RELEASE from version.js')
+          version,label,build=vm.groups()
+          checks={
+            'source title matches release':f'<title>VÄNÄ MOTOLAB {label}</title>' in idx,
+            'visible badge matches release':f'id="appVersionBadge">{label}<' in idx,
+            'runtime uses version.js':'MOTOLAB_RELEASE?.version' in idx,
+            'version.js loaded before app':f'<script src="./version.js?build={build}"></script>' in idx,
+            'old runtime identity gone':'31.0-core-sprint' not in idx,
+            'old SW registration gone':'sw.js?v=31' not in idx,
+            'update button exists':'UUSI MOTOLAB-VERSIO SAATAVILLA' in idx and 'PÄIVITÄ NYT' in idx,
+            'SW uses shared release source':f'importScripts("./version.js?build={build}")' in sw and 'MOTOLAB_RELEASE?.version' in sw,
+            'SW update waits for user':'await cacheInjectedIndex(c);await self.skipWaiting()' not in sw,
+            'SKIP_WAITING command retained':'event.data.type==="SKIP_WAITING"' in sw and 'self.skipWaiting()' in sw,
+          }
+          failed=[name for name,ok in checks.items() if not ok]
+          for name,ok in checks.items(): print(('OK  ' if ok else 'FAIL')+name)
+          if failed: raise SystemExit('Failed: '+', '.join(failed))
+          print('Validated release',label,'build',build)
+          PY

@@ -1,0 +1,50 @@
+name: Apply research auto sync build
+on:
+  push:
+    branches: [agent/research-auto-sync]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/research-auto-sync
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Apply build patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('version.js'); s=p.read_text(); s=s.replace('build:"2026-08-16k"','build:"2026-08-16l"'); p.write_text(s)
+          p=Path('index.html'); s=p.read_text(); s=s.replace('./version.js?build=2026-08-16k','./version.js?build=2026-08-16l'); p.write_text(s)
+          p=Path('sw.js'); s=p.read_text();
+          s=s.replace('./version.js?build=2026-08-16k','./version.js?build=2026-08-16l').replace('2026-08-16k','2026-08-16l')
+          if '"./research_sync.js"' not in s:
+              s=s.replace('"./trip_research.js","./version.js"','"./trip_research.js","./research_sync.js","./version.js"')
+          if 'research_sync.js?v=' not in s:
+              marker="if(!html.includes(\"trip_research.js\"))scripts.push('<script src=\"./trip_research.js?v='+V+'&build='+B+'\"></script>');"
+              add=marker+"\n if(!html.includes(\"research_sync.js\"))scripts.push('<script src=\"./research_sync.js?v='+V+'&build='+B+'\"></script>');"
+              s=s.replace(marker,add)
+          s=s.replace('default_dt|trip_research)\\.js','default_dt|trip_research|research_sync)\\.js')
+          p.write_text(s)
+          PY
+      - name: Validate syntax and integration
+        run: |
+          node --check research_sync.js
+          node --check raw_sync_server/server.js
+          node --check sw.js
+          grep -q 'build:"2026-08-16l"' version.js
+          grep -q 'version.js?build=2026-08-16l' index.html
+          grep -q 'research_sync.js' sw.js
+          grep -q '/api/research/v1/audio' raw_sync_server/server.js
+      - name: Commit generated files
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add version.js index.html sw.js
+          git commit -m 'MotoLab build: enable automatic research sync'
+          git push
