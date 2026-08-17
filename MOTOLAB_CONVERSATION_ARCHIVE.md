@@ -49,8 +49,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - A genuinely live microphone could therefore appear stale and trigger destructive `stopAudio()` + `startAudio()` repeatedly.
 - This was treated as an implementation regression, not normal iOS behavior.
 
-## v32.8 microphone stability correction — current published base before LIVE promotion
-- New active base before the LIVE UI work is **v32.8 / build `2026-08-17c-mic-stability`**.
+## v32.8 microphone stability correction
+- The published line advanced to **v32.8 / build `2026-08-17c-mic-stability`** before the LIVE UI work.
 - `sensor_persistence.js` advances to `sensor-persistence-v5`.
 - `audio_frames_stale` was removed as a destructive reconnect trigger.
 - A live, enabled microphone track on an active stream is now authoritative for the persistence watchdog.
@@ -78,13 +78,13 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - User decision: large amounts of operating state and technical data should not crowd the normal measurement/home view or Settings.
 - Settings should contain user-changeable configuration; a dedicated **LIVE** bottom-navigation page should expose current technical operation for inspection.
 - Requested purpose: sensor details, live operating data, RAW/sync/event queues and diagnostics must be inspectable from one place to verify application operation.
-- Normal-user bottom navigation target becomes effectively **MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET**; developer-only AUTOTUNE remains governed by existing developer mode.
-- The LIVE page should use expandable/collapsible cards so deep information is available without becoming visually overwhelming.
+- Normal-user bottom navigation becomes effectively **MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET**; developer-only AUTOTUNE remains governed by existing developer mode.
+- The LIVE page uses expandable/collapsible cards so deep information is available without becoming visually overwhelming.
 
-## v32.9 LIVE telemetry implementation — prepared on current main base
+## v32.9 LIVE telemetry implementation — active on main
 - The first LIVE implementation was initially prepared from an older v32.7 base, but `main` changed during the work with four newer v32.8 microphone-stability commits. The older branch was intentionally not promoted.
 - The LIVE work was rebuilt on current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` so the microphone-stability fix was preserved.
-- Prepared release identity is **v32.9 / build `2026-08-17d-live-status`** on `agent/v32.9-live-status`.
+- Active release identity is **v32.9 / build `2026-08-17d-live-status`**.
 - New `live_status.js` / `motolab-live-status-v1` dynamically adds the LIVE bottom-nav button and a dedicated technical page without modifying the large legacy measurement implementation in `index.html`.
 - LIVE summary shows traffic-light state for **GPS / MIC / IMU / RAW / SYNC**.
 - Expandable cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/EVENT QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
@@ -108,9 +108,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Current published base before v32.9 promotion is **v32.8 / build `2026-08-17c-mic-stability`**.
-- Prepared LIVE line is **v32.9 / build `2026-08-17d-live-status`** on `agent/v32.9-live-status`.
-- Persistent diagnostics remains part of the active line.
+- Active `main` is **v32.9 / build `2026-08-17d-live-status`**.
+- v32.8 microphone-stability correction and v32.7 persistent diagnostics are preserved under the new UI layer.
 - Third-gear research has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
