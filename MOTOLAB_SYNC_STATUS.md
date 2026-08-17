@@ -3,8 +3,8 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v33.6 / build `2026-08-17k-mic-off-authority`**.
-- v32.7 introduced persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 added LIVE technical inspection; v33.0 added user identity/approval/cloud state; v33.1 introduced feedback; v33.2 added Beta community/private diagnostics/run sharing; v33.3 added private feedback conversations; v33.4 added Tester Merit; v33.5 added visible User/Beta navigation; v33.6 enforces explicit user MIC OFF authority.
+- Active published line on `main`: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
+- v32.7 introduced persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 added LIVE technical inspection; v33.0 added user identity/approval/cloud state; v33.1 introduced feedback; v33.2 added Beta community/private diagnostics/run sharing; v33.3 added private feedback conversations; v33.4 added Tester Merit; v33.5 added visible User/Beta navigation; v33.6 enforced explicit user MIC OFF authority; v33.7 unified MIC controls through one command queue; v33.8 added admin-only audio-source and third-gear research test tools.
 - `version.js` remains the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; newer modules layer onto the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
@@ -16,7 +16,7 @@ Updated: 2026-08-17
 - Phone microphone RPM remains shadow/learning data in GPS MASTER and must not alter displayed RPM, run acceptance or gear learning.
 - Camera RPM remains disabled.
 - Preserve raw/top-candidate/harmonic information for replay and later trainer evaluation.
-- Identity, feedback, run-sharing, community, Tester Merit, Beta navigation, LIVE and diagnostics layers are non-measurement layers and must not change RPM authority, gear-learning authority, run acceptance or dyno calculations.
+- Identity, feedback, run-sharing, community, Tester Merit, Beta navigation, LIVE, diagnostics and admin test-tool layers must not change RPM authority, gear-learning authority, run acceptance or dyno calculations.
 
 ## Phone microphone / RPM basis
 - Standalone Phone RPM Tester v3.6 reference: 34.642 s / 1040 frames / displayed 1620–9890 rpm; all frames captured with chunked IndexedDB storage.
@@ -90,14 +90,33 @@ Updated: 2026-08-17
 - Admin destinations additionally include approvals, feedback admin, Merit review, per-user permissions and community/diagnostics.
 - Login remains automatic through device MotoLab identity; no password flow was added.
 
-## v33.6 MIC OFF authority — active on main
-- Current release: **v33.6 / build `2026-08-17k-mic-off-authority`**.
-- `mic_authority.js` / `motolab-mic-authority-v1` makes explicit user MIC OFF state authoritative.
-- MIC OFF writes `motolab_v32_sensor_prefs.mic=false` as early as pointer/touch/click capture and records user-authority telemetry.
-- Wrapped `startAudio()` refuses to open the microphone while desired state is OFF and logs `mic_start_blocked_user_off`.
-- If a live stream exists while desired state is OFF, existing `stopAudio()` is used and `mic_forced_stop_user_off` is logged.
-- The guard rechecks periodically and on visibility return, preventing autostart/recovery code from silently reopening a microphone the user disabled.
-- This complements rather than replaces v32.8 recovery: explicit OFF must stay OFF; explicit ON may still recover genuinely ended tracks.
+## v33.6 explicit MIC OFF authority — retained
+- Release build: **`2026-08-17k-mic-off-authority`**.
+- `mic_authority.js` / `motolab-mic-authority-v1` made explicit user MIC OFF authoritative over automatic opening/recovery.
+- Desired OFF state persisted to `motolab_v32_sensor_prefs.mic=false`; `startAudio()` was guarded and any still-live stream was stopped.
+- This complements v32.8 recovery: explicit OFF stays OFF; explicit ON may still recover genuinely ended tracks.
+
+## v33.7 unified MIC command queue — retained under current release
+- Release build: **`2026-08-17l-unified-mic-command`**.
+- `mic_authority.js` is now **`motolab-mic-authority-v2`**.
+- All main MIC actions are serialized through one Promise-backed command queue, preventing overlapping ON/OFF operations from separate UI/recovery callers.
+- Commands support `toggle`, `on` and `off`; result includes command id/source, desired state, actual active state, success and error.
+- `mic_command_start` and `mic_command_done` telemetry make command ordering and failures reconstructable.
+- Main controls `#extMicBtn`, `#extChip` and explicit OFF controls are intercepted and routed through this queue.
+- `MotoLabMicAuthority` exposes `command`, `toggle`, `on`, `off`, `setDesired`, `desired` and `active`.
+- v33.7 preserves explicit OFF authority while reducing MIC race conditions.
+
+## v33.8 admin audio / third-gear research test tools — active on main
+- Current release: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
+- `admin_test_tools.js` / `motolab-admin-test-tools-v1` is included in the PWA cache/module injection.
+- Only an active admin sees the additional audio-source selector; ordinary users keep the normal audio path.
+- Admin can select a specific input device. The chosen id is stored locally and applied with exact `deviceId` to audio `getUserMedia()` constraints.
+- If MIC is desired ON when the admin changes source, v33.7 authority performs ordered `off` → `on` so the stream reopens on the selected device.
+- During an active third-gear research session, an admin-only floating test overlay monitors gear-guard evidence.
+- A suspected 2nd or 4th gear must remain continuously detected for **2 seconds** before a confirmation prompt appears.
+- Admin may confirm 2/3/4 or skip. Confirmation emits `trip_gear_manual_reference`, dispatches `motolab-trip-gear-reference`, stores a global manual reference and writes a `manual_gear_reference` marker into the active `VanaMotoLabResearch` timeline when possible.
+- Skip logs `trip_gear_question_skipped` and avoids repeated prompt spam for the same current suspicion.
+- This is testing/reference instrumentation only; it must not silently change GPS MASTER displayed-RPM authority, run acceptance or normal gear-learning authority.
 
 ## ARM AUTO / pull comparison
 - ARM AUTO remains persistent across multiple pulls; each detected pull saves separately, cooldown/reset hysteresis re-arms automatically, STOP explicitly disarms.
@@ -105,7 +124,9 @@ Updated: 2026-08-17
 - Compare peak power, peak torque and useful-range/curve performance, not only one peak point.
 
 ## Current validation priorities
-- Validate v33.6 on real iPhone: explicit MIC OFF stays OFF across autostart/recovery/visibility transitions, while MIC ON still recovers genuinely ended/disconnected tracks.
+- Validate v33.7/v33.8 on real iPhone: explicit MIC OFF stays OFF, MIC ON still recovers genuinely ended/disconnected tracks, rapid taps/visibility changes do not create races, and admin source switching reliably opens the intended device.
+- Validate the v33.8 third-gear admin overlay during a real research session: 2-second hold behavior, 2nd/4th suspicion, confirm/skip flow, telemetry and IndexedDB marker persistence.
+- Confirm v33.8 admin-only controls never appear for normal users and do not alter normal-user `getUserMedia()` constraints.
 - Validate v33.4 Tester Merit with real active/admin users: scoring, one-review rule, bonus merit, persistence, privacy and no accidental permission escalation.
 - Validate v33.5 User/Beta navigation on phone: all user/admin destinations and invite sharing.
 - Continue validation of identity lifecycle, blocked state, token persistence, multi-device cloud-state restore/sync and RAW/research attribution.
@@ -117,7 +138,7 @@ Updated: 2026-08-17
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
 - FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
-- Identity/cloud, run sharing, Beta community/private diagnostics, private feedback, Tester Merit and MIC OFF authority require real multi-user/device/server field validation before being treated as fully proven.
+- Identity/cloud, run sharing, Beta community/private diagnostics, private feedback, Tester Merit, v33.7 unified MIC control and v33.8 admin test tools require real multi-user/device/server field validation before being treated as fully proven.
 
 ## Durable project-memory rule
 - GitHub is the durable MotoLab project memory.
@@ -126,4 +147,4 @@ Updated: 2026-08-17
 - Before implementation, check current `main`, this status, archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export/replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/PWA behavior, persistent diagnostics, v32.8 microphone stability, LIVE technical inspection, v33.x identity/cloud/run-sharing/community/private-feedback/Tester-Merit/Beta-menu layers, v33.6 explicit MIC OFF authority, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export/replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/PWA behavior, persistent diagnostics, v32.8 microphone stability, LIVE technical inspection, v33.x identity/cloud/run-sharing/community/private-feedback/Tester-Merit/Beta-menu layers, v33.7 unified MIC command authority, v33.8 admin-only test tools, and keep native AirPods motion experimental until validated on a real device.
