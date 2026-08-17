@@ -20,3 +20,5 @@ jobs:
       - name: Validate server package entrypoint syntax
         working-directory: raw_sync_server
         run: node --check server.js && node --check beta_auth_server.js && node --check user_server.js && node --check user_features_server.js && node --check community_server.js && node --check feedback_server.js && node --check merit_server.js
+      - name: Run server identity and cloud-state smoke test
+        run: node tests/server_smoke_test.js
