@@ -108,7 +108,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Active `main` is now **v32.9.1 FIELD / build `2026-08-17u-field-recovery`** at HEAD `189c09070802da456ab2e3f76e51442e2ac5c8af`.
+- Active published `main` application line remains **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**; documentation commits may sit above the application commit.
 - The field-recovery identity commit explicitly states that measurement logic is unchanged; the follow-up Service Worker change forces a clean field-recovery cache and removes old MotoLab/MotorLab caches on activation.
 - v32.8 microphone-stability correction and v32.7 persistent diagnostics remain preserved under the v32.9.1 field line.
 - Third-gear research has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
@@ -119,11 +119,18 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 
 ## v34 development/release line — not promoted to main
 - A separate v34 release line exists and must not be confused with the field-recovery `main` line.
-- `release/v34.0-2026-08-17` currently points to commit `58d270274b979847fd760f7681818d9e7034b2ec` (`Trigger final v34 validation after identity normalization`).
-- Its release identity is **v34.0 / build `2026-08-17o-rebuild-ui-i18n`**.
+- `release/v34.0-2026-08-17` points to commit `58d270274b979847fd760f7681818d9e7034b2ec` (`Trigger final v34 validation after identity normalization`).
 - User-approved product direction for v34 includes the rebuilt UI/navigation, user identity/cloud work, language support and other agreed v34 systems, but promotion to `main` is not implied by the existence of the release branch.
 - Current user decision: the newly completed visual appearance is considered **finished and locked as the visual baseline**. Future functional work should avoid reworking the approved appearance unless the user explicitly reopens UI design.
 - Installation/deploy/merge actions were intentionally paused while a new repository update was being completed. Documentation may record the state, but this archive job must not install or modify application code.
+
+## v34.6 DEV browser/Service Worker validation — 2026-08-17
+- Newer v34 rebuild work is on **`dev/v34-rebuild`**, currently commit `f203b3e2fb95afbbd0a04ff27319b5f40d7f8dcb`, identity **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**. This is separate from `main` and from the older v34.0 release branch.
+- A real Chromium + Service Worker smoke test was added to the v34 rebuild validation flow so navigation/runtime behavior is exercised after an actual SW-controlled reload, not only by syntax/static tests.
+- The browser smoke test exposed a genuine Service Worker bug: HTML injection used a regex to rewrite inline `navigator.serviceWorker.register(...)`; the regex stopped at the inner `encodeURIComponent(build)` parenthesis and truncated inline JavaScript. Result: after Service Worker reload, navigation click handlers could fail to initialize even though the first load appeared functional.
+- Fix at `f203b3e`: Service Worker no longer regex-rewrites inline JavaScript/register calls. Build/cache identity was bumped to `2026-08-17w-v34-rebuild-swfix` so the corrected worker is distinguishable from the broken dev cache.
+- GitHub Actions validation run **32044453957** completed successfully for `f203b3e`. Passing stages included app JS syntax, server/validation JS syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, and **Browser + Service Worker smoke x2**.
+- This validates browser/runtime navigation and SW reload behavior in Chromium, but it does **not** replace real-device iPhone GPS/microphone validation. v34 must remain unpromoted until the required device/field checks and explicit promotion decision are complete.
 
 ## Data pipeline retained from conversations
 - MotoLab stores RAW locally first.
@@ -152,6 +159,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
 - Existing RAW history should remain usable for later replay/reprocessing.
 - Field validation is still required for adaptive candidate tracking, 500 rpm band learning, Auto Gear Learn interaction and iOS sensor/microphone stability.
+- v34 browser/SW smoke is now green; remaining v34 promotion gate includes real iPhone GPS/microphone testing and explicit approval to promote/install.
 - Before any eventual v34 promotion, re-check current `main`, validate release identity/cache behavior, and preserve the locked approved UI without regressing measurement logic.
 
 ## Deferred work explicitly parked for later
