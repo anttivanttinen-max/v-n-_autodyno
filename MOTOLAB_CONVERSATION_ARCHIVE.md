@@ -39,15 +39,17 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The same RAW rows preserve the GPS MASTER safety rule correctly: `rpmControlAuthority=gps`, `micInfluencesDisplayedRpm=false`, `micInfluencesRunAcceptance=false`, and `micInfluencesGearLearning=false`.
 - This is now a confirmed field-data regression/unfinished item: microphone persistence/reconnect on iOS is not yet reliable even though GPS/IMU persistence remains active. Do not mark sensor recovery complete until a new RAW session shows the microphone returning live without repeated `track_not_live` failures.
 
-## Planned iOS microphone recovery fix — not yet implemented
-- The next recovery implementation should stop trying to revive an already dead/non-live MediaStreamTrack indefinitely.
-- When persisted microphone intent remains ON but the current track is not `live`, fully tear down the stale microphone pipeline: stop/release old tracks, disconnect nodes and close/release the old `AudioContext` as needed.
-- Request a fresh `getUserMedia()` audio stream and rebuild the RPM audio chain on that new stream.
-- Use bounded/exponential retry timing (for example approximately 0.5 s → 1 s → 2 s → 5 s) instead of a tight reconnect loop.
-- Add explicit RAW/research events for stream recreation and recovery outcome, such as `mic_stream_recreated`, `mic_recovery_success`, and a structured failure reason, so field validation can prove whether recovery works.
-- If repeated automatic recreation still fails because iOS requires renewed user activation, show a clear recovery action in the UI (for example `MIC RECOVERY / TAP TO RESTORE MICROPHONE`) and use that user gesture to retry opening the microphone.
-- GPS MASTER safety must remain unchanged through this work: microphone loss/recovery must never take over displayed RPM, run acceptance, or gear learning while GPS MASTER is selected.
-- Treat this as an open implementation direction only; no v32.6 recovery build or field validation exists yet in `main` at this archive update.
+## v32.6 iOS microphone recovery implementation — code complete, field validation pending
+- Recovery implementation was prepared from `main` HEAD `c847317864fc7696b15295dd9d743a2e20ec553e` on branch `agent/v32.6-ios-mic-recovery`.
+- Release identity is **v32.6 / build `2026-08-17a-mic-recovery`** on that branch; Service Worker cache identity was aligned with it.
+- `sensor_persistence.js` advances from `sensor-persistence-v3` to `sensor-persistence-v4`.
+- The recovery path now fully tears down the stale microphone pipeline through existing `stopAudio()` and then calls existing `startAudio()`, which requests a fresh exact-device `getUserMedia()` stream and rebuilds the AudioContext/worklet graph.
+- Automatic retries use bounded backoff of approximately **500 ms → 1 s → 2 s → 5 s**, with 5 s retained for continued failures instead of the old fixed reconnect loop.
+- New recovery telemetry includes `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail, and `mic_recovery_user_gesture`.
+- After three failed automatic recovery attempts, the UI exposes **MIC RECOVERY • PALAUTA MIKROFONI**. Its tap is used as an explicit iOS user gesture and forces another fresh-stream recovery attempt.
+- Manual microphone-off and explicit microphone reselection reset retry state and hide the recovery action.
+- GPS MASTER safety is intentionally untouched: no changes were made to displayed-RPM authority, run acceptance, gear learning, GPS reference logic, smart-phone RPM candidate selection or dyno calculations.
+- This must remain an **open bug pending field validation**. The fix is only considered confirmed after new RAW shows the track becoming live again, `mic_recovery_success`, and no continuing `track_not_live` reconnect storm.
 
 ## Adaptive RPM-learning implementation retained from current development
 - `rpm-learning-model.json` exists in the application repository using schema `motolab_rpm_learning_model_v1`.
@@ -60,7 +62,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Current `version.js` at this archive update is **v32.5 / build `2026-08-16x-gear-confirm`**.
+- Published `main` before v32.6 promotion is **v32.5 / build `2026-08-16x-gear-confirm`**.
+- Prepared recovery branch is **v32.6 / build `2026-08-17a-mic-recovery`**, pending branch validation/promotion and then real iOS field validation.
 - Third-gear research now has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
@@ -84,6 +87,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should be collapsible to keep the interface compact.
 
 ## Current implementation direction
+- First field task is to validate v32.6 fresh-stream microphone recovery against the confirmed iOS `track_not_live` failure.
 - GPS-supervised microphone learning should improve candidate/harmonic choice and RPM continuity without weakening GPS MASTER authority.
 - Keep raw candidate sets and region-specific behavior so later models can learn 0.5x / 1x / 2x branch preference by RPM region if reference data supports it.
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
