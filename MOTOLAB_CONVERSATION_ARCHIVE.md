@@ -19,185 +19,109 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Microphone RPM development must retain candidate/harmonic, continuity and reference-comparison information rather than only the selected RPM.
 - Measurement continuity and logging reliability take priority over UI smoothness.
 - Always inspect current `main` HEAD before editing.
+- Publication-facing product name is **VäNä MotorLab**; internal MotoLab/AutoDyno identifiers may remain where renaming would risk RAW/API/storage/diagnostic compatibility.
 
 ## Historical RAW / microphone findings
 - v32.4 / build `2026-08-16h` remains an earlier RAW baseline for GPS-master and BT/contact microphone comparisons.
-- One baseline RAW set contained 70 chunks and 14,709 samples.
+- One baseline RAW set contained **70 chunks / 14,709 samples**.
 - GPS-master behavior was correct: `rpmControlAuthority = gps`; microphone stayed out of displayed RPM, run acceptance and gear-learning authority.
 - BT/contact microphone contained genuine engine-RPM information but harmonic/candidate selection was not stable enough to trust alone.
 - Useful examples: GPS 5191 rpm vs mic 5512 rpm (~6.2% error); GPS 4261 rpm vs mic 3807 rpm (~10.6% error with lower confidence).
 - Preferred historical contact mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
 - Strong contact reference: about 6600 rpm truth, 6591 rpm audio average, ~92.2% confidence, f0 ~109–112 Hz and harmonics around 220/330/440/550/660 Hz.
 
-## iOS microphone recovery history
+## iOS microphone recovery / authority history
 - Earlier RAW showed wanted state `gps=true, imu=true, mic=true` while mic remained inactive and recovery failed with `track_not_live`; GPS and IMU stayed active.
 - v32.6 added fresh-stream recovery, bounded retries and a visible user-gesture recovery action.
 - Field testing then found repeated OFF/ON reconnecting because `MOTOLAB_AUDIO_LAST?.t` was used as a destructive stale-frame signal without a reliable producer.
 - v32.8 / build `2026-08-17c-mic-stability` corrected this in `sensor-persistence-v5`: `audio_frames_stale` no longer causes destructive reconnect; a genuinely live enabled track is authoritative. Genuine ended/non-live tracks still recover.
-- Real-device validation remains required for both no-false-reconnect and genuine ended-track recovery.
+- v33.6 / build `2026-08-17k-mic-off-authority` made explicit user MIC OFF authoritative over automatic opening/recovery.
+- v33.7 / build `2026-08-17l-unified-mic-command` advanced `mic_authority.js` to `motolab-mic-authority-v2`: MIC operations are serialized through one Promise-backed command queue; `mic_command_start` / `mic_command_done` telemetry reconstruct ordering/failures.
+- Main MIC controls and explicit OFF actions share the same authority path. OFF means stay OFF; ON may recover genuinely ended tracks.
+- Real-device validation remains required for rapid taps, visibility transitions, genuine ended-track recovery and no false reconnect loops.
 
-## v32.7 persistent diagnostics
+## v32.7 diagnostics / v32.9 LIVE
 - `diagnostics.js` / `motolab-diagnostics-v1` records global JS errors, rejected promises, console warnings/errors, fetch/HTTP failures, lifecycle/network/media-device events and selected Service Worker events.
-- Central `addLearningEvent` traffic is mirrored observationally.
-- A persistent 500-event local ring plus heartbeat/session marker survives restarts/crashes.
-- iOS `pagehide` is not treated as proof of clean shutdown.
-- Queue metadata is summarized without copying secrets or arbitrary payload contents.
-- Pending diagnostics replay into RAW as `diagnostic_replay` when the normal event path becomes available.
-- Diagnostics never gains measurement or recovery authority.
+- A persistent 500-event local ring plus heartbeat/session marker survives restarts/crashes; pending diagnostics can replay into RAW as `diagnostic_replay`.
+- Diagnostics is observational only and never gains measurement/recovery authority.
+- `live_status.js` / `motolab-live-status-v1` adds deep LIVE technical inspection. Cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
+- v34 hides this depth from normal users by default while retaining admin/development access.
 
-## v32.9 LIVE technical inspection
-- Normal visible navigation is effectively **MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET**; experimental AUTOTUNE remains developer-only.
-- `live_status.js` / `motolab-live-status-v1` adds LIVE; `live_status_guard.js` preserves legacy self-test/navigation compatibility.
-- LIVE summary shows GPS / MIC / IMU / RAW / SYNC traffic-light state.
-- Expandable cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
-- LIVE is strictly observational.
-
-## v33.0 identity / approval / cloud-state foundation
-- `user_identity.js` / `motolab-user-identity-v1` creates/preserves device identity and resolves a server-side user record.
-- `raw_sync_server/user_server.js` stores user registry, one-use invitations and per-user cloud state.
-- User states: `pending`, `active`, `blocked`; admins approve/block users.
-- Invitation values are hashed, one-use and expire after seven days.
-- Device tokens are HMAC-signed using `BETA_TOKEN_SECRET`; default lifetime 365 days unless configured otherwise.
-- RAW/research beta requests are tied to an active resolved user/device identity.
+## v33.0-v33.5 identity / cloud / community / sharing / merit
+- v33.0 introduced device-bound identity, server-side user registry and per-user cloud state. User states are `pending`, `active`, `blocked`.
+- Invitations are one-use/expiring; device sessions are signed server-side. RAW/research beta requests resolve to active user + device.
 - Per-user cloud state uses `/api/users/v1/state`; remote state is preferred on initial sync when available, otherwise local state is uploaded.
-
-## v33.1-v33.3 feedback / community / run-sharing foundation
 - v33.1 introduced authenticated in-app feedback.
 - v33.2 added Beta community, private diagnostic packages, per-user feature permissions and reduced graphical run sharing. Shared runs contain no RAW payload and recipients have no edit rights.
-- v33.2 community supports issue threads, comments, `Minulla sama ongelma`, statuses, working solutions and private admin-only diagnostics with roughly 60 seconds of technical history.
-- Public issue data stays separate from device/contact/app/sensor/diagnostic metadata.
-- v33.3 converted feedback into two-way private conversations. Users see only their own threads; admin can reply and manage states.
-- Admin can publish a private feedback item anonymously into the public Beta community while retaining the private source thread separately.
+- v33.3 converted feedback into private two-way user/admin conversations. Admin may publish an issue anonymously into the public Beta community while retaining the private source thread separately.
+- v33.4 / build `2026-08-17i-tester-merit` introduced quality-based Tester Merit. Categories: `data`, `reports`, `activity`, `community`, `reliability`, `ideas`; levels 0–39 Beta Tester, 40–64 Active Tester, 65–84 Advanced Tester, 85–100 Core Tester.
+- Merit rewards useful/reproducible participation, not message volume. Device/app/sensor-caused failures do not automatically penalize the user. Merit does not automatically grant experimental permissions.
+- v33.5 / build `2026-08-17j-beta-navigation` added visible KÄYTTÄJÄ / BETA navigation: account, private feedback/messages, Beta community, shared runs, tester level and invite tester; admin gets approvals, feedback admin, Merit review, permissions and community/private diagnostics.
 
-## v33.4 Tester Merit — retained
-- v33.4 build: **`2026-08-17i-tester-merit`**.
-- `raw_sync_server/merit_server.js` adds quality-based tester merit using persistent `tester_merit.json` storage.
-- Merit categories: `data`, `reports`, `activity`, `community`, `reliability`, `ideas`.
-- Tester levels: 0–39 **Beta Tester**, 40–64 **Active Tester**, 65–84 **Advanced Tester**, 85–100 **Core Tester**.
-- Merit rewards useful participation, reproducible bug reports, good test data, working solutions, community help and strong development ideas; it is not based on message count.
-- Technical failure can be classified as `user`, `device`, `app`, `sensor`, `unknown` or `none`; device/app/sensor failures do not automatically penalize the user.
-- The same feedback/issue/comment can be reviewed only once. Admin can also award separate bonus merit.
-- Normal users see their tester level and general explanation, not the exact scoring formula/history. Admin sees exact score, category totals, event history and review candidates.
-- Tester Merit does **not** automatically grant experimental features. Admin keeps explicit per-user feature-permission authority.
-- `merit.js` / `motolab-tester-merit-v1` adds user Tester Level UI plus admin scoring/review UI.
-- Detailed policy is in `TESTER_MERIT_V33_4.md`.
+## v33.8-v33.9 admin audio / gear beta / owner
+- v33.8 added admin-only audio-source selection using an exact exposed `deviceId`, with controlled OFF -> source change -> ON through the unified MIC queue.
+- An unavailable selected input must not silently fall back to another microphone and be treated as the same sensor.
+- Third-gear research overlay asks for manual 2/3/4/OHITA confirmation only after a suspected 2nd/4th gear persists continuously for 2 seconds.
+- Manual confirmation is shadow/reference teaching evidence only. GPS MASTER remains authoritative for displayed RPM, run acceptance and normal gear-learning authority.
+- v33.9 / build `2026-08-17n-owner-gear-beta` made the third-gear prompt available to all beta users during active research while audio-source selection remains admin-only.
+- `user_identity.js` v2 added secure VäNä owner activation. Nickname alone never grants admin; server-side role/status is authoritative.
+- Owner bootstrap is single-use and recovery is server-controlled; recovery secrets must never be committed to public app code.
 
-## v33.5 visible User / Beta navigation — retained
-- v33.5 build: **`2026-08-17j-beta-navigation`**.
-- `beta_menu.js` / `motolab-beta-menu-v1` adds a clearly visible **KÄYTTÄJÄ / BETA** entry point instead of leaving identity/community/feedback/sharing functions scattered or hidden.
-- User menu groups: own account, private feedback/messages, Beta community, shared runs, tester level and invite tester.
-- Admin menu additionally exposes user approvals, private feedback admin, Merit scoring, feature permissions and community/diagnostics.
-- Account login remains automatic through the device MotoLab identity; no password flow was introduced.
-- Invitation action reuses existing invite creation and system share/clipboard behavior.
-
-## v33.6 explicit user MIC OFF authority — retained
-- v33.6 build: **`2026-08-17k-mic-off-authority`**.
-- `mic_authority.js` / `motolab-mic-authority-v1` made explicit user MIC OFF state authoritative over automatic microphone opening/recovery.
-- MIC OFF persisted `motolab_v32_sensor_prefs.mic=false`; guarded `startAudio()` blocked automatic reopening and logged `mic_start_blocked_user_off`.
-- If a microphone stream remained live while desired state was OFF, existing `stopAudio()` was used and `mic_forced_stop_user_off` logged.
-- This complemented v32.8 recovery: OFF means stay OFF; ON may still recover genuinely ended tracks.
-
-## v33.7 unified MIC command queue — retained
-- v33.7 build: **`2026-08-17l-unified-mic-command`**.
-- `mic_authority.js` advanced to **`motolab-mic-authority-v2`**.
-- MIC actions are serialized through one Promise-backed command queue instead of letting multiple UI/recovery callers race each other.
-- Commands support `toggle`, `on` and `off`; result data includes command id, source, desired state, actual active state, success and error.
-- New telemetry includes `mic_command_start` and `mic_command_done`; desired-state changes still emit `mic_user_authority` with source information.
-- Main MIC controls `#extMicBtn` and `#extChip` are intercepted in capture phase and routed to the unified queue. Explicit OFF controls are also routed through the same authority path.
-- `MotoLabMicAuthority` exposes `command`, `toggle`, `on`, `off`, `setDesired`, `desired` and `active`.
-- v33.7 keeps v33.6 OFF authority semantics while reducing ON/OFF race conditions between UI, autostart, recovery and other callers.
-- Real-device validation is still required to prove rapid repeated taps, visibility transitions and recovery no longer create command races.
-
-## v33.8 admin audio source + third-gear test tools — retained under v33.9
-- v33.8 build: **`2026-08-17m-admin-audio-gear-test`**.
-- `admin_test_tools.js` originally shipped as **`motolab-admin-test-tools-v1`**.
-- Active approved admin can choose a specific audio input for test work. The selected device id is stored locally in `motolab_admin_audio_device` and applied as an exact `deviceId` constraint to audio `getUserMedia()` calls.
-- Normal users are intentionally unaffected by the audio-source selector and continue using the normal microphone path.
-- Changing admin audio source while MIC is wanted cycles the microphone through the v33.7 unified authority queue (`off` then `on`) so the new source is reopened in a controlled order.
-- A floating **3. VAIHTEEN TESTI** overlay watches gear-guard evidence during active third-gear research.
-- A suspected 2nd or 4th gear must persist continuously for **2 seconds** before asking for manual confirmation, reducing one-frame/short transient prompts.
-- Confirmation creates `trip_gear_manual_reference` telemetry, dispatches `motolab-trip-gear-reference`, stores `MOTOLAB_TRIP_MANUAL_GEAR_REFERENCE`, and writes a `manual_gear_reference` marker into the active `VanaMotoLabResearch` timeline when available.
-- Skip action logs `trip_gear_question_skipped` and suppresses repeated prompting for the same current suspected gear.
-- These tools are testing/reference instrumentation and do not grant microphone or manual gear reference authority over GPS MASTER displayed RPM, run acceptance or normal gear-learning rules.
-
-## v33.9 owner / gear beta release — current active release
-- Current `main` release identity is **v33.9 / build `2026-08-17n-owner-gear-beta`**; `version.js` and Service Worker cache identity are aligned to v33.9.
-- `admin_test_tools.js` advanced to **`motolab-admin-test-tools-v2`**: the third-gear research prompt is now available to **all beta users** during an active research session, while selectable audio input remains admin-only.
-- Manual gear confirmation source is generalized to `manual_reference`; 2-second hold, 2/3/4 confirmation, OHITA, event logging and research marker behavior are retained.
-- GPS MASTER remains authoritative; beta gear confirmation is reference/shadow teaching evidence only.
-- `user_identity.js` advanced to **`motolab-user-identity-v2`** with explicit VäNä owner activation UI/API support. Owner nickname alone never grants admin rights; server-side role/status remains authoritative.
-- Owner bootstrap supports first-owner promotion to active admin and issues a fresh signed device token after promotion.
-- `raw_sync_server/owner_recovery_server.js` adds a single-use first-owner bootstrap plus server-configured owner recovery for site-data loss/new device. Recovery requires server-side configuration (`MOTOLAB_OWNER_RECOVERY_CODE`); recovery secrets are not stored as plaintext public app credentials.
-- Bootstrap consumption is persisted in `owner-bootstrap.json`, preventing reuse after successful first-owner activation; owner recovery attaches/reuses a device on the existing admin account and reissues a device token.
-- v33.9 owner/admin persistence across ordinary PWA updates remains a required field-validation item.
-
-## Next release locked handoff / language system
-- `NEXT_RELEASE_PLAN.md` is the current locked cross-conversation handoff for the next server/app release. Re-check current main immediately before implementing/deploying it.
-- The plan retains v33.9 measurement invariants, all-beta third-gear teaching UI, admin-only audio source selection, owner persistence/recovery, MIC regression validation, User/Beta navigation, per-user cloud validation, feedback/community privacy, Tester Merit and LIVE/UI simplification.
-- English support is now explicitly **included in the next release plan**, not parked as an unrelated branch.
-- `LANGUAGE_PACK_EN_V1.md` is **READY FOR NEXT RELEASE, NOT YET DEPLOYED**.
-- Existing Finnish remains the default/fallback. Settings will add **Suomi / English**, with preference persisted locally and in per-user cloud state.
-- Language is presentation-only: switching language must not reset sensors, an active run, identity, stored data, RPM/gear-learning authority, RAW behavior or dyno logic.
-- Active visible UI strings should move to translation keys; missing English keys fall back to Finnish. Established terminology includes RPM, POWER, TORQUE, RUN, GEAR, CONFIDENCE, AUDIO INPUT and RAW DATA.
-
-## Adaptive GPS-taught RPM learning
-- `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline starts with no learned bands.
-- Learning works in 500-rpm regions and may prefer 0.5x / 1x / 2x harmonic branches when GPS-supervised evidence supports them.
+## Adaptive GPS-taught RPM learning / RAW pipeline
+- `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; learning operates in 500-rpm regions and can prefer 0.5x / 1x / 2x harmonic branches when GPS-supervised evidence supports them.
 - Continuity/prediction is part of candidate selection; old local RAW can be replayed through newer logic.
 - Auto Gear Learn must never receive microphone authority while GPS MASTER + MIC LEARN is selected.
 - Trainer may publish only validated improving models; reject bad/non-improving models and retain rollback history in `Motolab-data`.
+- Third-gear research storage stays separate from normal run/learning storage.
+- RAW/research is local-first and retried after network loss/reopen; multi-phone data is separated by persistent device identity/labels.
+- Railway mirrors accepted RAW/research into private `anttivanttinen-max/Motolab-data`; receiver/read secrets must never be committed to the public repo.
 
-## Research / RAW pipeline
-- Third-gear GPS + MIC research uses GPS MASTER and a gear-confirm guard.
-- Research storage stays separate from normal run/learning storage.
-- RAW/research is local-first and retried after network loss/reopen.
-- Multi-phone data is separated by persistent device identity/labels.
-- Railway mirrors accepted RAW/research into private `anttivanttinen-max/Motolab-data`.
-- Receiver/read secrets must never be committed to the public app repository.
-
-## Vehicle / maintenance / UI decisions
+## Vehicle / maintenance / UI decisions retained
 - Finland vehicle database v2, Yamaha DT125R and Derbi Senda 50 families, editable drivetrain data, technical-spec editor and maintenance/history remain active.
 - Home-screen microphone control stays directly reachable.
-- Settings contains user-changeable configuration; LIVE contains deep technical state.
-- Settings/maintenance sections should remain compact/collapsible.
-- An unavailable selected audio input must not silently fall back to another microphone and be treated as the same sensor.
-- Publication-facing product name is **VäNä MotorLab**; internal legacy MotoLab/AutoDyno identifiers may stay unchanged where renaming would risk RAW/API/storage/diagnostic compatibility.
-- Current redesign direction is dark black/deep-red racing UI with translucent cards and a subtle workshop environment; normal screens should show only information that helps run measurement, result review or tuning decisions.
-- **Throttle must be removed from the normal UI** because no throttle-position/TPS signal is currently available; do not show invented throttle data.
-- Proposed normal navigation direction: **ETUSIVU / VEDOT / ANALYYSI / ASETUKSET / KÄYTTÄJÄ**, while deep technical sensor/RAW/diagnostic information remains separately reachable through LIVE/admin/developer tooling as implementation is reconciled with the existing navigation.
-- Settings redesign rule: compact accordion sections, initially closed, with only one section open at a time.
-- Floating bottom navigation must respect iPhone safe area and must not cover the last content/control on a page; full-screen graph views may hide it.
-- Splash/branding may use the real repository DT image. The DT may be cleaned visually with lighting/contrast/crop/background treatment, but must remain recognizably the same real bike with no major geometry/component redesign. Do not substitute an AI-invented motorcycle for the actual DT asset.
+- Settings contains user-changeable configuration; deep technical sensor/RAW/diagnostic information belongs under LIVE/admin/developer tooling.
+- Throttle/TPS must not appear in the normal UI until a real throttle-position signal exists.
+- Bottom navigation must respect iPhone safe area and must not cover page-end controls/content; full-screen graphs may hide it.
 
-## Approved visual mockup refinement — 2026-08-17
-- The **workshop + white DT composition is now the accepted visual base** for the MotorLab redesign mockups. The motorcycle should read as naturally embedded in the garage scene rather than pasted over it.
-- The accepted DT presentation is slightly more side-on than the earliest draft while retaining enough three-quarter angle to show the engine/expansion chamber and overall stance clearly.
-- The loading/splash concept is approved in a **portrait smartphone proportion**, not as a landscape desktop composition.
-- Splash hierarchy is intentionally simple: **VÄNÄ** and **MOTORLAB** branding occupy the free upper area, the DT/workshop remains the hero visual, and loading state/progress sits in the lower part of the phone screen.
-- For this splash/loading view, avoid extra product-name clutter such as separate “Tester” branding; the visible top branding should remain VäNä + MotorLab.
-- The mockup may include restrained red racing illumination and workshop depth, but the visual treatment must not imply that the current published v33.9 UI already contains this screen.
-- These are **approved design-reference decisions only**. Implementation must preserve the existing measurement/sensor/identity/RAW invariants and should use the real DT asset or a faithful derived presentation rather than an invented replacement bike.
+## Approved visual baseline — locked 2026-08-17
+- The **workshop + white DT composition** is the accepted visual base. The bike should read as naturally embedded in the garage scene, with a slightly side-on three-quarter view that still shows the engine/expansion chamber and stance.
+- Splash/loading composition is portrait-smartphone oriented. **VÄNÄ + MOTORLAB** branding occupies the free upper area, DT/workshop is the hero visual and loading state/progress belongs in the lower area.
+- Avoid extra product-name clutter such as separate Tester branding on the splash.
+- Restrained red racing illumination/workshop depth are accepted. Use the real DT asset or a faithful derived presentation; do not substitute an invented motorcycle or materially redesign its geometry/components.
+- The user has now explicitly stated that the **appearance is finished**. Treat the accepted UI/look as a **locked baseline**: future functional development should preserve it unless the user explicitly reopens visual redesign.
 
-## Current build handoff and validation priorities
-- Active `main`: **v33.9 / build `2026-08-17n-owner-gear-beta`**.
-- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit, v33.5 Beta navigation, v33.6 MIC OFF authority, v33.7 unified MIC command queue and v33.8 admin audio-source tooling.
-- Validate v33.9 on real iPhone: explicit MIC OFF stays OFF, MIC ON recovers genuinely ended tracks, rapid controls do not race, admin source switching reliably reopens the intended audio input, and the third-gear prompt appears for ordinary beta users only during active research.
-- Validate third-gear behavior: 2-second 2nd/4th hold, 2/3/4 confirmation, OHITA, automatic close/return behavior, telemetry and IndexedDB marker persistence.
-- Validate VäNä owner activation, single-use bootstrap, ordinary-update persistence and recovery behavior without creating an unintended admin path.
-- Validate v33.4 Tester Merit end-to-end with real active/admin users, one-time review behavior, bonus merit, persistence and privacy.
-- Validate v33.5 User/Beta navigation on phone, including all user/admin destinations and invite flow.
-- Continue validation of identity lifecycle, multi-device cloud state, RAW/research user attribution, run sharing, Beta community/private diagnostics and v33.3 private conversations.
-- Validate LIVE/diagnostics persistence and no measurement-performance regression.
-- Validate adaptive candidate tracking, 500-rpm learning and Auto Gear Learn without weakening GPS MASTER.
-- Before the next wider beta, implement/validate the locked FI/EN language system without disturbing measurement state.
+## v34.0 MotorLab UI / branding / FI-EN release
+- Active published `main` release is **v34.0 / build `2026-08-17o-motorlab-ui-fi-en`**.
+- `version.js`, Service Worker cache identity and PWA manifest are aligned to v34.0.
+- v34.0 is a presentation/navigation/language release layered on the retained v33.9 measurement/server foundation; measurement authority/calculations were not intentionally changed.
+- `simple_user_ui.js` / `motorlab-simple-user-ui-v34` implements role-aware simplification: normal navigation is **ETUSIVU / VEDOT / ANALYYSI / ASETUKSET / KÄYTTÄJÄ**, deep technical panels are hidden from normal users, settings are compact accordions with one section open at a time, and the bottom nav is fixed/floating with safe-area spacing.
+- `motorlab_i18n.js` / `motorlab-i18n-v1` adds Suomi / English presentation switching. Finnish remains fallback; `motolab_language` is included in per-user cloud state.
+- Language switching must not reset sensors, active run state, identity, stored data, RPM authority, gear learning, RAW or dyno calculations.
+- Preferred English dyno terminology: RPM, POWER, TORQUE, RUN, GEAR, CONFIDENCE, AUDIO INPUT, RAW DATA.
+- Approved splash asset is `assets/motorlab_splash_approved.webp`; branding/display logic is in `motorlab_branding.js` / `motorlab-branding-v1`.
+
+## v34.0 real-device bug discovered after deploy
+- User field report after v34.0: **the splash does not appear at all on the phone**.
+- This invalidates any assumption that splash integration has been successfully validated merely because the asset/module exists in the repository.
+- Next debugging should verify real runtime module injection/order, Service Worker/PWA update/cache behavior, splash session/timing gate and actual asset loading/display on the phone.
+- Keep the accepted splash artwork unchanged while diagnosing the visibility path; do not redesign the locked visual baseline to work around this bug.
+
+## Current handoff / validation priorities
+- Highest immediate visual defect: reproduce and fix the **splash-not-visible** issue on the real phone without changing the approved appearance.
+- Validate v34 fixed bottom-nav safe area, page-end spacing, one-open-at-a-time settings, User menu, role visibility and absence of UI loop/jank on iPhone.
+- Validate FI/EN switching across active screens, reload/update persistence and per-user cloud restore without disturbing measurement state.
+- Re-test MIC OFF -> ON, genuine ended-track recovery, rapid taps/visibility transitions and admin source switching.
+- Validate third-gear beta UI with ordinary users, including 2-second hold, 2/3/4/OHITA, telemetry and IndexedDB research markers.
+- Validate owner/admin persistence across normal PWA updates and configured recovery.
+- Continue multi-user/device validation of identity/cloud, feedback/community privacy, reduced run sharing and Tester Merit.
+- Validate LIVE/diagnostics/RAW replay show no measurement-performance regression.
 
 ## Deferred / unfinished work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
-- FI/EN language work is no longer parked: its v1 specification is ready and included in the next release, but it is **not yet deployed**.
-- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit, unified MIC control, v33.9 owner/recovery and gear-beta behavior remain newly published and need field validation before being treated as fully proven.
-- The UI/branding redesign is an accepted direction/implementation plan, not yet a claim that the current published app already matches the new mockups.
-- The approved workshop/DT portrait splash remains a **design reference still to be implemented and validated on real phone layouts**; safe-area behavior, readability and asset fidelity must be checked during implementation.
+- Camera RPM remains disabled.
+- Native AirPods motion remains experimental until validated on a real device.
+- v34.0 UI is deployed and visually locked, but field validation remains incomplete; the first confirmed v34 UI defect is the missing splash on the user's phone.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
