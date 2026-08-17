@@ -90,14 +90,14 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Account login remains automatic through the device MotoLab identity; no password flow was introduced.
 - Invitation action reuses existing invite creation and system share/clipboard behavior.
 
-## v33.6 explicit user MIC OFF authority — retained under current release
+## v33.6 explicit user MIC OFF authority — retained
 - v33.6 build: **`2026-08-17k-mic-off-authority`**.
 - `mic_authority.js` / `motolab-mic-authority-v1` made explicit user MIC OFF state authoritative over automatic microphone opening/recovery.
 - MIC OFF persisted `motolab_v32_sensor_prefs.mic=false`; guarded `startAudio()` blocked automatic reopening and logged `mic_start_blocked_user_off`.
 - If a microphone stream remained live while desired state was OFF, existing `stopAudio()` was used and `mic_forced_stop_user_off` logged.
 - This complemented v32.8 recovery: OFF means stay OFF; ON may still recover genuinely ended tracks.
 
-## v33.7 unified MIC command queue — retained under current release
+## v33.7 unified MIC command queue — retained
 - v33.7 build: **`2026-08-17l-unified-mic-command`**.
 - `mic_authority.js` advanced to **`motolab-mic-authority-v2`**.
 - MIC actions are serialized through one Promise-backed command queue instead of letting multiple UI/recovery callers race each other.
@@ -108,17 +108,37 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - v33.7 keeps v33.6 OFF authority semantics while reducing ON/OFF race conditions between UI, autostart, recovery and other callers.
 - Real-device validation is still required to prove rapid repeated taps, visibility transitions and recovery no longer create command races.
 
-## v33.8 admin audio source + 3rd gear test tools — current active release
-- Current `main` release identity: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
-- New `admin_test_tools.js` / **`motolab-admin-test-tools-v1`** is loaded by the PWA shell and is admin-only.
+## v33.8 admin audio source + third-gear test tools — retained under v33.9
+- v33.8 build: **`2026-08-17m-admin-audio-gear-test`**.
+- `admin_test_tools.js` originally shipped as **`motolab-admin-test-tools-v1`**.
 - Active approved admin can choose a specific audio input for test work. The selected device id is stored locally in `motolab_admin_audio_device` and applied as an exact `deviceId` constraint to audio `getUserMedia()` calls.
-- Normal users are intentionally unaffected and continue using the normal microphone path; the extra audio-source selector is only shown to an active admin.
+- Normal users are intentionally unaffected by the audio-source selector and continue using the normal microphone path.
 - Changing admin audio source while MIC is wanted cycles the microphone through the v33.7 unified authority queue (`off` then `on`) so the new source is reopened in a controlled order.
-- During active third-gear research, an admin-only floating **3. VAIHTEEN TESTI** overlay can watch gear-guard evidence.
-- A suspected 2nd or 4th gear must persist continuously for **2 seconds** before the overlay asks for manual confirmation, reducing one-frame/short transient prompts.
-- Admin can confirm gear 2/3/4 or skip the prompt. Confirmation creates `trip_gear_manual_reference` telemetry, dispatches `motolab-trip-gear-reference`, stores `MOTOLAB_TRIP_MANUAL_GEAR_REFERENCE`, and writes a `manual_gear_reference` marker into the active `VanaMotoLabResearch` timeline when available.
+- A floating **3. VAIHTEEN TESTI** overlay watches gear-guard evidence during active third-gear research.
+- A suspected 2nd or 4th gear must persist continuously for **2 seconds** before asking for manual confirmation, reducing one-frame/short transient prompts.
+- Confirmation creates `trip_gear_manual_reference` telemetry, dispatches `motolab-trip-gear-reference`, stores `MOTOLAB_TRIP_MANUAL_GEAR_REFERENCE`, and writes a `manual_gear_reference` marker into the active `VanaMotoLabResearch` timeline when available.
 - Skip action logs `trip_gear_question_skipped` and suppresses repeated prompting for the same current suspected gear.
-- These tools are intended as testing/reference instrumentation; they do not grant microphone or manual gear reference authority over GPS MASTER displayed RPM, run acceptance or normal gear-learning rules unless later explicitly designed and validated.
+- These tools are testing/reference instrumentation and do not grant microphone or manual gear reference authority over GPS MASTER displayed RPM, run acceptance or normal gear-learning rules.
+
+## v33.9 owner / gear beta release — current active release
+- Current `main` release identity is **v33.9 / build `2026-08-17n-owner-gear-beta`**; `version.js` and Service Worker cache identity are aligned to v33.9.
+- `admin_test_tools.js` advanced to **`motolab-admin-test-tools-v2`**: the third-gear research prompt is now available to **all beta users** during an active research session, while selectable audio input remains admin-only.
+- Manual gear confirmation source is generalized to `manual_reference`; 2-second hold, 2/3/4 confirmation, OHITA, event logging and research marker behavior are retained.
+- GPS MASTER remains authoritative; beta gear confirmation is reference/shadow teaching evidence only.
+- `user_identity.js` advanced to **`motolab-user-identity-v2`** with explicit VäNä owner activation UI/API support. Owner nickname alone never grants admin rights; server-side role/status remains authoritative.
+- Owner bootstrap supports first-owner promotion to active admin and issues a fresh signed device token after promotion.
+- `raw_sync_server/owner_recovery_server.js` adds a single-use first-owner bootstrap plus server-configured owner recovery for site-data loss/new device. Recovery requires server-side configuration (`MOTOLAB_OWNER_RECOVERY_CODE`); recovery secrets are not stored as plaintext public app credentials.
+- Bootstrap consumption is persisted in `owner-bootstrap.json`, preventing reuse after successful first-owner activation; owner recovery attaches/reuses a device on the existing admin account and reissues a device token.
+- v33.9 owner/admin persistence across ordinary PWA updates remains a required field-validation item.
+
+## Next release locked handoff / language system
+- `NEXT_RELEASE_PLAN.md` is the current locked cross-conversation handoff for the next server/app release. Re-check current main immediately before implementing/deploying it.
+- The plan retains v33.9 measurement invariants, all-beta third-gear teaching UI, admin-only audio source selection, owner persistence/recovery, MIC regression validation, User/Beta navigation, per-user cloud validation, feedback/community privacy, Tester Merit and LIVE/UI simplification.
+- English support is now explicitly **included in the next release plan**, not parked as an unrelated branch.
+- `LANGUAGE_PACK_EN_V1.md` is **READY FOR NEXT RELEASE, NOT YET DEPLOYED**.
+- Existing Finnish remains the default/fallback. Settings will add **Suomi / English**, with preference persisted locally and in per-user cloud state.
+- Language is presentation-only: switching language must not reset sensors, an active run, identity, stored data, RPM/gear-learning authority, RAW behavior or dyno logic.
+- Active visible UI strings should move to translation keys; missing English keys fall back to Finnish. Established terminology includes RPM, POWER, TORQUE, RUN, GEAR, CONFIDENCE, AUDIO INPUT and RAW DATA.
 
 ## Adaptive GPS-taught RPM learning
 - `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline starts with no learned bands.
@@ -141,24 +161,33 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings contains user-changeable configuration; LIVE contains deep technical state.
 - Settings/maintenance sections should remain compact/collapsible.
 - An unavailable selected audio input must not silently fall back to another microphone and be treated as the same sensor.
+- Publication-facing product name is **VäNä MotorLab**; internal legacy MotoLab/AutoDyno identifiers may stay unchanged where renaming would risk RAW/API/storage/diagnostic compatibility.
+- Current redesign direction is dark black/deep-red racing UI with translucent cards and a subtle workshop environment; normal screens should show only information that helps run measurement, result review or tuning decisions.
+- **Throttle must be removed from the normal UI** because no throttle-position/TPS signal is currently available; do not show invented throttle data.
+- Proposed normal navigation direction: **ETUSIVU / VEDOT / ANALYYSI / ASETUKSET / KÄYTTÄJÄ**, while deep technical sensor/RAW/diagnostic information remains separately reachable through LIVE/admin/developer tooling as implementation is reconciled with the existing navigation.
+- Settings redesign rule: compact accordion sections, initially closed, with only one section open at a time.
+- Floating bottom navigation must respect iPhone safe area and must not cover the last content/control on a page; full-screen graph views may hide it.
+- Splash/branding may use the real repository DT image. The DT may be cleaned visually with lighting/contrast/crop/background treatment, but must remain recognizably the same real bike with no major geometry/component redesign. Do not substitute an AI-invented motorcycle for the actual DT asset.
 
 ## Current build handoff and validation priorities
-- Active `main`: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
-- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit, v33.5 Beta navigation, v33.6 MIC OFF authority and v33.7 unified MIC command queue.
-- Validate v33.7/v33.8 on real iPhone: explicit MIC OFF stays OFF, MIC ON still recovers genuinely ended tracks, rapid controls do not race, and admin source switching reliably reopens the intended audio input.
-- Validate v33.8 third-gear overlay against real research data: 2-second hold, 2nd/4th suspicion, confirm/skip behavior, event logging and IndexedDB marker persistence.
-- Confirm admin-only tools never appear for normal active users and do not change their audio constraints.
+- Active `main`: **v33.9 / build `2026-08-17n-owner-gear-beta`**.
+- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit, v33.5 Beta navigation, v33.6 MIC OFF authority, v33.7 unified MIC command queue and v33.8 admin audio-source tooling.
+- Validate v33.9 on real iPhone: explicit MIC OFF stays OFF, MIC ON recovers genuinely ended tracks, rapid controls do not race, admin source switching reliably reopens the intended audio input, and the third-gear prompt appears for ordinary beta users only during active research.
+- Validate third-gear behavior: 2-second 2nd/4th hold, 2/3/4 confirmation, OHITA, automatic close/return behavior, telemetry and IndexedDB marker persistence.
+- Validate VäNä owner activation, single-use bootstrap, ordinary-update persistence and recovery behavior without creating an unintended admin path.
 - Validate v33.4 Tester Merit end-to-end with real active/admin users, one-time review behavior, bonus merit, persistence and privacy.
 - Validate v33.5 User/Beta navigation on phone, including all user/admin destinations and invite flow.
 - Continue validation of identity lifecycle, multi-device cloud state, RAW/research user attribution, run sharing, Beta community/private diagnostics and v33.3 private conversations.
 - Validate LIVE/diagnostics persistence and no measurement-performance regression.
 - Validate adaptive candidate tracking, 500-rpm learning and Auto Gear Learn without weakening GPS MASTER.
+- Before the next wider beta, implement/validate the locked FI/EN language system without disturbing measurement state.
 
 ## Deferred / unfinished work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
-- FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
-- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit, unified MIC control and v33.8 admin test tools remain newly published and need field validation before being treated as fully proven.
+- FI/EN language work is no longer parked: its v1 specification is ready and included in the next release, but it is **not yet deployed**.
+- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit, unified MIC control, v33.9 owner/recovery and gear-beta behavior remain newly published and need field validation before being treated as fully proven.
+- The UI/branding redesign is an accepted direction/implementation plan, not yet a claim that the current published app already matches the new mockups.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
