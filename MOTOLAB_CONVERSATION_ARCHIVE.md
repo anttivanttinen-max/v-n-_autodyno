@@ -84,7 +84,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 ## v32.9 LIVE telemetry implementation — active on main
 - The first LIVE implementation was initially prepared from an older v32.7 base, but `main` changed during the work with four newer v32.8 microphone-stability commits. The older branch was intentionally not promoted.
 - The LIVE work was rebuilt on current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` so the microphone-stability fix was preserved.
-- Active release identity is **v32.9 / build `2026-08-17d-live-status`**.
+- Active release identity was **v32.9 / build `2026-08-17d-live-status`** before the field-recovery build described below.
 - New `live_status.js` / `motolab-live-status-v1` dynamically adds the LIVE bottom-nav button and a dedicated technical page without modifying the large legacy measurement implementation in `index.html`.
 - LIVE summary shows traffic-light state for **GPS / MIC / IMU / RAW / SYNC**.
 - Expandable cards cover GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/EVENT QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
@@ -108,13 +108,22 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The overnight trainer is instructed to keep rollback history in `Motolab-data` and only publish a validated accepted model to the app repository; it must not change unrelated application code.
 
 ## Current research / build handoff
-- Active `main` is **v32.9 / build `2026-08-17d-live-status`**.
-- v32.8 microphone-stability correction and v32.7 persistent diagnostics are preserved under the new UI layer.
+- Active `main` is now **v32.9.1 FIELD / build `2026-08-17u-field-recovery`** at HEAD `189c09070802da456ab2e3f76e51442e2ac5c8af`.
+- The field-recovery identity commit explicitly states that measurement logic is unchanged; the follow-up Service Worker change forces a clean field-recovery cache and removes old MotoLab/MotorLab caches on activation.
+- v32.8 microphone-stability correction and v32.7 persistent diagnostics remain preserved under the v32.9.1 field line.
 - Third-gear research has a guard/confirmation flow so research microphone/raw collection can be paused when the third-gear condition is not confirmed and resumed deliberately.
 - Gear guard transitions are logged into the research timeline.
 - Phone raw research capture is non-invasive relative to the normal MotoLab measurement logic.
 - Finland vehicle database v2 files have been installed in the application repository.
 - Beta auth was enabled for automatic RAW sync.
+
+## v34 development/release line — not promoted to main
+- A separate v34 release line exists and must not be confused with the field-recovery `main` line.
+- `release/v34.0-2026-08-17` currently points to commit `58d270274b979847fd760f7681818d9e7034b2ec` (`Trigger final v34 validation after identity normalization`).
+- Its release identity is **v34.0 / build `2026-08-17o-rebuild-ui-i18n`**.
+- User-approved product direction for v34 includes the rebuilt UI/navigation, user identity/cloud work, language support and other agreed v34 systems, but promotion to `main` is not implied by the existence of the release branch.
+- Current user decision: the newly completed visual appearance is considered **finished and locked as the visual baseline**. Future functional work should avoid reworking the approved appearance unless the user explicitly reopens UI design.
+- Installation/deploy/merge actions were intentionally paused while a new repository update was being completed. Documentation may record the state, but this archive job must not install or modify application code.
 
 ## Data pipeline retained from conversations
 - MotoLab stores RAW locally first.
@@ -134,19 +143,21 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Deep technical sensor/queue/diagnostic state belongs primarily under LIVE rather than crowding the measurement view.
 
 ## Current implementation direction
+- Keep `main` field-recovery line stable while v34 work is validated separately.
 - Real-device validate v32.8 microphone stability: live mic should remain continuously ON while real ended-track recovery still works.
-- Real-device validate v32.9 LIVE navigation, sensor state indicators, queue status and diagnostics/event visibility without measurement-performance regression.
+- Real-device validate v32.9/LIVE behavior on the v32.9.1 field line: navigation, sensor state indicators, queue status and diagnostics/event visibility without measurement-performance regression.
 - Validate v32.7 diagnostics persistence across abrupt termination and RAW replay of retained diagnostic events.
 - GPS-supervised microphone learning should improve candidate/harmonic choice and RPM continuity without weakening GPS MASTER authority.
 - Keep raw candidate sets and region-specific behavior so later models can learn 0.5x / 1x / 2x branch preference by RPM region if reference data supports it.
 - Auto Gear Learn exists but should only learn from data paths that are explicitly allowed by the selected control mode.
 - Existing RAW history should remain usable for later replay/reprocessing.
 - Field validation is still required for adaptive candidate tracking, 500 rpm band learning, Auto Gear Learn interaction and iOS sensor/microphone stability.
+- Before any eventual v34 promotion, re-check current `main`, validate release identity/cache behavior, and preserve the locked approved UI without regressing measurement logic.
 
 ## Deferred work explicitly parked for later
 - Automatic knock/ignition autotune.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator.
-- FI/EN language-system work is on a separate unpromoted development branch and must not be considered active until explicitly resumed.
+- Camera RPM remains disabled.
 
 ## Project-wide durable-memory instruction
 When a MotoLab conversation contains information that would matter after that conversation ends, archive it in GitHub. This includes at minimum:
