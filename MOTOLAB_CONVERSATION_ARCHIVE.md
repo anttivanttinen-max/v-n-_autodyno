@@ -61,30 +61,48 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Details: `LIVE_STATUS_V32_9.md`.
 
 ## v33.0 user identity / approval / cloud state — active foundation
-- New release line: **v33.0 / build `2026-08-17e-user-identity`** before the subsequent v33.1 feedback release.
-- New client module `user_identity.js` / `motolab-user-identity-v1` creates/preserves a device identity, uses the existing beta token/server configuration and resolves a server-side user record.
-- Server-side `raw_sync_server/user_server.js` adds a persistent user registry, invitation records and per-user cloud-state storage.
+- Release line began as **v33.0 / build `2026-08-17e-user-identity`** and remains the identity foundation under later v33.x builds.
+- `user_identity.js` / `motolab-user-identity-v1` creates/preserves a device identity, uses the existing beta token/server configuration and resolves a server-side user record.
+- `raw_sync_server/user_server.js` adds persistent user registry, invitation records and per-user cloud-state storage.
 - User states are `pending`, `active` and `blocked`; admin users can approve or block users. An admin cannot be blocked through the normal admin status endpoint.
-- New devices can register via invitation. Invitations are stored as hashes, are one-use where dynamically generated, and dynamic invites expire after seven days.
-- Pending users see an approval lock screen and can set a nickname; active users get an account pill/panel.
-- Active users can create invitation links. Admin users can view users and approval state from the app UI.
+- New devices can register via invitation. Dynamic invitation values are stored hashed, one-use and expire after seven days.
+- Pending users see an approval lock screen and can set a nickname; active users get account UI and can create invite links.
 - Device tokens are HMAC-signed using `BETA_TOKEN_SECRET`; default lifetime is 365 days unless configured otherwise.
-- RAW/research server requests carrying a beta token are now tied to an active resolved user/device identity before continuing.
-- Per-user cloud state uses `/api/users/v1/state`; selected local state keys (profiles, runs, RAW fallback/learning preference, RAW sync config, consent/dev state) are synchronized. Existing remote state is preferred on initial sync when present; otherwise current local state is uploaded.
-- Automatic state upload checks for changes about every 6 seconds after an active user is established.
-- The identity layer must not change GPS MASTER, RPM measurement, run acceptance, gear learning or dyno calculations.
+- RAW/research requests carrying beta identity are tied to an active resolved user/device identity.
+- Per-user cloud state uses `/api/users/v1/state`; selected profiles/runs/learning/sync/consent/dev state is synchronized. Existing remote state is preferred on initial sync when present; otherwise local state is uploaded. Change checks occur about every 6 seconds after activation.
 
-## v33.1 in-app user feedback — current active release
-- Current release identity on `main`: **v33.1 / build `2026-08-17f-user-feedback`**.
-- New `raw_sync_server/feedback_server.js` provides authenticated feedback APIs backed by `data/users/feedback.json`.
-- Active users can submit feedback through `/api/feedback/v1/comment`; supported categories are `problem`, `update`, `development` and `other`.
-- Each feedback item stores a generated feedback ID, resolved user/nickname/device, category, message, app version, current page, timestamp and workflow status.
-- Feedback status workflow supports `new`, `reviewing`, `done` and `archived`, plus an admin note field.
-- Admin endpoints list feedback and update feedback status; admin identity is required.
-- New `feedback.js` / `motolab-feedback-v1` adds an in-app **PALAUTE** action and modal for users to send problems, update ideas, development suggestions or other comments directly to MotoLab administration.
-- Admin users also receive **PALAUTTEET** UI to review incoming feedback and mark items `KÄSITTELYYN` / `VALMIS`.
-- App shell/server wiring and Service Worker were updated so identity and feedback modules are loaded in the published PWA.
-- v33.1 supersedes v33.0 only as release identity; the v33.0 user-identity/approval/cloud-state foundation remains active underneath it.
+## v33.1 in-app user feedback — retained foundation
+- v33.1 release identity was **`2026-08-17f-user-feedback`**.
+- `raw_sync_server/feedback_server.js` introduced authenticated feedback APIs and persistent feedback storage.
+- Active users could submit problem/update/development/other feedback with user/nickname/device, app version, page and workflow status.
+- `feedback.js` / `motolab-feedback-v1` added **PALAUTE** for users and **PALAUTTEET** for admin review.
+- v33.1 is superseded by v33.2/v33.3 but remains the base of the current private-feedback system.
+
+## v33.2 Beta community / private diagnostics / user rollout — retained under v33.3
+- v33.2 release build: **`2026-08-17g-beta-community`**.
+- The rollout combined the v33.0 identity/approval layer with per-user feature permissions and client version/build heartbeat.
+- Nickname-based run sharing is graphical/reduced only: recipients do not receive RAW data or edit rights.
+- Shared runs can be compared to a selected own run with run-quality/success percentage, and to the best comparable own run automatically.
+- New Beta community/issue bank supports user comments, peer troubleshooting, `Minulla sama ongelma`, issue states `open`, `working`, `resolved`, `fixed`, `not reproduced`, and admin-selected working solutions.
+- Invite flow includes normal share plus WhatsApp action. Users may optionally provide a private contact route such as WhatsApp, phone, email, Telegram or other.
+- Public community data is deliberately reduced to nickname/title/description/category/status/comments/same-problem count. Device IDs, contact details, app/device metadata, sensor state, diagnostics and technical history are private/admin-only.
+- Issue creation and `Minulla sama ongelma` attach a private diagnostic package containing release/build, platform metadata, sensor/queue snapshots, recent diagnostic events and roughly 60 seconds of rolling technical history.
+- The diagnostic package is not intended to capture listenable microphone audio; it contains technical sensor/app state for reproduction.
+- `BETA_COMMUNITY_V33_2.md` records the release and privacy rules.
+- PR #15 and the associated v33.2 community/Railway preload rollout were merged with explicit user approval. Railway success still needs field confirmation before server rollout is considered validated.
+- The community/user layer must not change GPS MASTER authority, RPM calculation, run acceptance, Auto Gear Learn or dyno computation.
+
+## v33.3 two-way private feedback conversations — current active release
+- Current `main` release identity: **v33.3 / build `2026-08-17h-private-feedback-chat`**.
+- `feedback.js` advanced to `motolab-feedback-v2` and the feedback server storage/API migrated toward `motolab_feedback_v2` conversation semantics.
+- A user can now see their own private feedback threads, open a new private feedback conversation and reply to the admin inside the same thread.
+- Admin can reply to the user in the same thread. Thread states now include `waiting_admin`, `waiting_user`, `working` and `resolved` in addition to migration handling for older statuses.
+- Private thread messages preserve role (`user` / `admin`) and timestamps. User-facing APIs only return that user's own threads; admin list returns the administrative metadata needed for handling.
+- Admin can publish a private feedback item into the Beta community as an **anonymous** public issue. The published community issue omits the user's identity and links internally back to the source feedback for administration.
+- Once anonymized to the community, the user is told that the issue was published without exposing their nickname/private conversation to other users.
+- The feedback server can write the anonymized issue to the community issue store while preserving the private original thread separately.
+- Service Worker/release bundling was aligned to v33.3 so the private feedback chat is included in the published PWA.
+- v33.3 supersedes v33.2 only as release/build identity; v33.2 community/private diagnostics and earlier identity/cloud foundations remain active.
 
 ## Adaptive GPS-taught RPM learning
 - `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline has no learned bands and explicit acceptance limits.
@@ -111,21 +129,23 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - A selected unavailable audio input must not silently fall back to a different microphone and be treated as the same sensor.
 
 ## Current build handoff and validation priorities
-- Active `main`: **v33.1 / build `2026-08-17f-user-feedback`**.
-- v32.8 microphone stability, v32.7 persistent diagnostics and v32.9 LIVE telemetry are all retained under the newer identity/feedback layer.
+- Active `main`: **v33.3 / build `2026-08-17h-private-feedback-chat`**.
+- v32.8 microphone stability, v32.7 persistent diagnostics, v32.9 LIVE telemetry, v33.0 identity/cloud, v33.2 Beta community/private diagnostics and v33.3 private feedback chat are all retained.
 - Validate v32.8 mic behavior on real iPhone: continuous live track must not cycle; genuine ended/disconnected track must recover.
 - Validate v32.9 LIVE navigation/status/queue/event visibility without measurement-performance regression.
 - Validate diagnostics persistence across abrupt termination and RAW replay.
-- Validate v33.0 identity lifecycle end-to-end: invite → pending nickname → admin approval → active login, blocked-state behavior, token persistence and per-user cloud-state restore/sync.
-- Validate that RAW/research uploads from authenticated devices are correctly associated with active user/device identity and rejected for non-active users.
-- Validate v33.1 feedback end-to-end: normal user submission, user/version/device attribution, admin list, status changes and persistence across server restart.
+- Validate identity lifecycle end-to-end: invite → pending nickname → admin approval → active login, blocked-state behavior, token persistence and per-user cloud-state restore/sync.
+- Validate RAW/research attribution to active user/device identity and rejection for non-active users.
+- Validate v33.2 community end-to-end: issue creation, comments, same-problem, public/private data separation, diagnostic package capture, admin-only diagnostic access and Railway persistence/restart behavior.
+- Validate run sharing permissions and reduced graphical-only payload, selected-own comparison and automatic best-own comparison.
+- Validate v33.3 private conversations end-to-end: user thread list/new message/reply, admin reply, state transitions, old v33.1 feedback migration, anonymous community publication and strict privacy separation.
 - Validate adaptive candidate tracking against GPS, 500-rpm region learning and Auto Gear Learn interaction without weakening GPS MASTER.
 
 ## Deferred / unfinished work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
 - FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
-- User identity/cloud state and in-app feedback are newly published and require real multi-user/device field validation before being treated as fully proven.
+- User identity/cloud, run sharing, Beta community/private diagnostics and two-way feedback are newly published and require real multi-user/device/server field validation before being treated as fully proven.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
