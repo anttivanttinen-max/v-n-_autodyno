@@ -84,15 +84,22 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - This does not replace real iPhone GPS/microphone validation.
 
 ## New main test publication and auth-origin regression — 2026-08-17 evening
-- Current `main/HEAD` checked by the archive job is `6493bd0384e3e9ef2a9cf0bb1571f6321d79edf9`, commit **“Publish v34 test build under ty folder”** (2026-08-17 18:36:25Z).
+- `main` gained commit `6493bd0384e3e9ef2a9cf0bb1571f6321d79edf9`, **“Publish v34 test build under ty folder”** (2026-08-17 18:36:25Z).
 - This commit adds a **test copy under `ty/`**; it does not mean the root v32.9.1 FIELD application line was replaced or that v34 was promoted as the production/root application.
 - `ty/version.js` identifies the copied test build as **v34.6 DEV / `2026-08-17w-v34-rebuild-swfix`**.
 - After the test publication, a real user test reported **login not working**.
 - Code inspection confirmed `user_identity.js` targets Railway production server `https://v-n-autodyno-production.up.railway.app`, while the backend CORS contract allows the GitHub Pages origin `https://anttivanttinen-max.github.io` for user/admin requests.
 - The test-launch approach had used a different/CDN origin in the v34 test path, so browser CORS could block auth requests before actual activation/session logic reached Railway. Treat this as a **test-host/origin integration regression**, not proof that the underlying user registry/token logic itself is broken.
 - Required follow-up: ensure the test app executes under the allowed GitHub Pages origin (or deliberately update the backend CORS contract), then perform a real end-to-end owner/session/activation test against Railway. Do not declare login fixed based only on UI/static/browser smoke tests.
-- A separate UI field report also noted an **alavalikko/submenu overlapping the notification/status area**. This belongs to the locked-UI regression list: functional layering/z-index fixes are allowed, but the approved visual design should not be redesigned.
+- A separate UI field report also noted an **alavalikko/submenu overlapping the notification/status area**.
 - No new RAW measurement finding was identified in this archive interval.
+
+## v34 submenu/notification overlap fix — recovered handoff detail
+- The `dev/v34-rebuild` branch advanced two commits beyond the earlier archived validated point: `cd244ecad4902229d0c4d17a3460e3ab2e1e7d5e` (**“Keep user submenu below notification/status area”**) and `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0` (**“Assert submenu clears notification area”**).
+- `cd244eca` updates `beta_menu.js` from `motolab-beta-menu-v3` to `motolab-beta-menu-v4`, gives the user submenu safe-area-aware top padding and bounded `100dvh` height, and raises toast z-index so the notification/status layer remains above the submenu without redesigning the approved appearance.
+- `ae6f100` extends `scripts/browser_smoke.js` for the 390×844 phone viewport and fails if the user submenu top is below the required clearance (`menuBox.y < 88`). This converts the overlap bug into an explicit browser regression assertion.
+- Current inspected `dev/v34-rebuild` HEAD is `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0`. No separate combined commit status was published for this HEAD, so the code/test changes are archived but should not be described as CI-validated unless a later green run confirms them.
+- This resolves the known overlap in the development branch at code/test level; actual-phone viewport validation remains desirable, and it does not resolve the separate Railway login/auth-origin issue.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
@@ -112,7 +119,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Keep the root v32.9.1 FIELD line stable while v34 is validated separately.
 - Preserve the locked v34 appearance; fix only functional regressions unless design is explicitly reopened.
 - Resolve and real-device validate v34 test login/auth origin end-to-end against Railway.
-- Validate submenu/notification layering on the actual phone viewport.
+- Re-check submenu/notification layering on the actual phone viewport even though `dev/v34-rebuild` now contains a code fix and browser regression assertion.
 - Real-device validate v34 GPS/microphone behavior before any production promotion.
 - Real-device validate v32.8 microphone stability, v32.9/LIVE behavior and v32.7 diagnostics persistence/replay.
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
