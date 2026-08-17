@@ -73,6 +73,15 @@ Updated: 2026-08-17
 - Sensor state persistence / automatic restoration work exists, but iOS field stability still requires validation.
 - **Confirmed from new RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active. Treat iOS microphone reconnect as an open bug, not a completed feature.
 
+## Planned iOS microphone recovery path — open, not implemented
+- Do not rely on repeatedly restarting an already non-live `MediaStreamTrack`.
+- If microphone intent remains ON but the track is not `live`, the recovery path should tear down the stale stream/audio graph and request a **fresh `getUserMedia()` stream**, then rebuild the RPM audio chain.
+- Retry should be bounded/backed off rather than tight-looped (for example roughly 0.5 s → 1 s → 2 s → 5 s).
+- RAW/research telemetry should explicitly record stream recreation, recovery success and structured failure reasons so the field fix can be validated from data.
+- After repeated automatic failure, expose a clear user-gesture recovery action for iOS (for example tap-to-restore microphone), because browser audio permission/activation may require renewed interaction.
+- GPS MASTER behavior must remain unchanged during recovery attempts: microphone recovery may not gain authority over displayed RPM, run acceptance or gear learning.
+- No v32.6 microphone-recovery build is present on `main` yet; this is the agreed next implementation direction for the reconnect regression.
+
 ## ARM AUTO / multi-pull capture
 - ARM AUTO remains a persistent session across multiple pulls.
 - Every detected pull is completed and saved as its own run; no new ARM press is required between pulls.
@@ -95,10 +104,10 @@ Updated: 2026-08-17
 - AirPods motion remains experimental and is not a validated MotoLab RPM source.
 
 ## Current validation priorities
+- Implement and then field-validate the fresh-stream iOS microphone recovery path against the confirmed `track_not_live` regression.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
-- Fix and then validate iOS microphone persistence/recovery: current RAW shows repeated `track_not_live` reconnect failures while mic is desired ON.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
 
 ## Deferred work
