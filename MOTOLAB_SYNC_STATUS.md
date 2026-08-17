@@ -3,8 +3,8 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Prepared line on `agent/v32.9-live-status`: **v32.9 / build `2026-08-17d-live-status`**, based directly on current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` after detecting and preserving the newer v32.8 microphone-stability commits.
-- Current published base before promotion is **v32.8 / build `2026-08-17c-mic-stability`**.
+- Active published line on `main`: **v32.9 / build `2026-08-17d-live-status`**.
+- v32.9 was rebuilt on the then-current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` after detecting four newer v32.8 microphone-stability commits during development, then promoted by fast-forward after a final HEAD check.
 - v32.7 introduced full persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 adds the dedicated LIVE technical inspection page without changing measurement authority.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
@@ -71,7 +71,7 @@ Updated: 2026-08-17
 - Home-screen microphone control remains directly reachable.
 - Settings panels remain collapsible with remembered open/closed state.
 - Third-gear research confirmation buttons are part of the current build.
-- Dedicated bottom-navigation **LIVE** inspection page is now part of the v32.9 prepared line.
+- Dedicated bottom-navigation **LIVE** inspection page is active in v32.9.
 - Product split: normal measurement/home stays focused; Settings contains user-adjustable choices; LIVE contains deep technical state and observability.
 - LIVE provides a traffic-light GPS / MIC / IMU / RAW / SYNC summary and expandable cards for GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
 
@@ -80,8 +80,8 @@ Updated: 2026-08-17
 - The implementation did not change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
 - Field report after v32.6 showed repeated microphone OFF/ON cycling.
 
-## v32.8 microphone stability correction — current published base
-- `sensor_persistence.js` is now `sensor-persistence-v5` on the current published base.
+## v32.8 microphone stability correction
+- `sensor_persistence.js` is now `sensor-persistence-v5`.
 - Root cause of the OFF/ON reconnect storm was the use of `globalThis.MOTOLAB_AUDIO_LAST?.t` as a destructive frame-stale trigger without a reliable producer-backed timestamp in the active repository line.
 - v32.8 removes `audio_frames_stale` as a destructive reconnect reason.
 - A live, enabled track on an active stream is authoritative for the persistence watchdog.
@@ -102,7 +102,7 @@ Updated: 2026-08-17
 - Detailed architecture and safety rules are documented in `MOTOLAB_DIAGNOSTICS.md`.
 - Diagnostics must never gain authority over GPS MASTER, RPM, run acceptance, gear learning, candidate selection, sensor recovery or dyno calculations.
 
-## v32.9 LIVE technical status page — prepared
+## v32.9 LIVE technical status page — active on main
 - New `live_status.js` / `motolab-live-status-v1` dynamically adds a **LIVE** button to the bottom navigation and a dedicated technical status page.
 - Normal visible navigation becomes effectively MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET; developer-only AUTOTUNE remains controlled by existing developer mode.
 - LIVE reads existing runtime state only. It does not write measurement configuration or control sensors.
