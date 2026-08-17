@@ -15,16 +15,23 @@ Updated: 2026-08-17
 ## Separate v34 line — do not confuse with main
 - v34 remains separate and is **not** the currently published `main` field line.
 - Older release branch `release/v34.0-2026-08-17` remains at `58d270274b979847fd760f7681818d9e7034b2ec` / v34.0 build `2026-08-17o-rebuild-ui-i18n`.
-- Current validated rebuild work is newer: **`dev/v34-rebuild` at `f203b3e2fb95afbbd0a04ff27319b5f40d7f8dcb`**, identity **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**.
+- Current inspected rebuild work is newer: **`dev/v34-rebuild` at `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0`**. Its app identity remains **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**; the two newer commits adjust user-submenu layering and its browser regression test rather than changing release identity.
 - User decision: the completed v34 visual appearance is finished and **locked as the approved visual baseline**. Functional work should preserve that appearance unless UI design is explicitly reopened.
 - v34 has not been promoted/installed by the memory job; explicit promotion approval and remaining real-device validation are still required.
 
 ## v34.6 DEV validation / Service Worker fix
-- Chromium + Service Worker browser smoke testing is now part of the v34 rebuild validation flow.
+- Chromium + Service Worker browser smoke testing is part of the v34 rebuild validation flow.
 - The smoke test found a real reload-only runtime bug: Service Worker HTML injection regex-rewrote inline `navigator.serviceWorker.register(...)` and truncated JavaScript at the inner `encodeURIComponent(build)` parenthesis, preventing navigation handlers from initializing after SW reload.
 - Commit `f203b3e` fixes this by stopping regex rewriting of inline JavaScript and bumps the dev build/cache identity to `2026-08-17w-v34-rebuild-swfix`.
-- GitHub Actions run `32044453957` is green. It passed app/server JS syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, and **Browser + Service Worker smoke x2**.
-- Browser/SW runtime validation is therefore green in Chromium. This does not replace real iPhone GPS/microphone testing.
+- GitHub Actions run `32044453957` is green. It passed app/server JS syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, and **Browser + Service Worker smoke x2** for that validated point.
+- Browser/SW runtime validation is therefore green at `f203b3e`. This does not replace real iPhone GPS/microphone testing.
+
+## v34 user-submenu overlap correction
+- A phone UI report identified the **KÄYTTÄJÄ submenu overlapping the notification/status area**.
+- Commit `cd244ecad4902229d0c4d17a3460e3ab2e1e7d5e` changes `beta_menu.js` to `motolab-beta-menu-v4`, adds safe-area-aware top clearance, bounds menu height with `100dvh`, and keeps toast/status layering above the menu without redesigning the approved UI.
+- Commit `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0` extends the 390×844 browser smoke test and explicitly fails if the submenu top is inside the notification/status clearance (`menuBox.y < 88`).
+- No combined CI status is published for `ae6f100`; therefore preserve the earlier green `f203b3e` validation record and treat the newer overlap fix as code/test-complete but still needing an actual-phone confirmation or later green CI run.
+- The separate v34 login/Railway auth-origin issue remains unresolved by these submenu commits.
 
 ## Measurement strategy
 - Road-test / learning work uses **GPS MASTER + MIC LEARN** unless a specific explicit test mode says otherwise.
@@ -153,7 +160,9 @@ Updated: 2026-08-17
 
 ## Current validation priorities
 - Keep `main` v32.9.1 FIELD stable while v34 validation remains separate.
-- v34 Chromium + Service Worker smoke is green; preserve this regression test.
+- Preserve the green Chromium + Service Worker smoke result from `f203b3e` and keep the submenu-overlap assertion added at `ae6f100`.
+- Resolve and real-device validate the v34 GitHub Pages/Railway login-auth origin path end-to-end; submenu fixes do not prove login works.
+- Confirm the v34 user submenu clears the notification/status area on the actual phone viewport.
 - Real-device validate v34 on iPhone for GPS/microphone behavior before promotion; browser smoke does not prove hardware sensor behavior.
 - Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
 - Real-device validate LIVE navigation and telemetry on the v32.9.1 field line without measurement-performance regression.
@@ -177,4 +186,4 @@ Updated: 2026-08-17
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 browser/Service Worker smoke regression coverage, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 browser/Service Worker smoke regression coverage, v34 user-submenu notification-area clearance assertion, and keep native AirPods motion experimental until validated on a real device.
