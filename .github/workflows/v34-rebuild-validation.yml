@@ -1,0 +1,42 @@
+name: V34 Rebuild Validation
+
+on:
+  push:
+    branches: [dev/v34-rebuild]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: JavaScript syntax - app
+        run: find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: JavaScript syntax - server and validation scripts
+        run: |
+          find raw_sync_server -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check scripts/validate_v34_rebuild.js
+      - name: Static rebuild validation x3
+        run: |
+          node scripts/validate_v34_rebuild.js
+          node scripts/validate_v34_rebuild.js
+          node scripts/validate_v34_rebuild.js
+      - name: Identity and server integration x3
+        run: |
+          node raw_sync_server/test_identity_flow.js
+          node raw_sync_server/test_identity_flow.js
+          node raw_sync_server/test_identity_flow.js
+      - name: Measurement invariant markers
+        run: |
+          grep -q "GPS MASTER" gps_master_learning.js
+          grep -q "trip-gear" trip_gear_guard.js
+          grep -q "rpm-learning" adaptive_rpm_learning.js
+          grep -q "phone" phone_rpm_smart.js
+          ! grep -q "camera" v34_dashboard_ui.js
