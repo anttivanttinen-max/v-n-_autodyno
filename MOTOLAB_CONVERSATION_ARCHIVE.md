@@ -169,6 +169,15 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Floating bottom navigation must respect iPhone safe area and must not cover the last content/control on a page; full-screen graph views may hide it.
 - Splash/branding may use the real repository DT image. The DT may be cleaned visually with lighting/contrast/crop/background treatment, but must remain recognizably the same real bike with no major geometry/component redesign. Do not substitute an AI-invented motorcycle for the actual DT asset.
 
+## Approved visual mockup refinement — 2026-08-17
+- The **workshop + white DT composition is now the accepted visual base** for the MotorLab redesign mockups. The motorcycle should read as naturally embedded in the garage scene rather than pasted over it.
+- The accepted DT presentation is slightly more side-on than the earliest draft while retaining enough three-quarter angle to show the engine/expansion chamber and overall stance clearly.
+- The loading/splash concept is approved in a **portrait smartphone proportion**, not as a landscape desktop composition.
+- Splash hierarchy is intentionally simple: **VÄNÄ** and **MOTORLAB** branding occupy the free upper area, the DT/workshop remains the hero visual, and loading state/progress sits in the lower part of the phone screen.
+- For this splash/loading view, avoid extra product-name clutter such as separate “Tester” branding; the visible top branding should remain VäNä + MotorLab.
+- The mockup may include restrained red racing illumination and workshop depth, but the visual treatment must not imply that the current published v33.9 UI already contains this screen.
+- These are **approved design-reference decisions only**. Implementation must preserve the existing measurement/sensor/identity/RAW invariants and should use the real DT asset or a faithful derived presentation rather than an invented replacement bike.
+
 ## Current build handoff and validation priorities
 - Active `main`: **v33.9 / build `2026-08-17n-owner-gear-beta`**.
 - Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit, v33.5 Beta navigation, v33.6 MIC OFF authority, v33.7 unified MIC command queue and v33.8 admin audio-source tooling.
@@ -188,6 +197,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - FI/EN language work is no longer parked: its v1 specification is ready and included in the next release, but it is **not yet deployed**.
 - Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit, unified MIC control, v33.9 owner/recovery and gear-beta behavior remain newly published and need field validation before being treated as fully proven.
 - The UI/branding redesign is an accepted direction/implementation plan, not yet a claim that the current published app already matches the new mockups.
+- The approved workshop/DT portrait splash remains a **design reference still to be implemented and validated on real phone layouts**; safe-area behavior, readability and asset fidelity must be checked during implementation.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
