@@ -3,13 +3,21 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.9 / build `2026-08-17d-live-status`**.
-- v32.9 was rebuilt on the then-current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` after detecting four newer v32.8 microphone-stability commits during development, then promoted by fast-forward after a final HEAD check.
-- v32.7 introduced full persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 adds the dedicated LIVE technical inspection page without changing measurement authority.
+- Active published line on `main`: **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**.
+- Field-recovery release identity was created without changing measurement logic, then the Service Worker was changed to force a clean field-recovery cache and clear older MotoLab/MotorLab caches on activation.
+- `main` was at application HEAD `189c09070802da456ab2e3f76e51442e2ac5c8af` before the documentation-only archive commits from this job.
+- v32.9 remains the LIVE telemetry base beneath the field-recovery identity; v32.8 microphone-stability correction and v32.7 persistent diagnostics are preserved.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
 - Current temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded.
+
+## Separate v34 line — do not confuse with main
+- A separate v34 release/development line exists and is **not** the currently published `main` field line.
+- `release/v34.0-2026-08-17` points to commit `58d270274b979847fd760f7681818d9e7034b2ec` with message `Trigger final v34 validation after identity normalization`.
+- That branch identifies itself as **v34.0 / build `2026-08-17o-rebuild-ui-i18n`**.
+- User decision: the newly completed v34 visual appearance is finished and **locked as the approved visual baseline**. Functional work should preserve that appearance unless UI design is explicitly reopened.
+- Installation/deploy/merge actions were intentionally paused while the repository update was being completed; this memory job must not promote or install v34.
 
 ## Measurement strategy
 - Road-test / learning work uses **GPS MASTER + MIC LEARN** unless a specific explicit test mode says otherwise.
@@ -71,9 +79,10 @@ Updated: 2026-08-17
 - Home-screen microphone control remains directly reachable.
 - Settings panels remain collapsible with remembered open/closed state.
 - Third-gear research confirmation buttons are part of the current build.
-- Dedicated bottom-navigation **LIVE** inspection page is active in v32.9.
+- Dedicated bottom-navigation **LIVE** inspection page is active in the v32.9 base used by v32.9.1 FIELD.
 - Product split: normal measurement/home stays focused; Settings contains user-adjustable choices; LIVE contains deep technical state and observability.
 - LIVE provides a traffic-light GPS / MIC / IMU / RAW / SYNC summary and expandable cards for GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
+- The newer v34 appearance is approved and locked, but it remains on the separate v34 line until explicitly promoted.
 
 ## v32.6 iOS microphone recovery implementation
 - v32.6 introduced fresh-stream recovery through `stopAudio()` + `startAudio()`, bounded approximately **0.5 s → 1 s → 2 s → 5 s** retry, structured recovery telemetry, and the **MIC RECOVERY • PALAUTA MIKROFONI** user-gesture action.
@@ -102,8 +111,8 @@ Updated: 2026-08-17
 - Detailed architecture and safety rules are documented in `MOTOLAB_DIAGNOSTICS.md`.
 - Diagnostics must never gain authority over GPS MASTER, RPM, run acceptance, gear learning, candidate selection, sensor recovery or dyno calculations.
 
-## v32.9 LIVE technical status page — active on main
-- New `live_status.js` / `motolab-live-status-v1` dynamically adds a **LIVE** button to the bottom navigation and a dedicated technical status page.
+## v32.9 LIVE technical status page — retained under v32.9.1 FIELD
+- `live_status.js` / `motolab-live-status-v1` dynamically adds a **LIVE** button to the bottom navigation and a dedicated technical status page.
 - Normal visible navigation becomes effectively MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET; developer-only AUTOTUNE remains controlled by existing developer mode.
 - LIVE reads existing runtime state only. It does not write measurement configuration or control sensors.
 - GPS card exposes active state, speed, GPS-derived RPM and control-authority context where available.
@@ -136,19 +145,21 @@ Updated: 2026-08-17
 - AirPods motion remains experimental and is not a validated MotoLab RPM source.
 
 ## Current validation priorities
+- Keep `main` v32.9.1 FIELD stable while v34 validation remains separate.
 - Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
-- Real-device validate v32.9 LIVE navigation and telemetry without measurement-performance regression.
+- Real-device validate LIVE navigation and telemetry on the v32.9.1 field line without measurement-performance regression.
 - Confirm LIVE GPS/MIC/IMU/RAW/SYNC traffic lights match actual states and that queue/error details are readable.
 - Validate v32.7 diagnostics on a real iPhone: confirm errors/queue transitions survive reload, `previous_session_unclean` appears after an abrupt termination, and retained diagnostic events replay into RAW.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
+- Before any v34 promotion, re-check current `main`, release/cache identity and measurement invariants, and preserve the locked approved UI.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains intentionally parked.
-- FI/EN language-system work exists only on a separate unpromoted development branch and must not be treated as active until explicitly resumed.
+- Camera RPM remains disabled.
 
 ## Durable project-memory rule
 - GitHub is the durable MotoLab project memory.
