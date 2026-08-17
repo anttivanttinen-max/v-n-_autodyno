@@ -1,7 +1,7 @@
-importScripts("./version.js?build=2026-08-17k-mic-off-authority");
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.6";
+importScripts("./version.js?build=2026-08-17l-unified-mic-command");
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||"33.7";
 const VERSION_LABEL=globalThis.MOTOLAB_RELEASE?.label||("v"+VERSION);
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17k-mic-off-authority";
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||"2026-08-17l-unified-mic-command";
 const V=encodeURIComponent(VERSION);
 const B=encodeURIComponent(BUILD);
 const CACHE="vana-motolab-"+VERSION.replace(/[^a-z0-9]+/gi,"-")+"-"+BUILD.replace(/[^a-z0-9]+/gi,"-");
