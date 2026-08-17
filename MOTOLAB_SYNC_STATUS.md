@@ -3,7 +3,8 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.5 / build `2026-08-16x-gear-confirm`**.
+- Active published line on `main`: **v32.5 / build `2026-08-16x-gear-confirm`** until the v32.6 recovery branch is promoted.
+- Prepared recovery line: **v32.6 / build `2026-08-17a-mic-recovery`** on `agent/v32.6-ios-mic-recovery`.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
@@ -71,16 +72,17 @@ Updated: 2026-08-17
 - Settings panels remain collapsible with remembered open/closed state.
 - Third-gear research confirmation buttons are part of the current build.
 - Sensor state persistence / automatic restoration work exists, but iOS field stability still requires validation.
-- **Confirmed from new RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active. Treat iOS microphone reconnect as an open bug, not a completed feature.
+- **Confirmed from RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active.
 
-## Planned iOS microphone recovery path — open, not implemented
-- Do not rely on repeatedly restarting an already non-live `MediaStreamTrack`.
-- If microphone intent remains ON but the track is not `live`, the recovery path should tear down the stale stream/audio graph and request a **fresh `getUserMedia()` stream**, then rebuild the RPM audio chain.
-- Retry should be bounded/backed off rather than tight-looped (for example roughly 0.5 s → 1 s → 2 s → 5 s).
-- RAW/research telemetry should explicitly record stream recreation, recovery success and structured failure reasons so the field fix can be validated from data.
-- After repeated automatic failure, expose a clear user-gesture recovery action for iOS (for example tap-to-restore microphone), because browser audio permission/activation may require renewed interaction.
-- GPS MASTER behavior must remain unchanged during recovery attempts: microphone recovery may not gain authority over displayed RPM, run acceptance or gear learning.
-- No v32.6 microphone-recovery build is present on `main` yet; this is the agreed next implementation direction for the reconnect regression.
+## v32.6 iOS microphone recovery implementation
+- `sensor_persistence.js` is advanced to `sensor-persistence-v4` on the recovery branch.
+- When a previously live wanted microphone becomes non-live/stalled, recovery now fully calls the existing `stopAudio()` teardown before `startAudio()` requests a fresh `getUserMedia()` stream and rebuilds the AudioContext/worklet chain.
+- Automatic retry is bounded/backed off through approximately **0.5 s → 1 s → 2 s → 5 s**, with the 5 s delay retained for further failures instead of a tight loop.
+- Recovery telemetry adds `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail and user-gesture recovery events.
+- After three failed automatic recovery attempts, a visible **MIC RECOVERY • PALAUTA MIKROFONI** action is exposed; tapping it performs a forced fresh-stream attempt from an iOS user gesture.
+- Manual microphone-off and a newly selected microphone reset recovery/backoff state and hide the recovery action.
+- The implementation does **not** change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
+- This is code-complete but **not field-validated yet**. Do not call the iOS reconnect bug closed until new RAW proves a lost track returns live and repeated `track_not_live` events stop.
 
 ## ARM AUTO / multi-pull capture
 - ARM AUTO remains a persistent session across multiple pulls.
@@ -104,7 +106,8 @@ Updated: 2026-08-17
 - AirPods motion remains experimental and is not a validated MotoLab RPM source.
 
 ## Current validation priorities
-- Implement and then field-validate the fresh-stream iOS microphone recovery path against the confirmed `track_not_live` regression.
+- Promote v32.6 only after repository-diff/build checks, then field-validate fresh-stream iOS microphone recovery against the confirmed `track_not_live` regression.
+- In the next RAW, verify `mic_recovery_attempt` → `mic_stream_recreated` → `mic_recovery_success`, active mic state returning true, and no continuing reconnect storm.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
