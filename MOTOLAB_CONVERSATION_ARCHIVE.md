@@ -77,6 +77,16 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Automatic knock/ignition autotune.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator.
 
+## 2026-08-17 recovery / isolation handoff
+- A microphone regression was reported in the newer application line: the microphone did not work reliably in the field-test path.
+- Inspection of `sensor_autostart.js` showed that the current auto-start path calls `startAudio()` automatically; on iOS the microphone stream may require an explicit user gesture, so a false desired/ON state must not be treated as a live microphone stream.
+- The user explicitly chose the recovery strategy: restore the last working measurement baseline to `main` first, then repair login, microphone and UI changes in isolation rather than continuing to modify the field-test build.
+- `main` was deliberately moved back to **v32.5 / build `2026-08-16x-gear-confirm`**, commit `7eac2ebf80d8328f5b040f7641724fd9559f9b40`, as the stable field-test baseline.
+- A separate branch **`dev/auth-mic-ui-repair`** exists for login + microphone + UI repair work. Those changes must be tested there before any deliberate promotion to `main`.
+- The accepted current visual design is considered finished/locked as a visual baseline. Future functional work should preserve that approved appearance rather than repeatedly redesigning the interface.
+- Do not infer that later UI/auth work is present on `main` merely because it existed in another branch or intermediate build; always verify the current `main/HEAD` before handoff or deployment.
+- Remaining work from this recovery decision: fix iOS microphone activation so the stream is genuinely live after a user gesture, fix/validate user-login and server identity flow, validate the repaired UI/auth/microphone branch, and only then selectively reintroduce validated changes to the stable line.
+
 ## Project-wide durable-memory instruction
 When a MotoLab conversation contains information that would matter after that conversation ends, archive it in GitHub. This includes at minimum:
 1. accepted decisions and constraints,
