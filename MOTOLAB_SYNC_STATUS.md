@@ -3,8 +3,9 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.7 / build `2026-08-17b-full-diagnostics`**.
-- v32.7 was promoted by fast-forward from `agent/v32.7-full-diagnostics` after confirming no competing `main` commits had appeared and the diff contained only diagnostics, release/PWA loading and project-memory files.
+- Prepared line on `agent/v32.9-live-status`: **v32.9 / build `2026-08-17d-live-status`**, based directly on current `main` HEAD `769c2171999f3e7c05282de2b2e2bebdcd6e234c` after detecting and preserving the newer v32.8 microphone-stability commits.
+- Current published base before promotion is **v32.8 / build `2026-08-17c-mic-stability`**.
+- v32.7 introduced full persistent diagnostics; v32.8 corrected the false microphone stale reconnect storm; v32.9 adds the dedicated LIVE technical inspection page without changing measurement authority.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
@@ -32,7 +33,6 @@ Updated: 2026-08-17
 - It evaluates H1–H6 harmonic structure and simultaneous **0.5x / 1x / 2x RPM hypotheses**.
 - Candidate selection uses spectral strength, harmonic count, previous RPM, predicted RPM/velocity, temporal continuity, candidate gap and a soft GPS reference when available.
 - Large implausible branch jumps require confirmation; the tracker may hold/follow the predicted branch instead of accepting a one-frame harmonic jump.
-- A stream watchdog restarts ended/muted/stalled microphone streams when the page is visible and the microphone mode remains wanted.
 - Rich phone telemetry is stored in learning rows, including smart/raw/corrected/predicted RPM, chosen ratio, confidence, gap, runner-up, f0, RMS, harmonic data, top candidates and GPS assist.
 
 ## Adaptive GPS-taught RPM learning
@@ -71,22 +71,26 @@ Updated: 2026-08-17
 - Home-screen microphone control remains directly reachable.
 - Settings panels remain collapsible with remembered open/closed state.
 - Third-gear research confirmation buttons are part of the current build.
-- Sensor state persistence / automatic restoration work exists, but iOS field stability still requires validation.
-- **Confirmed from RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active.
+- Dedicated bottom-navigation **LIVE** inspection page is now part of the v32.9 prepared line.
+- Product split: normal measurement/home stays focused; Settings contains user-adjustable choices; LIVE contains deep technical state and observability.
+- LIVE provides a traffic-light GPS / MIC / IMU / RAW / SYNC summary and expandable cards for GPS, MIC/RPM, IMU, GEAR, DYNO/RUN, RAW/SYNC/QUEUES, DIAGNOSTICS/EVENT LOG and SYSTEM.
 
 ## v32.6 iOS microphone recovery implementation
-- `sensor_persistence.js` is `sensor-persistence-v4` on `main`.
-- When a previously live wanted microphone becomes non-live/stalled, recovery fully calls the existing `stopAudio()` teardown before `startAudio()` requests a fresh `getUserMedia()` stream and rebuilds the AudioContext/worklet chain.
-- Automatic retry is bounded/backed off through approximately **0.5 s → 1 s → 2 s → 5 s**, with the 5 s delay retained for further failures instead of a tight loop.
-- Recovery telemetry adds `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail and user-gesture recovery events.
-- After three failed automatic recovery attempts, a visible **MIC RECOVERY • PALAUTA MIKROFONI** action is exposed; tapping it performs a forced fresh-stream attempt from an iOS user gesture.
-- Manual microphone-off and a newly selected microphone reset recovery/backoff state and hide the recovery action.
-- The implementation does **not** change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
-- Field report after v32.6: the microphone repeatedly toggles OFF/ON. Code inspection found `micFramesFresh()` relies on `globalThis.MOTOLAB_AUDIO_LAST`, but no producer for that timestamp exists in the repository. This makes a live microphone appear stale and can trigger destructive recovery repeatedly. Treat this as an open v32.6 regression.
-- The intended stability correction is to stop using the invalid frame-stale condition as a reason to tear down a live microphone. Fresh-stream recreation should be reserved for a genuinely non-live/ended track or another independently validated stall signal.
+- v32.6 introduced fresh-stream recovery through `stopAudio()` + `startAudio()`, bounded approximately **0.5 s → 1 s → 2 s → 5 s** retry, structured recovery telemetry, and the **MIC RECOVERY • PALAUTA MIKROFONI** user-gesture action.
+- The implementation did not change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
+- Field report after v32.6 showed repeated microphone OFF/ON cycling.
 
-## v32.7 full persistent diagnostics — active on main
-- New `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational only.
+## v32.8 microphone stability correction — current published base
+- `sensor_persistence.js` is now `sensor-persistence-v5` on the current published base.
+- Root cause of the OFF/ON reconnect storm was the use of `globalThis.MOTOLAB_AUDIO_LAST?.t` as a destructive frame-stale trigger without a reliable producer-backed timestamp in the active repository line.
+- v32.8 removes `audio_frames_stale` as a destructive reconnect reason.
+- A live, enabled track on an active stream is authoritative for the persistence watchdog.
+- Fresh-stream teardown/recreation remains available for genuinely non-live/ended tracks and existing backoff/manual recovery behavior is retained.
+- Details are recorded in `MIC_STABILITY_V32_8.md`.
+- Real-device validation remains required: live mic must stay continuously ON while a real ended/disconnected track must still recover correctly.
+
+## v32.7 full persistent diagnostics
+- `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational only.
 - It records `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed fetches, non-OK HTTP responses, network changes, visibility/page lifecycle, media-device changes and selected Service Worker state messages.
 - It mirrors central `addLearningEvent` traffic into a local persistent ring without changing the original event call.
 - Every diagnostic record carries build/release identity, session id and a sensor snapshot where available.
@@ -97,6 +101,18 @@ Updated: 2026-08-17
 - Pending diagnostic events carry `rawMirrored=false` and are replayed in bounded batches into the normal MotoLab RAW/learning stream as `diagnostic_replay` once `addLearningEvent` is available again.
 - Detailed architecture and safety rules are documented in `MOTOLAB_DIAGNOSTICS.md`.
 - Diagnostics must never gain authority over GPS MASTER, RPM, run acceptance, gear learning, candidate selection, sensor recovery or dyno calculations.
+
+## v32.9 LIVE technical status page — prepared
+- New `live_status.js` / `motolab-live-status-v1` dynamically adds a **LIVE** button to the bottom navigation and a dedicated technical status page.
+- Normal visible navigation becomes effectively MITTAUS / VEDOT / LIVE / ANALYYSI / ASETUKSET; developer-only AUTOTUNE remains controlled by existing developer mode.
+- LIVE reads existing runtime state only. It does not write measurement configuration or control sensors.
+- GPS card exposes active state, speed, GPS-derived RPM and control-authority context where available.
+- MIC/RPM card exposes wanted state, track state/enabled/muted/device, audio/raw RPM, confidence, f0, candidate gap and runner-up when available.
+- Additional cards expose IMU, gear/fusion/slip, live dyno/run state, RAW learning counters, RAW/sync queue status, all diagnostics queue summaries, recent diagnostic events and system/build/PWA state.
+- `live_status_guard.js` keeps the dynamically injected LIVE page outside the legacy `.screen` count used by the existing self-test while ensuring leaving LIVE through any normal nav button hides the page correctly.
+- LIVE refreshes only while its page is active, approximately every 750 ms, to limit unnecessary UI work.
+- Details and validation checklist are documented in `LIVE_STATUS_V32_9.md`.
+- LIVE is strictly observational and must not alter GPS MASTER, RPM, run acceptance, gear learning, microphone recovery, adaptive learning or dyno calculations.
 
 ## ARM AUTO / multi-pull capture
 - ARM AUTO remains a persistent session across multiple pulls.
@@ -120,7 +136,9 @@ Updated: 2026-08-17
 - AirPods motion remains experimental and is not a validated MotoLab RPM source.
 
 ## Current validation priorities
-- Fix and field-validate the v32.6 microphone OFF/ON reconnect storm without weakening real dead-track recovery.
+- Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
+- Real-device validate v32.9 LIVE navigation and telemetry without measurement-performance regression.
+- Confirm LIVE GPS/MIC/IMU/RAW/SYNC traffic lights match actual states and that queue/error details are readable.
 - Validate v32.7 diagnostics on a real iPhone: confirm errors/queue transitions survive reload, `previous_session_unclean` appears after an abrupt termination, and retained diagnostic events replay into RAW.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
@@ -130,6 +148,7 @@ Updated: 2026-08-17
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains intentionally parked.
+- FI/EN language-system work exists only on a separate unpromoted development branch and must not be treated as active until explicitly resumed.
 
 ## Durable project-memory rule
 - GitHub is the durable MotoLab project memory.
@@ -138,4 +157,4 @@ Updated: 2026-08-17
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, and keep native AirPods motion experimental until validated on a real device.
