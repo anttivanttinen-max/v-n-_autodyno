@@ -3,8 +3,8 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.6 / build `2026-08-17a-mic-recovery`**.
-- v32.6 was promoted by fast-forward from `agent/v32.6-ios-mic-recovery` after confirming the branch was based directly on the then-current `main` and the diff contained only the intended microphone-recovery/release-memory files.
+- Active published line on `main`: **v32.6 / build `2026-08-17a-mic-recovery`** until the v32.7 diagnostics branch is promoted.
+- Prepared diagnostics line: **v32.7 / build `2026-08-17b-full-diagnostics`** on `agent/v32.7-full-diagnostics`.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
@@ -75,14 +75,28 @@ Updated: 2026-08-17
 - **Confirmed from RAW on 2026-08-17:** persisted desired state can remain `mic=true` while the active microphone stays false; repeated `sensor-persistence-v3` reconnect attempts fail with `track_not_live` while GPS and IMU remain active.
 
 ## v32.6 iOS microphone recovery implementation
-- `sensor_persistence.js` is now `sensor-persistence-v4` on `main`.
-- When a previously live wanted microphone becomes non-live/stalled, recovery now fully calls the existing `stopAudio()` teardown before `startAudio()` requests a fresh `getUserMedia()` stream and rebuilds the AudioContext/worklet chain.
+- `sensor_persistence.js` is `sensor-persistence-v4` on `main`.
+- When a previously live wanted microphone becomes non-live/stalled, recovery fully calls the existing `stopAudio()` teardown before `startAudio()` requests a fresh `getUserMedia()` stream and rebuilds the AudioContext/worklet chain.
 - Automatic retry is bounded/backed off through approximately **0.5 s → 1 s → 2 s → 5 s**, with the 5 s delay retained for further failures instead of a tight loop.
 - Recovery telemetry adds `mic_recovery_attempt`, `mic_stream_recreated`, `mic_recovery_success`, `mic_recovery_failure`, teardown-error detail and user-gesture recovery events.
 - After three failed automatic recovery attempts, a visible **MIC RECOVERY • PALAUTA MIKROFONI** action is exposed; tapping it performs a forced fresh-stream attempt from an iOS user gesture.
 - Manual microphone-off and a newly selected microphone reset recovery/backoff state and hide the recovery action.
 - The implementation does **not** change GPS MASTER, displayed-RPM authority, run acceptance, gear learning, smart-RPM candidate selection or dyno calculations.
-- This is published code but **not field-validated yet**. Do not call the iOS reconnect bug closed until new RAW proves a lost track returns live and repeated `track_not_live` events stop.
+- Field report after v32.6: the microphone repeatedly toggles OFF/ON. Code inspection found `micFramesFresh()` relies on `globalThis.MOTOLAB_AUDIO_LAST`, but no producer for that timestamp exists in the repository. This makes a live microphone appear stale and can trigger destructive recovery repeatedly. Treat this as an open v32.6 regression.
+- The intended stability correction is to stop using the invalid frame-stale condition as a reason to tear down a live microphone. Fresh-stream recreation should be reserved for a genuinely non-live/ended track or another independently validated stall signal.
+
+## v32.7 full persistent diagnostics — prepared
+- New `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational only.
+- It records `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed fetches, non-OK HTTP responses, network changes, visibility/page lifecycle, media-device changes and selected Service Worker state messages.
+- It mirrors central `addLearningEvent` traffic into a local persistent ring without changing the original event call.
+- Every diagnostic record carries build/release identity, session id and a sensor snapshot where available.
+- A 500-event persistent local ring, session marker and heartbeat survive app restarts/crashes.
+- Previous sessions without a reliable clean shutdown produce `previous_session_unclean` on the next boot with the last heartbeat, sensor state and queue summary.
+- iOS `pagehide` is intentionally **not** treated as proof of clean shutdown, because the PWA may be backgrounded and later killed.
+- All known persistent queue states plus other localStorage keys containing `queue` are summarized. Queue counts/status/errors are captured without copying authentication secrets or arbitrary payload contents.
+- Pending diagnostic events carry `rawMirrored=false` and are replayed in bounded batches into the normal MotoLab RAW/learning stream as `diagnostic_replay` once `addLearningEvent` is available again.
+- Detailed architecture and safety rules are documented in `MOTOLAB_DIAGNOSTICS.md`.
+- Diagnostics must never gain authority over GPS MASTER, RPM, run acceptance, gear learning, candidate selection, sensor recovery or dyno calculations.
 
 ## ARM AUTO / multi-pull capture
 - ARM AUTO remains a persistent session across multiple pulls.
@@ -106,8 +120,8 @@ Updated: 2026-08-17
 - AirPods motion remains experimental and is not a validated MotoLab RPM source.
 
 ## Current validation priorities
-- Field-validate v32.6 fresh-stream iOS microphone recovery against the confirmed `track_not_live` regression.
-- In the next RAW, verify `mic_recovery_attempt` → `mic_stream_recreated` → `mic_recovery_success`, active mic state returning true, and no continuing reconnect storm.
+- Fix and field-validate the v32.6 microphone OFF/ON reconnect storm without weakening real dead-track recovery.
+- Validate v32.7 diagnostics on a real iPhone: confirm errors/queue transitions survive reload, `previous_session_unclean` appears after an abrupt termination, and retained diagnostic events replay into RAW.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
@@ -124,4 +138,4 @@ Updated: 2026-08-17
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, and keep native AirPods motion experimental until validated on a real device.
