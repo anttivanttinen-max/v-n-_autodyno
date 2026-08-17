@@ -69,7 +69,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - v33.3 converted feedback into two-way private conversations. Users see only their own threads; admin can reply and manage states.
 - Admin can publish a private feedback item anonymously into the public Beta community while retaining the private source thread separately.
 
-## v33.4 Tester Merit — retained under current release
+## v33.4 Tester Merit — retained
 - v33.4 build: **`2026-08-17i-tester-merit`**.
 - `raw_sync_server/merit_server.js` adds quality-based tester merit using persistent `tester_merit.json` storage.
 - Merit categories: `data`, `reports`, `activity`, `community`, `reliability`, `ideas`.
@@ -82,7 +82,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - `merit.js` / `motolab-tester-merit-v1` adds user Tester Level UI plus admin scoring/review UI.
 - Detailed policy is in `TESTER_MERIT_V33_4.md`.
 
-## v33.5 visible User / Beta navigation — retained under current release
+## v33.5 visible User / Beta navigation — retained
 - v33.5 build: **`2026-08-17j-beta-navigation`**.
 - `beta_menu.js` / `motolab-beta-menu-v1` adds a clearly visible **KÄYTTÄJÄ / BETA** entry point instead of leaving identity/community/feedback/sharing functions scattered or hidden.
 - User menu groups: own account, private feedback/messages, Beta community, shared runs, tester level and invite tester.
@@ -90,16 +90,35 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Account login remains automatic through the device MotoLab identity; no password flow was introduced.
 - Invitation action reuses existing invite creation and system share/clipboard behavior.
 
-## v33.6 user MIC OFF authority — current active release
-- Current `main` release identity: **v33.6 / build `2026-08-17k-mic-off-authority`**.
-- New `mic_authority.js` / `motolab-mic-authority-v1` makes explicit user MIC OFF state authoritative over automatic microphone opening/recovery.
-- MIC OFF interaction is captured early (`pointerdown`, `touchstart`, `click`) and persists `motolab_v32_sensor_prefs.mic=false`.
-- `startAudio()` is guarded: if desired mic state is OFF, automatic/manual code paths that call the wrapped `startAudio()` are blocked and logged as `mic_start_blocked_user_off`.
-- If a microphone stream is still live while desired state is OFF, the module calls the existing `stopAudio()` and records `mic_forced_stop_user_off`.
-- The guard rechecks periodically and after returning to visible state so background/recovery logic cannot silently reopen a microphone the user explicitly disabled.
-- User authority changes are logged with `mic_user_authority`; module load is logged with `mic_authority_loaded`.
-- This is separate from v32.8 dead-track recovery: OFF means stay OFF; ON may still use genuine recovery logic when a track actually ends.
-- Real iPhone validation is still required to confirm MIC OFF stays off across recovery/visibility transitions and MIC ON genuine recovery remains intact.
+## v33.6 explicit user MIC OFF authority — retained under current release
+- v33.6 build: **`2026-08-17k-mic-off-authority`**.
+- `mic_authority.js` / `motolab-mic-authority-v1` made explicit user MIC OFF state authoritative over automatic microphone opening/recovery.
+- MIC OFF persisted `motolab_v32_sensor_prefs.mic=false`; guarded `startAudio()` blocked automatic reopening and logged `mic_start_blocked_user_off`.
+- If a microphone stream remained live while desired state was OFF, existing `stopAudio()` was used and `mic_forced_stop_user_off` logged.
+- This complemented v32.8 recovery: OFF means stay OFF; ON may still recover genuinely ended tracks.
+
+## v33.7 unified MIC command queue — retained under current release
+- v33.7 build: **`2026-08-17l-unified-mic-command`**.
+- `mic_authority.js` advanced to **`motolab-mic-authority-v2`**.
+- MIC actions are serialized through one Promise-backed command queue instead of letting multiple UI/recovery callers race each other.
+- Commands support `toggle`, `on` and `off`; result data includes command id, source, desired state, actual active state, success and error.
+- New telemetry includes `mic_command_start` and `mic_command_done`; desired-state changes still emit `mic_user_authority` with source information.
+- Main MIC controls `#extMicBtn` and `#extChip` are intercepted in capture phase and routed to the unified queue. Explicit OFF controls are also routed through the same authority path.
+- `MotoLabMicAuthority` exposes `command`, `toggle`, `on`, `off`, `setDesired`, `desired` and `active`.
+- v33.7 keeps v33.6 OFF authority semantics while reducing ON/OFF race conditions between UI, autostart, recovery and other callers.
+- Real-device validation is still required to prove rapid repeated taps, visibility transitions and recovery no longer create command races.
+
+## v33.8 admin audio source + 3rd gear test tools — current active release
+- Current `main` release identity: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
+- New `admin_test_tools.js` / **`motolab-admin-test-tools-v1`** is loaded by the PWA shell and is admin-only.
+- Active approved admin can choose a specific audio input for test work. The selected device id is stored locally in `motolab_admin_audio_device` and applied as an exact `deviceId` constraint to audio `getUserMedia()` calls.
+- Normal users are intentionally unaffected and continue using the normal microphone path; the extra audio-source selector is only shown to an active admin.
+- Changing admin audio source while MIC is wanted cycles the microphone through the v33.7 unified authority queue (`off` then `on`) so the new source is reopened in a controlled order.
+- During active third-gear research, an admin-only floating **3. VAIHTEEN TESTI** overlay can watch gear-guard evidence.
+- A suspected 2nd or 4th gear must persist continuously for **2 seconds** before the overlay asks for manual confirmation, reducing one-frame/short transient prompts.
+- Admin can confirm gear 2/3/4 or skip the prompt. Confirmation creates `trip_gear_manual_reference` telemetry, dispatches `motolab-trip-gear-reference`, stores `MOTOLAB_TRIP_MANUAL_GEAR_REFERENCE`, and writes a `manual_gear_reference` marker into the active `VanaMotoLabResearch` timeline when available.
+- Skip action logs `trip_gear_question_skipped` and suppresses repeated prompting for the same current suspected gear.
+- These tools are intended as testing/reference instrumentation; they do not grant microphone or manual gear reference authority over GPS MASTER displayed RPM, run acceptance or normal gear-learning rules unless later explicitly designed and validated.
 
 ## Adaptive GPS-taught RPM learning
 - `rpm-learning-model.json` uses schema `motolab_rpm_learning_model_v1`; baseline starts with no learned bands.
@@ -124,9 +143,11 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - An unavailable selected audio input must not silently fall back to another microphone and be treated as the same sensor.
 
 ## Current build handoff and validation priorities
-- Active `main`: **v33.6 / build `2026-08-17k-mic-off-authority`**.
-- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit and v33.5 Beta navigation.
-- Validate v33.6 on real iPhone: explicit MIC OFF must remain OFF and not be reopened by autostart/recovery/visibility behavior; MIC ON must still recover genuinely ended tracks.
+- Active `main`: **v33.8 / build `2026-08-17m-admin-audio-gear-test`**.
+- Retained foundations include v32.7 diagnostics, v32.8 mic stability, v32.9 LIVE, v33.0 identity/cloud, v33.2 community/private diagnostics/run sharing, v33.3 private feedback chat, v33.4 Tester Merit, v33.5 Beta navigation, v33.6 MIC OFF authority and v33.7 unified MIC command queue.
+- Validate v33.7/v33.8 on real iPhone: explicit MIC OFF stays OFF, MIC ON still recovers genuinely ended tracks, rapid controls do not race, and admin source switching reliably reopens the intended audio input.
+- Validate v33.8 third-gear overlay against real research data: 2-second hold, 2nd/4th suspicion, confirm/skip behavior, event logging and IndexedDB marker persistence.
+- Confirm admin-only tools never appear for normal active users and do not change their audio constraints.
 - Validate v33.4 Tester Merit end-to-end with real active/admin users, one-time review behavior, bonus merit, persistence and privacy.
 - Validate v33.5 User/Beta navigation on phone, including all user/admin destinations and invite flow.
 - Continue validation of identity lifecycle, multi-device cloud state, RAW/research user attribution, run sharing, Beta community/private diagnostics and v33.3 private conversations.
@@ -137,7 +158,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Automatic knock / ignition autotune remains intentionally parked.
 - Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator remains parked.
 - FI/EN language-system work exists only on a separate unpromoted development branch and is not active until explicitly resumed.
-- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit and MIC OFF authority remain newly published and need field validation before being treated as fully proven.
+- Identity/cloud, run sharing, Beta community/private diagnostics, feedback conversations, Tester Merit, unified MIC control and v33.8 admin test tools remain newly published and need field validation before being treated as fully proven.
 
 ## Project-wide durable-memory instruction
 Archive at minimum: accepted decisions/constraints, measured test/reference results, algorithm changes and reasons, regressions/fixes, build identity, unresolved/deferred work, RAW interpretations, deployment/sync changes and cross-thread handoff notes. Full chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory remains the durable source of truth.
