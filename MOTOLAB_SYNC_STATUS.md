@@ -3,8 +3,8 @@
 Updated: 2026-08-17
 
 ## Current application line
-- Active published line on `main`: **v32.6 / build `2026-08-17a-mic-recovery`** until the v32.7 diagnostics branch is promoted.
-- Prepared diagnostics line: **v32.7 / build `2026-08-17b-full-diagnostics`** on `agent/v32.7-full-diagnostics`.
+- Active published line on `main`: **v32.7 / build `2026-08-17b-full-diagnostics`**.
+- v32.7 was promoted by fast-forward from `agent/v32.7-full-diagnostics` after confirming no competing `main` commits had appeared and the diff contained only diagnostics, release/PWA loading and project-memory files.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
 - Yamaha DT125R Athena 170 remains the startup-bike line used by the current development flow.
@@ -85,7 +85,7 @@ Updated: 2026-08-17
 - Field report after v32.6: the microphone repeatedly toggles OFF/ON. Code inspection found `micFramesFresh()` relies on `globalThis.MOTOLAB_AUDIO_LAST`, but no producer for that timestamp exists in the repository. This makes a live microphone appear stale and can trigger destructive recovery repeatedly. Treat this as an open v32.6 regression.
 - The intended stability correction is to stop using the invalid frame-stale condition as a reason to tear down a live microphone. Fresh-stream recreation should be reserved for a genuinely non-live/ended track or another independently validated stall signal.
 
-## v32.7 full persistent diagnostics — prepared
+## v32.7 full persistent diagnostics — active on main
 - New `diagnostics.js` / `motolab-diagnostics-v1` is always-on and observational only.
 - It records `window.error`, `unhandledrejection`, `console.error`, `console.warn`, failed fetches, non-OK HTTP responses, network changes, visibility/page lifecycle, media-device changes and selected Service Worker state messages.
 - It mirrors central `addLearningEvent` traffic into a local persistent ring without changing the original event call.
