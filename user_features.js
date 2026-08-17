@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='motolab-user-features-v1';
+const VERSION='motolab-user-features-v2';
 const SERVER_KEY='motolab_v32_beta_server',TOKEN_KEY='motolab_v32_beta_token';
 let permissions=null,me=null,overlay=null;
 const $=id=>document.getElementById(id);
@@ -9,7 +9,16 @@ function token(){return localStorage.getItem(TOKEN_KEY)||''}
 async function api(path,opt={}){const r=await fetch(server()+path,{cache:'no-store',...opt,headers:{'Content-Type':'application/json','X-MotoLab-Beta-Token':token(),...(opt.headers||{})}});let j={};try{j=await r.json()}catch{}if(!r.ok)throw Error(j.error||('HTTP '+r.status));return j}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function appMeta(){return {appVersion:String(globalThis.MOTOLAB_RELEASE?.version||''),build:String(globalThis.MOTOLAB_RELEASE?.build||''),platform:navigator.platform||navigator.userAgent||'',deviceModel:navigator.userAgent||''}}
-function hideDenied(){if(!permissions)return;const btAllowed=!!permissions.bt_contact_mic;['extMicBtn','extChip','audioDevice','audioRefreshBtn','btTestBtn'].forEach(id=>{const e=$(id);if(e)e.closest('.panel,.card,.ctl,.switchrow')?.classList.toggle('muf-denied',!btAllowed)});if(!btAllowed){const b=$('extMicBtn');if(b){b.disabled=true;b.title='BT-kontaktimikrofoni ei kuulu tämän käyttäjän oikeuksiin'}}document.body.dataset.motolabBtContact=btAllowed?'1':'0'}
+function hideDenied(){
+ if(!permissions)return;
+ const phoneMicAllowed=permissions.phone_mic!==false,btAllowed=!!permissions.bt_contact_mic;
+ // The dashboard MIC control is the normal phone/default microphone control and must
+ // not disappear just because advanced BT/contact-source selection is unavailable.
+ ['extMicBtn','extChip'].forEach(id=>{const e=$(id);if(!e)return;e.disabled=!phoneMicAllowed;e.closest('.panel,.card,.ctl,.switchrow')?.classList.toggle('muf-denied',!phoneMicAllowed);if(!phoneMicAllowed)e.title='Mikrofoni ei kuulu tämän käyttäjän oikeuksiin';else e.removeAttribute('title')});
+ // Only advanced source-selection controls are admin/BT-contact gated.
+ ['audioDevice','audioRefreshBtn','btTestBtn'].forEach(id=>{const e=$(id);if(e)e.closest('label,.panel,.card,.switchrow')?.classList.toggle('muf-denied',!btAllowed)});
+ document.body.dataset.motolabPhoneMic=phoneMicAllowed?'1':'0';document.body.dataset.motolabBtContact=btAllowed?'1':'0'
+}
 async function refresh(){if(!server()||!token())return;try{const a=await api('/api/users/v1/me'),b=await api('/api/features/v1/me');me=a.user;permissions=b.permissions||{};hideDenied();await api('/api/features/v1/heartbeat',{method:'POST',body:JSON.stringify(appMeta())});enhanceAccount()}catch{}}
 function styles(){if($('motolabUserFeaturesStyle'))return;const s=document.createElement('style');s.id='motolabUserFeaturesStyle';s.textContent=`.muf-denied{display:none!important}.muf-overlay{position:fixed;inset:0;z-index:260000;background:#000e;display:flex;align-items:flex-end;justify-content:center;padding:10px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}.muf-card{width:min(100%,480px);max-height:92vh;overflow:auto;background:#0b0c0f;border:1px solid #ff263f;border-radius:20px;padding:14px}.muf-card h2,.muf-card h3{margin:5px 0 10px}.muf-row{border:1px solid #2d3036;border-radius:11px;padding:9px;margin:7px 0}.muf-row small{display:block;color:#9ca2aa;margin:3px 0}.muf-btn{width:100%;padding:10px;margin-top:7px;border-radius:10px;border:1px solid #ff263f;background:#66101c;color:#fff;font-weight:900}.muf-btn.gray{border-color:#444;background:#17191e}.muf-perm{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #202228}.muf-perm input{width:auto}.muf-canvas{width:100%;height:260px;background:#050608;border:1px solid #292c31;border-radius:10px}`;document.head.appendChild(s)}
 function close(){if(overlay){overlay.remove();overlay=null}}
