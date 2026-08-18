@@ -7,6 +7,7 @@ $ErrorActionPreference='Stop'
 $src=Split-Path -Parent $MyInvocation.MyCommand.Path
 New-Item -ItemType Directory -Force $InstallDir|Out-Null
 Copy-Item (Join-Path $src 'MotoLab-Zeel-Capture.ps1') $InstallDir -Force
+Copy-Item (Join-Path $src 'ZeelProxyEngine.cs') $InstallDir -Force
 Copy-Item (Join-Path $src 'Analyze-ZeelCapture.ps1') $InstallDir -Force
 Copy-Item (Join-Path $src 'README.md') $InstallDir -Force -ErrorAction SilentlyContinue
 
