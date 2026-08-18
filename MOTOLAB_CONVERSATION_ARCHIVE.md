@@ -61,59 +61,74 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Auto Gear Learn remains available but GPS MASTER + MIC LEARN must never give microphone shadow RPM gear-learning authority.
 - Overnight trainer may publish only validated improving models, with rollback history retained in `Motolab-data`.
 
-## Published field line on root main
-- The root published application line remains **v32.9.1 FIELD / build `2026-08-17u-field-recovery`** beneath documentation/test-folder commits.
-- Field-recovery identity did not change measurement logic; Service Worker recovery forces a clean cache and removes old MotoLab/MotorLab caches.
-- v32.8 microphone stability and v32.7 diagnostics remain preserved under this line.
-- Third-gear research includes confirmation/guard flow and logs gear-guard transitions; phone raw research capture is non-invasive.
-- Finland vehicle database v2 is installed. Beta auth is enabled for automatic RAW sync.
+## Historical root field line — v32.9.1
+- The earlier root published application line was **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**.
+- Field-recovery identity did not change measurement logic; Service Worker recovery forced a clean cache and removed old MotoLab/MotorLab caches.
+- v32.8 microphone stability and v32.7 diagnostics were preserved under that line.
+- Third-gear research included confirmation/guard flow and gear-guard transitions; phone RAW research capture was non-invasive.
+- Finland vehicle database v2 and beta-auth RAW sync were already present.
+- This line is now historical: `main` was later explicitly promoted to v34.8 BETA.
 
-## v34 development/release line and locked appearance
-- v34 is separate from the root v32.9.1 FIELD line and must not be confused with it.
+## v34 development and locked appearance
 - Older `release/v34.0-2026-08-17` points to `58d270274b979847fd760f7681818d9e7034b2ec` / build `2026-08-17o-rebuild-ui-i18n`.
 - User-approved v34 direction includes rebuilt UI/navigation, user identity/cloud work, language support and agreed v34 systems.
 - User decision: the completed visual appearance is **finished and locked as the approved visual baseline**. Functional work should preserve it unless UI design is explicitly reopened.
-- Install/deploy/merge actions require explicit approval; this memory job never performs them.
+- Install/deploy/merge actions require explicit approval; this memory job itself never performs application promotion or deployment.
 
 ## v34.6 DEV browser/Service Worker validation
-- Validated rebuild work is on `dev/v34-rebuild`; archived validated point `f203b3e2fb95afbbd0a04ff27319b5f40d7f8dcb`, identity **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**.
-- Chromium + real Service Worker smoke testing was added so runtime behavior is exercised after SW-controlled reload.
-- It found a real reload-only bug: SW HTML injection regex rewrote inline `navigator.serviceWorker.register(...)` and truncated JS at an inner `encodeURIComponent(build)` parenthesis, preventing navigation handlers from initializing after reload.
-- Fix `f203b3e`: stop regex-rewriting inline JS/register calls; bump build/cache identity.
+- Validated rebuild point `f203b3e2fb95afbbd0a04ff27319b5f40d7f8dcb` used identity **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**.
+- Chromium + real Service Worker smoke testing found a reload-only bug: SW HTML injection regex rewrote inline `navigator.serviceWorker.register(...)` and truncated JS at an inner `encodeURIComponent(build)` parenthesis, preventing navigation handlers from initializing after reload.
+- Fix `f203b3e`: stop regex-rewriting inline JS/register calls and bump build/cache identity.
 - GitHub Actions run `32044453957` passed app/server syntax, static validation x3, identity/server integration x3, measurement invariant markers and Browser + Service Worker smoke x2.
-- This does not replace real iPhone GPS/microphone validation.
+- Browser/SW validation does not replace real iPhone GPS/microphone validation.
 
-## New main test publication and auth-origin regression — 2026-08-17 evening
-- `main` gained commit `6493bd0384e3e9ef2a9cf0bb1571f6321d79edf9`, **“Publish v34 test build under ty folder”** (2026-08-17 18:36:25Z).
-- This commit adds a **test copy under `ty/`**; it does not mean the root v32.9.1 FIELD application line was replaced or that v34 was promoted as the production/root application.
-- `ty/version.js` identifies the copied test build as **v34.6 DEV / `2026-08-17w-v34-rebuild-swfix`**.
-- After the test publication, a real user test reported **login not working**.
-- Code inspection confirmed `user_identity.js` targets Railway production server `https://v-n-autodyno-production.up.railway.app`, while the backend CORS contract allows the GitHub Pages origin `https://anttivanttinen-max.github.io` for user/admin requests.
-- The test-launch approach had used a different/CDN origin in the v34 test path, so browser CORS could block auth requests before actual activation/session logic reached Railway. Treat this as a **test-host/origin integration regression**, not proof that the underlying user registry/token logic itself is broken.
-- Required follow-up: ensure the test app executes under the allowed GitHub Pages origin (or deliberately update the backend CORS contract), then perform a real end-to-end owner/session/activation test against Railway. Do not declare login fixed based only on UI/static/browser smoke tests.
-- A separate UI field report also noted an **alavalikko/submenu overlapping the notification/status area**.
-- No new RAW measurement finding was identified in this archive interval.
+## 2026-08-17 test publication and auth-origin regression
+- `main` gained commit `6493bd0384e3e9ef2a9cf0bb1571f6321d79edf9`, publishing a v34 test copy under `ty/`; it did not promote v34 to root at that time.
+- `ty/version.js` identified v34.6 DEV / `2026-08-17w-v34-rebuild-swfix`.
+- Real test report: login did not work.
+- `user_identity.js` targeted Railway production while backend CORS allowed GitHub Pages origin. A different/CDN test origin could therefore block auth before Railway activation/session logic.
+- Treat this as a test-host/origin integration regression, not proof that registry/token logic itself was broken.
+- Required recovery was to run under the allowed GitHub Pages origin or deliberately change backend CORS, then validate owner/session/activation end-to-end against Railway.
+- A separate phone UI report identified KÄYTTÄJÄ submenu overlap with notification/status area.
 
-## v34 submenu/notification overlap fix — recovered handoff detail
-- The `dev/v34-rebuild` branch advanced two commits beyond the earlier archived validated point: `cd244ecad4902229d0c4d17a3460e3ab2e1e7d5e` (**“Keep user submenu below notification/status area”**) and `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0` (**“Assert submenu clears notification area”**).
-- `cd244eca` updates `beta_menu.js` from `motolab-beta-menu-v3` to `motolab-beta-menu-v4`, gives the user submenu safe-area-aware top padding and bounded `100dvh` height, and raises toast z-index so the notification/status layer remains above the submenu without redesigning the approved appearance.
-- `ae6f100` extends `scripts/browser_smoke.js` for the 390×844 phone viewport and fails if the user submenu top is below the required clearance (`menuBox.y < 88`). This converts the overlap bug into an explicit browser regression assertion.
-- Current inspected `dev/v34-rebuild` HEAD is `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0`. No separate combined commit status was published for this HEAD, so the code/test changes are archived but should not be described as CI-validated unless a later green run confirms them.
-- This resolves the known overlap in the development branch at code/test level; actual-phone viewport validation remains desirable, and it does not resolve the separate Railway login/auth-origin issue.
+## v34 submenu/notification overlap fix
+- `cd244ecad4902229d0c4d17a3460e3ab2e1e7d5e` changed `beta_menu.js` to `motolab-beta-menu-v4`, added safe-area-aware top clearance, bounded menu height with `100dvh`, and kept toast/status layering above the menu without redesigning the approved UI.
+- `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0` extended 390×844 browser smoke and fails if submenu clearance is violated (`menuBox.y < 88`).
+- This converted the overlap report into an explicit regression assertion; actual-phone viewport validation remained desirable.
 
 ## 2026-08-18 repository cleanup and v34.7 BETA handoff
-- Before this archive update, `main/HEAD` was inspected at `0ac6230584d210d2c61c9f178c38e5b2c103e3e1`. Root `version.js` still identifies the published field line as **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**; the cleanup commits above it do not promote v34.
-- `main` cleanup removed the obsolete duplicate `ty/` tester copy, obsolete one-off patch workflows and old v31 patch/zip artifacts. These are repository-maintenance changes, not a new measurement/application build.
-- `dev/v34-rebuild` has advanced beyond the earlier v34.6 handoff. Its current inspected release identity is **v34.7 BETA / build `2026-08-18b-splash-run-analysis`**.
-- v34.7 fixes the bike/profile selector so choosing a bike immediately updates and persists the active profile.
-- Analysis now has explicit **Run A / Run B** selectors for comparing two different stored runs. The comparison covers measured power/torque together with recorded tuning/setup differences.
+- Cleanup removed obsolete duplicate `ty/` tester copy, obsolete one-off patch workflows and old v31 patch/zip artifacts. These were repository-maintenance changes, not a measurement build.
+- `dev/v34-rebuild` advanced to **v34.7 BETA / build `2026-08-18b-splash-run-analysis`**.
+- v34.7 fixed bike/profile selection so the selected bike immediately updates and persists as active profile.
+- Analysis added explicit **Run A / Run B** selectors for comparing two stored runs, including measured power/torque and recorded tuning/setup differences.
 - Run tuning/setup metadata may be completed or corrected after a run. Post-run edits must never rewrite `run.data`, RAW/source-specific samples or learning data; edited metadata is marked with post-run origin/timestamp information.
-- A/B comparison warns when bike profile, gear, quality or setup signatures make the runs insufficiently comparable and must not claim tuning causation from weak/non-comparable pairs.
-- The approved splash/login/guest handoff from the latest v34 rebuild is retained. Production/fallback shells are intended to run under the allowed GitHub Pages origin, avoiding the earlier CDN-origin auth/CORS failure mode.
-- v34.7 adds/extends browser validation around splash/login handoff, actual bike-profile selection, A/B analysis and post-run metadata persistence without measurement-data mutation. A full UI-walk script is also present for exercising buttons, menus and key flows.
-- Promotion gate remains: static validation, identity/server tests, measurement invariants and Chromium + Service Worker smoke must pass before any `main` promotion. Do not infer a green v34.7 promotion gate unless an explicit later CI result confirms it.
-- Real iPhone GPS/MIC/IMU routing still requires a physical-device check; browser automation cannot validate hardware routing.
-- No new RAW measurement result was established by these v34.7 UI/analysis changes; RPM-learning validation and replay of historical sweep/ZIP/test datasets remain separate research work.
+- A/B comparison warns when bike profile, gear, quality or setup signatures make runs insufficiently comparable and must not claim tuning causation from weak/non-comparable pairs.
+- v34.7 browser coverage added splash/login handoff, real profile selection, A/B analysis, post-run metadata persistence and a full UI walk.
+- No new RAW measurement result was established by these UI/analysis changes.
+
+## v34.8 BETA finalization and promotion — 2026-08-18
+- v34.8 final identity is **v34.8 BETA / build `2026-08-18c-final-ui-gear-auth`**.
+- Approved splash is part of startup on both first uncontrolled load and Service Worker-controlled reloads. The splash uses local `assets/motorlab_splash_approved.webp`, a minimum display time, centered safe login card and guest fallback.
+- First uncontrolled load can bootstrap `user_identity.js` before Service Worker control, allowing owner/session lookup to begin behind the splash instead of waiting for the first SW reload.
+- Owner/admin device-session recovery remains wired through `owner_device_session_server.js` and loaded by beta auth.
+- User menu remains the home for Feedback & Messages, community, shared runs, Tester Merit, LIVE and invites; legacy floating feedback/admin-feedback buttons are suppressed.
+- v34.8 includes the centered safe-area gear-suspicion confirmation flow, associated gear metadata handling and the phone candidate bridge covered by the final browser regressions.
+- Final validated commit before promotion: `21c396cbb0a55bc33ea65f85db2c9b53bf4fced1`.
+- GitHub Actions run `32111288808` completed successfully: application JS syntax, server/validation-script syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, Browser + Service Worker smoke x2 and Full user UI walk all passed.
+- Browser regression coverage includes first-load splash, splash/login safe area, Run A/B comparison, post-run metadata persistence, gear metadata editing without measurement-data mutation, centered gear confirmation colors/confirmation, phone candidate bridge, user-menu feedback placement, profile selection, LIVE navigation and main-menu runtime behavior.
+- Commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` explicitly **promoted v34.8 BETA to root `main` while preserving project-memory files**.
+- Current root `version.js` on `main` therefore identifies v34.8 BETA / `2026-08-18c-final-ui-gear-auth`; v32.9.1 is no longer the active root release line.
+- This promotion does not by itself prove physical iPhone GPS/MIC/IMU routing; hardware validation remains separate.
+
+## VäNä owner/admin recovery after v34.8 promotion
+- After the v34.8 promotion, `main` added a **one-time VäNä owner bootstrap** for admin recovery.
+- Commit `167341692750b597ef99f691348aa42016303cc4` added `raw_sync_server/owner_bootstrap_server.js` with a hash-gated one-time activation path. A successful claim creates/restores nickname `VäNä`, sets `status=active` and `role=admin`, binds the claiming device, records owner-claim metadata, marks the bootstrap consumed and issues a signed one-year device token.
+- Safety properties in that implementation: bootstrap refuses after consumption, refuses when an admin already exists, requires configured `BETA_TOKEN_SECRET`, requires a deviceId, and ordinary nickname `VäNä` alone does not grant admin rights.
+- Commit `9af0fcd900ca354c58e8d75eb3016b6165220a1e` explicitly loads the owner bootstrap through `beta_auth_server.js` while preserving the existing owner-device-session layer.
+- Commit `a9551311c2b658c1a162cd7ab5a8ff1679fffc92` added `/api/users/v1/owner-bootstrap-status`, exposing only readiness state (`armed`, `consumed`, `adminExists`) for operational recovery checks.
+- Commit `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded` changed the bootstrap hash to the current short one-time VäNä owner bootstrap code. **The plaintext recovery code must not be archived here or exposed in project memory.**
+- Current inspected `main/HEAD` before this documentation update was `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded`.
+- Remaining field check: confirm Railway is running the matching server commit/configuration, confirm bootstrap readiness/consumption state through the status endpoint as appropriate, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
@@ -130,18 +145,18 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Keep the root v32.9.1 FIELD line stable while v34 is validated separately.
-- Preserve the locked v34 appearance; fix only functional regressions unless design is explicitly reopened.
-- Validate the v34.7 profile selector, Run A/B comparison and post-run metadata editing through browser regression tests and an actual-phone UI pass.
-- Confirm post-run edits never mutate `run.data`, RAW/source samples or learning records and that comparison warnings prevent unsupported tuning-causation claims.
-- Complete the v34.7 promotion gate (static, identity/server, measurement invariants, Chromium + Service Worker smoke) before any promotion.
-- Re-check submenu/notification layering and splash/login handoff on the actual phone viewport.
-- Real-device validate v34 GPS/microphone/IMU behavior before any production promotion.
-- Real-device validate v32.8 microphone stability, v32.9/LIVE behavior and v32.7 diagnostics persistence/replay.
+- Treat root `main` as **v34.8 BETA / `2026-08-18c-final-ui-gear-auth`** unless a newer checked `version.js` says otherwise.
+- Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
+- Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin.
+- Confirm one-time owner-bootstrap recovery works only as intended and that the resulting VäNä admin/device session persists across normal updates; never add a universal hidden admin backdoor.
+- Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
+- Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
+- Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
+- Validate LIVE telemetry and v32.7 diagnostics persistence/replay without measurement-performance regression.
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- Before any eventual v34 promotion, re-check current `main`, release/cache identity, measurement invariants and require explicit promotion/install approval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
