@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <NimBLEDevice.h>
+#include <BLEDevice.h>
 #include <Preferences.h>
 
 static constexpr uint8_t PULSE_PIN = 4;
@@ -13,7 +13,7 @@ static constexpr uint32_t ENGINE_OFF_US = 1500000;
 static constexpr float MAX_STEP_FRACTION = 0.55f;
 
 Preferences prefs;
-NimBLECharacteristic *telemetryChar = nullptr;
+BLECharacteristic *telemetryChar = nullptr;
 volatile uint32_t irqLastUs = 0;
 volatile uint32_t irqPeriodUs = 0;
 volatile uint32_t irqAccepted = 0;
@@ -43,18 +43,23 @@ static_assert(sizeof(TelemetryV1) == 36, "protocol size mismatch");
 void IRAM_ATTR onPulse() {
   const uint32_t now = micros();
   const uint32_t period = now - irqLastUs;
-  if (irqLastUs && period < MIN_PERIOD_US) { irqNoise++; return; }
+  if (irqLastUs && period < MIN_PERIOD_US) {
+    const uint32_t nextNoise = irqNoise + 1;
+    irqNoise = nextNoise;
+    return;
+  }
   irqLastUs = now;
   if (period) irqPeriodUs = period;
-  irqAccepted++;
+  const uint32_t nextAccepted = irqAccepted + 1;
+  irqAccepted = nextAccepted;
 }
 
 static uint16_t sat16(uint32_t v) { return v > 65535 ? 65535 : (uint16_t)v; }
 
-class ConfigCallbacks : public NimBLECharacteristicCallbacks {
-  void onWrite(NimBLECharacteristic *c, NimBLEConnInfo &) override {
-    std::string s = c->getValue();
-    if (s.rfind("PPR=", 0) == 0) {
+class ConfigCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *c) override {
+    String s = c->getValue();
+    if (s.startsWith("PPR=")) {
       float v = strtof(s.c_str() + 4, nullptr);
       if (isfinite(v) && v >= 0.1f && v <= 8.0f) {
         pulsesPerRev = v; prefs.putFloat("ppr", v);
@@ -76,17 +81,16 @@ void setup() {
   resetCounter = (rr == ESP_RST_POWERON) ? 0 : 1;
   attachInterrupt(digitalPinToInterrupt(PULSE_PIN), onPulse, RISING);
 
-  NimBLEDevice::init(DEVICE_NAME);
-  NimBLEDevice::setPower(ESP_PWR_LVL_P3);
-  NimBLEServer *server = NimBLEDevice::createServer();
-  NimBLEService *service = server->createService(SERVICE_UUID);
-  telemetryChar = service->createCharacteristic(TELEMETRY_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
-  NimBLECharacteristic *cfg = service->createCharacteristic(CONFIG_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
+  BLEDevice::init(DEVICE_NAME);
+  BLEServer *server = BLEDevice::createServer();
+  BLEService *service = server->createService(SERVICE_UUID);
+  telemetryChar = service->createCharacteristic(TELEMETRY_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+  BLECharacteristic *cfg = service->createCharacteristic(CONFIG_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
   cfg->setCallbacks(new ConfigCallbacks()); cfg->setValue("PPR=1.000");
-  NimBLECharacteristic *info = service->createCharacteristic(INFO_UUID, NIMBLE_PROPERTY::READ);
+  BLECharacteristic *info = service->createCharacteristic(INFO_UUID, BLECharacteristic::PROPERTY_READ);
   info->setValue("{\"fw\":\"1.0.0\",\"board\":\"ESP32-S3-N16R8\",\"protocol\":1,\"pulsePin\":4}");
   service->start();
-  NimBLEAdvertising *adv = NimBLEDevice::getAdvertising();
+  BLEAdvertising *adv = BLEDevice::getAdvertising();
   adv->addServiceUUID(SERVICE_UUID); adv->setName(DEVICE_NAME); adv->start();
 }
 
