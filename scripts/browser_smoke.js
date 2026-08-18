@@ -49,7 +49,6 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   for(const x of ['SUORITUSKYKY','KAASUTTIMEN SÄÄTÖ','SUUTIN-EHDOTUS','SYTYTYS']) if(!analysisText.includes(x)) fail('Missing analysis item '+x);
   await analysis.nth(3).click();
   if(!/tarkoituksella pois käytöstä/i.test(await page.locator('#analysisText').textContent()||'')) fail('Ignition beta guard message missing');
-
   await page.evaluate(()=>{
     const p=getCurrentProfile();
     const pts=(gain=1)=>[3000,4000,5000,6000,7000,8000].map((rpm,i)=>({rpm,hp:(5+i*2)*gain,nm:(8+i)*gain,kmh:30+i*8}));
@@ -69,7 +68,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   await page.fill('#mlMetaIgnMap','A2');await page.fill('#mlMetaNotes','smoke post-run metadata');await page.click('#mlMetaSave');await sleep(250);
   const edited=await page.evaluate(()=>{const r=runs.find(x=>x.id==='smoke-a');return {map:r?.tuning?.ignitionMap,flag:r?.tuning?.metadataEditedAfterRun,data:r?.data?.length}});
   if(edited.map!=='A2'||edited.flag!==true||edited.data!==6) fail('Run metadata edit failed or measurement data changed: '+JSON.stringify(edited));
-
+  if(await page.locator('#runModal.show').count()) await page.click('#closeRun');
   await nav('settings');
   const accordions=page.locator('#screen-settings .panel.ml-accordion:not(.ml-hidden-user)');
   if(await accordions.count()<3) fail('Too few user settings accordions');
@@ -80,7 +79,6 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const before=getProfiles();const original=before[0]?.id;newProfile();const added=getCurrentProfile().id;const sel=document.getElementById('profileSelect');sel.value=original;sel.dispatchEvent(new Event('change',{bubbles:true}));return {original,added,current:getCurrentProfile().id,stored:localStorage.getItem('motolab_v26_profile')};
   });
   if(!profileResult.original || profileResult.current!==profileResult.original || profileResult.stored!==profileResult.original) fail('Bike/profile selection regression: '+JSON.stringify(profileResult));
-
   const userNav=page.locator('.bottomNav .ml-user-nav');
   if(!await userNav.count()) fail('User nav missing');
   await userNav.click();await page.waitForSelector('.mlbm-card',{timeout:5000});
