@@ -69,10 +69,10 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Finland vehicle database v2 and beta-auth RAW sync were already present.
 - This line is now historical: `main` was later explicitly promoted to v34.8 BETA.
 
-## v34 development and locked appearance
+## v34 development and visual/navigation baseline
 - Older `release/v34.0-2026-08-17` points to `58d270274b979847fd760f7681818d9e7034b2ec` / build `2026-08-17o-rebuild-ui-i18n`.
 - User-approved v34 direction includes rebuilt UI/navigation, user identity/cloud work, language support and agreed v34 systems.
-- User decision: the completed visual appearance is **finished and locked as the approved visual baseline**. Functional work should preserve it unless UI design is explicitly reopened.
+- The overall completed v34 visual style remains the approved baseline, but later user review found that the implemented menu/navigation hierarchy did not match the agreed reference. Menu/navigation is therefore explicitly reopened for correction against the recovered approved mockup; this is a specification repair, not a new redesign exercise.
 - Install/deploy/merge actions require explicit approval; this memory job itself never performs application promotion or deployment.
 
 ## v34.6 DEV browser/Service Worker validation
@@ -188,9 +188,19 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - `d8e8e8fcbca6da00e69b4362d47a4a77d4b6e3aa` wires `user_raw_server.js` into the production beta-auth server stack, so the authenticated user RAW endpoint is actually loaded by that server path.
 - `fb4628bd85e501d0f4bf603b815f3604342411a1` changes `raw_sync.js` to `v34-user-raw-auto-sync-1`: when an active signed-in user exists, queued local RAW chunks are automatically sent to the authenticated user endpoint with the normal beta token; the existing manual endpoint/ingest-key path remains the fallback when automatic signed-in user sync is not available.
 - The user-requested new-user alert is now implemented. `14a1d509609f1f6d3d617337d668a3916c8da952` adds `admin_pending_notify.js`: active admins poll `/api/admin/v1/users` every 30 seconds, identify non-admin `pending` users, show an in-app approval banner, track already-seen userIds locally, and optionally issue a system/PWA notification after notification permission is granted.
-- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` loads the notification module in the Service Worker and adds notification-click handling that focuses/opens the app with `?adminUsers=1`, leading to the approval screen. `399784c6783a05f67d7e4df8cc2270ea042000f` advances the release to **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**.
+- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` loads the notification module in the Service Worker and adds notification-click handling that focuses/opens the app with `?adminUsers=1`, leading to the approval screen. `399784c6783a05f67d7a08dbf945a776ca3b6e91` advances the release to **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**.
 - Notification payloads contain approval-facing nickname/count information only; passwords, beta tokens and owner recovery secrets must remain excluded.
 - These changes are auth/storage/sync/account-notification infrastructure only. They establish no new RPM/RAW measurement accuracy result and do not change GPS MASTER, microphone authority, run acceptance, gear learning or dyno algorithms.
+
+## Production confirmation and approved menu baseline correction — 2026-08-18
+- Before this documentation update, application/server `main` handoff was `960bd80f1dad6e8e0418e804a337a642bbedb790` (`Sync admin notifications and automatic user RAW upload`). GitHub/Railway commit status for that HEAD was **success**, superseding the earlier failed deployment tied to `399784c6783a05f67d7a08dbf945a776ca3b6e91`.
+- The production-success status confirms that the repository handoff deployed; it does **not** prove all real-device functional checks, sensor routing, auth edge cases or notification behavior.
+- User review then found that the current MotoLab menus were **not at all the menus that had been agreed**. The mismatch is now a known UI/navigation bug/specification regression.
+- The previously generated reference image was recovered from the user's file library as `MotoLab-sovelluksen käyttöliittymäesittely.png`. It contains the explicit section **“VALIKOT (AVATAAN YKSI KERRALLAAN)”** and is now the binding menu/navigation master rather than a loose visual reference.
+- The approved top-level hierarchy shown in that master is **Koti, Vedot, Pyörä / Profiili, Vertaa, Opi, Asetukset**, with their defined submenus and one-menu-at-a-time behavior.
+- Future menu work must compare current v34.8 screen-by-screen against that image and follow its order, grouping, visibility and submenu placement literally. Existing features should be moved under their agreed menu rather than discarded merely because their current placement is wrong.
+- Developer/diagnostic functionality should remain out of the ordinary-user surface unless the approved menu master explicitly exposes it; deep technical state remains primarily under LIVE where applicable.
+- No application code was changed by this archive job. Remaining work is to prepare the menu correction against the master, preview/verify it screen-by-screen, and only then perform any application change under the normal explicit-approval rule.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
@@ -208,9 +218,10 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise.
-- Current application/server handoff before this documentation update is `fb4628bd85e501d0f4bf603b815f3604342411a1`.
-- Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
+- Treat root application line as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise.
+- Current application/server handoff before this documentation update is `960bd80f1dad6e8e0418e804a337a642bbedb790`; later documentation-only commits do not change the deployed application identity.
+- Preserve the approved v34 visual style, but correct menu/navigation against `MotoLab-sovelluksen käyttöliittymäesittely.png`; do not treat the current menu hierarchy as accepted.
+- Audit current menus screen-by-screen against the approved master: **Koti / Vedot / Pyörä-Profiili / Vertaa / Opi / Asetukset**, their approved submenus and one-menu-at-a-time behavior.
 - Confirm the GitHub Pages → Railway user/owner/password/self-registration auth path end-to-end on the actual deployed origin.
 - Validate self-registration → `pending` → admin approval → active login end-to-end and verify duplicate nickname/device and rate-limit behavior does not strand legitimate users.
 - Validate new-user notifications on the installed admin device: permission prompt behavior, in-app banner, 30-second polling, seen-user de-duplication, background/system notification where supported, notification tap/deep-link into approvals, and no credential/secret leakage.
@@ -228,7 +239,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync/menu-baseline interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
