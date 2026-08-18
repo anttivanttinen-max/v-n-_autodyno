@@ -1,9 +1,6 @@
 'use strict';
 
 // Normalize the configured browser origin before loading modules that read it.
-// Railway variables are sometimes entered with a trailing slash or the full
-// GitHub Pages app path. CORS compares only the URL origin, so normalize it
-// once here and make every auth/user module see the same canonical value.
 const CANONICAL_PAGES_ORIGIN='https://anttivanttinen-max.github.io';
 const configuredOrigin=String(process.env.ALLOWED_ORIGIN||CANONICAL_PAGES_ORIGIN).trim();
 try{process.env.ALLOWED_ORIGIN=new URL(configuredOrigin).origin}catch{process.env.ALLOWED_ORIGIN=CANONICAL_PAGES_ORIGIN}
@@ -11,6 +8,7 @@ try{process.env.ALLOWED_ORIGIN=new URL(configuredOrigin).origin}catch{process.en
 require('./feedback_server');
 require('./owner_bootstrap_server');
 require('./user_server');
+require('./user_raw_server');
 require('./password_auth_server');
 require('./owner_device_session_server');
 const http=require('http');
@@ -51,4 +49,4 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  }
  return listener(req,res)
 })};
-console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; password-auth=enabled; owner-bootstrap=first; owner-device-session=enabled; origin=${ALLOWED_ORIGIN}`);
+console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; user-raw=enabled; password-auth=enabled; owner-bootstrap=first; owner-device-session=enabled; origin=${ALLOWED_ORIGIN}`);
