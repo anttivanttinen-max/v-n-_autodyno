@@ -29,7 +29,10 @@ Updated: 2026-08-18
 - `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`: allows one separate post-bootstrap owner recovery when the original bootstrap is already consumed and an admin already exists. Recovery rebinds/adds the requesting device to the existing admin, refreshes VäNä active/admin state and issues a new signed one-year device token.
 - The post-bootstrap recovery is itself one-time. It records `ownerBootstrapRecoveryConsumedAt` and the recovery device, and later attempts are refused. `/api/users/v1/owner-bootstrap-status` now also reports readiness-only `recoveryUsed`.
 - Bootstrap safety remains state-bound: ordinary nickname `VäNä` never grants admin rights; initial bootstrap still requires the configured secret and a deviceId; the recovery path does not create a repeatable or universal hidden admin backdoor.
-- Current operational follow-up: verify the matching `df6e074…` server code/config is actually deployed on Railway, inspect bootstrap/recovery status when needed, use recovery only if genuinely required, and verify the resulting owner/device session persists across normal PWA updates.
+- Real phone regression found after this work: `user_identity.js` could erase `motolab_v32_beta_token` immediately on `/api/users/v1/me` HTTP 401 before confirming that owner-device recovery succeeded, leaving the owner logged out if recovery also failed.
+- `c47de47eb67a00a131e6eea5f829a9879ba62ccb` fixes that path in `motorlab-user-identity-v10-session-safe`: 401 no longer deletes the saved token before recovery, owner-device restoration can be retried deliberately, and a replacement token is stored only after a successful server recovery response.
+- The `c47de47e…` change is auth/session-only; it does not alter measurement, RPM, RAW, run acceptance, gear learning or dyno logic.
+- Current operational follow-up: verify Railway owner/session endpoints remain deployed/configured correctly and validate on the actual iPhone/PWA that normal updates preserve the owner session, same-device 401 recovery succeeds when appropriate, and failed recovery does not silently erase the locally retained token/state.
 - Do not add or accept a universal hidden admin backdoor.
 
 ## v34.7 profile / analysis / post-run metadata work retained in v34.8
@@ -138,7 +141,8 @@ Updated: 2026-08-18
 ## Current validation priorities / unfinished work
 - Confirm root `main` v34.8 on the actual iPhone: GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
 - Confirm GitHub Pages → Railway user/owner auth end-to-end on the production origin.
-- Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly, then verify owner/admin session persistence across normal PWA updates.
+- Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly.
+- Validate the `c47de47e…` session-safe auth path on the real iPhone/PWA: normal reload/update persistence, same-device owner recovery after a genuine 401, and preservation of local token/state when recovery cannot complete.
 - Validate v32.8 microphone-stability behavior on real hardware.
 - Validate v32.7 persistent diagnostics: abrupt termination, `previous_session_unclean`, queue/error persistence and RAW replay.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
@@ -146,7 +150,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -161,4 +165,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
