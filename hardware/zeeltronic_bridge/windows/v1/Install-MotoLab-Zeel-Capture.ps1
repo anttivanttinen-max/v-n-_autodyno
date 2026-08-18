@@ -1,0 +1,6 @@
+param([string]$InstallDir="$env:LOCALAPPDATA\MotoLab\ZeelCapture",[switch]$NoShortcut)
+$ErrorActionPreference='Stop';$src=Split-Path -Parent$MyInvocation.MyCommand.Path;New-Item -ItemType Directory -Force$InstallDir|Out-Null;foreach($n in'MotoLab-Zeel-Capture.ps1','Analyze-ZeelCapture.ps1','README.md'){if(Test-Path(Join-Path$src$n)){Copy-Item(Join-Path$src$n)$InstallDir -Force}}
+$cmd=Join-Path$InstallDir'Start-MotoLab-Zeel-Capture.cmd';'@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\MotoLab\ZeelCapture\MotoLab-Zeel-Capture.ps1"'|Set-Content -Encoding ASCII$cmd
+if(-not$NoShortcut){$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut((Join-Path([Environment]::GetFolderPath('Desktop'))'MotoLab Zeel Capture.lnk'));$s.TargetPath=$cmd;$s.WorkingDirectory=$InstallDir;$s.Description='MotoLab Zeel Capture';$s.Save()}
+New-Item -ItemType Directory -Force"$env:USERPROFILE\Documents\MotoLab\ZeelCapture"|Out-Null
+Write-Host"Asennettu: $InstallDir";Write-Host'Data: Documents\MotoLab\ZeelCapture';Write-Host'READ-ONLY toimii ilman lisäajuria. ZeelProg proxy vaatii erillisen virtuaali-COM-parin kernel-ajurin.'
