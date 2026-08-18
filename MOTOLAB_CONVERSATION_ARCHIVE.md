@@ -133,6 +133,16 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Current inspected `main/HEAD` before this documentation update was `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`.
 - Remaining field check: confirm Railway is running the matching server commit/configuration, verify status including `recoveryUsed`, exercise recovery only if genuinely required, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
 
+## 2026-08-18 session-token loss regression and fix
+- Real phone report after the owner/session work: the app lost the saved login state and ejected the owner/admin user.
+- Root cause in `user_identity.js`: when `/api/users/v1/me` returned HTTP 401, `refresh()` immediately removed `motolab_v32_beta_token` from `localStorage` **before** proving that owner-device recovery could succeed. A transient/stale auth failure could therefore destroy the last locally retained session credential and leave the user logged out when recovery also failed.
+- Commit `c47de47eb67a00a131e6eea5f829a9879ba62ccb` changes identity module version to `motorlab-user-identity-v10-session-safe` and makes the 401 path non-destructive: it no longer deletes the saved token before recovery.
+- The same commit lets owner-device restoration be retried deliberately (`restoreOwnerDevice(true)`) instead of being permanently blocked by an earlier failed one-shot attempt in the same page lifetime.
+- Successful owner-device recovery still replaces the local token only after the server has actually returned a new valid token; failed recovery leaves the prior local token intact for diagnostics/retry instead of erasing it.
+- This is an auth/session persistence fix only; it did not alter measurement, RPM, RAW, run acceptance, gear learning or dyno logic.
+- Current inspected `main/HEAD` after this fix is `c47de47eb67a00a131e6eea5f829a9879ba62ccb`.
+- Required field validation: on the real iPhone/PWA, verify an existing owner/admin session survives normal reload/update, verify a deliberately invalid/401 session can recover on the same bound device, and verify failed recovery does not silently erase the locally retained token or user state.
+
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
 - Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
@@ -152,6 +162,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
 - Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin.
 - Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
+- Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
 - Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
@@ -159,7 +170,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
