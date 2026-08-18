@@ -12,7 +12,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,6 +25,7 @@ jobs:
           find raw_sync_server -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
           node --check scripts/validate_v34_rebuild.js
           node --check scripts/browser_smoke.js
+          node --check scripts/full_ui_walk.js
       - name: Static rebuild validation x3
         run: |
           node scripts/validate_v34_rebuild.js
@@ -59,6 +60,10 @@ jobs:
         run: |
           node scripts/browser_smoke.js
           node scripts/browser_smoke.js
+      - name: Full user UI walk
+        env:
+          MOTOLAB_SMOKE_URL: http://127.0.0.1:8080/
+        run: node scripts/full_ui_walk.js
       - name: Publish successful validation status
         if: success()
         env:
