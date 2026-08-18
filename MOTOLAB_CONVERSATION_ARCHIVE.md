@@ -1,6 +1,6 @@
 # VÄNÄ MotoLab — conversation archive and durable project memory
 
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 ## Purpose and archiving rule
 This file is the durable GitHub memory for MotoLab development conversations. Important decisions, test results, constraints, implementation notes, unfinished work, data-analysis findings and cross-thread handoff notes must be retained here so they are not lost when a chat ends.
@@ -101,6 +101,20 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Current inspected `dev/v34-rebuild` HEAD is `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0`. No separate combined commit status was published for this HEAD, so the code/test changes are archived but should not be described as CI-validated unless a later green run confirms them.
 - This resolves the known overlap in the development branch at code/test level; actual-phone viewport validation remains desirable, and it does not resolve the separate Railway login/auth-origin issue.
 
+## 2026-08-18 repository cleanup and v34.7 BETA handoff
+- Before this archive update, `main/HEAD` was inspected at `0ac6230584d210d2c61c9f178c38e5b2c103e3e1`. Root `version.js` still identifies the published field line as **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**; the cleanup commits above it do not promote v34.
+- `main` cleanup removed the obsolete duplicate `ty/` tester copy, obsolete one-off patch workflows and old v31 patch/zip artifacts. These are repository-maintenance changes, not a new measurement/application build.
+- `dev/v34-rebuild` has advanced beyond the earlier v34.6 handoff. Its current inspected release identity is **v34.7 BETA / build `2026-08-18b-splash-run-analysis`**.
+- v34.7 fixes the bike/profile selector so choosing a bike immediately updates and persists the active profile.
+- Analysis now has explicit **Run A / Run B** selectors for comparing two different stored runs. The comparison covers measured power/torque together with recorded tuning/setup differences.
+- Run tuning/setup metadata may be completed or corrected after a run. Post-run edits must never rewrite `run.data`, RAW/source-specific samples or learning data; edited metadata is marked with post-run origin/timestamp information.
+- A/B comparison warns when bike profile, gear, quality or setup signatures make the runs insufficiently comparable and must not claim tuning causation from weak/non-comparable pairs.
+- The approved splash/login/guest handoff from the latest v34 rebuild is retained. Production/fallback shells are intended to run under the allowed GitHub Pages origin, avoiding the earlier CDN-origin auth/CORS failure mode.
+- v34.7 adds/extends browser validation around splash/login handoff, actual bike-profile selection, A/B analysis and post-run metadata persistence without measurement-data mutation. A full UI-walk script is also present for exercising buttons, menus and key flows.
+- Promotion gate remains: static validation, identity/server tests, measurement invariants and Chromium + Service Worker smoke must pass before any `main` promotion. Do not infer a green v34.7 promotion gate unless an explicit later CI result confirms it.
+- Real iPhone GPS/MIC/IMU routing still requires a physical-device check; browser automation cannot validate hardware routing.
+- No new RAW measurement result was established by these v34.7 UI/analysis changes; RPM-learning validation and replay of historical sweep/ZIP/test datasets remain separate research work.
+
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
 - Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
@@ -118,11 +132,14 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 ## Current implementation direction / unfinished validation
 - Keep the root v32.9.1 FIELD line stable while v34 is validated separately.
 - Preserve the locked v34 appearance; fix only functional regressions unless design is explicitly reopened.
-- Resolve and real-device validate v34 test login/auth origin end-to-end against Railway.
-- Re-check submenu/notification layering on the actual phone viewport even though `dev/v34-rebuild` now contains a code fix and browser regression assertion.
-- Real-device validate v34 GPS/microphone behavior before any production promotion.
+- Validate the v34.7 profile selector, Run A/B comparison and post-run metadata editing through browser regression tests and an actual-phone UI pass.
+- Confirm post-run edits never mutate `run.data`, RAW/source samples or learning records and that comparison warnings prevent unsupported tuning-causation claims.
+- Complete the v34.7 promotion gate (static, identity/server, measurement invariants, Chromium + Service Worker smoke) before any promotion.
+- Re-check submenu/notification layering and splash/login handoff on the actual phone viewport.
+- Real-device validate v34 GPS/microphone/IMU behavior before any production promotion.
 - Real-device validate v32.8 microphone stability, v32.9/LIVE behavior and v32.7 diagnostics persistence/replay.
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
+- Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
 - Before any eventual v34 promotion, re-check current `main`, release/cache identity, measurement invariants and require explicit promotion/install approval.
 
