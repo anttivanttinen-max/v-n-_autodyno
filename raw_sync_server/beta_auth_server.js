@@ -1,6 +1,7 @@
 'use strict';
 require('./feedback_server');
 require('./user_server');
+require('./owner_bootstrap_server');
 require('./owner_device_session_server');
 const http=require('http');
 const crypto=require('crypto');
@@ -27,15 +28,11 @@ function send(res,status,obj,origin=''){
 
 http.createServer=function(listener){return originalCreateServer(async(req,res)=>{
  const origin=String(req.headers.origin||'');let u;try{u=new URL(req.url,'http://localhost')}catch{return listener(req,res)}
- // User/admin preflights are owned by user_server so PUT state sync and device identity
- // use exactly the same CORS contract. Other MotoLab API preflights are handled here.
  if(req.method==='OPTIONS'){
   if(u.pathname.startsWith('/api/users/')||u.pathname.startsWith('/api/admin/'))return listener(req,res);
   if(origin&&origin!==ALLOWED_ORIGIN){res.writeHead(403);return res.end()}
   res.writeHead(204,{'Access-Control-Allow-Origin':origin||ALLOWED_ORIGIN,'Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,PUT,HEAD,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Ingest-Key,X-MotoLab-Read-Key,X-MotoLab-Beta-Token','Access-Control-Max-Age':'86400'});return res.end()
  }
- // Activation/validation deliberately fall through to user_server. That implementation
- // supports both dynamic user invites and legacy/static invites and returns v2 device tokens.
  const betaToken=String(req.headers['x-motolab-beta-token']||'');
  if(betaToken){
   const p=verify(betaToken);if(!p)return send(res,401,{ok:false,error:'Invalid beta token'},origin);
@@ -44,4 +41,4 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  }
  return listener(req,res)
 })};
-console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-device-session=enabled`);
+console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-bootstrap=enabled; owner-device-session=enabled`);
