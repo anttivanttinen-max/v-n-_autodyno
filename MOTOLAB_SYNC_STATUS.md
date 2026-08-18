@@ -3,10 +3,10 @@
 Updated: 2026-08-18
 
 ## Current application line
-- Active root line on `main`: **v34.8 BETA / build `2026-08-18e-cache-reset`**.
+- Active root line on `main`: **v34.8 BETA / build `2026-08-18f-password-auth`**.
 - `version.js` is the release-identity source; Service Worker/app shell/cache identity must stay aligned with it.
-- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache maintenance advanced the build identity while retaining the v34.8 BETA release label.
-- Current startup/cache handoff commit before this documentation update: `10e8802774475b3871aa66c7b86f9ea2dc4d68fa`.
+- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth maintenance advanced the build identity while retaining the v34.8 BETA release label.
+- Current application handoff before this documentation update: `aa4914a52aecf753339b4cfc3d4742c93e313287`.
 - The earlier **v32.9.1 FIELD / `2026-08-17u-field-recovery`** line is now historical, not the active root release.
 - The locked approved v34 visual appearance remains the baseline. Functional fixes should preserve it unless UI design is explicitly reopened.
 - This recurring memory job is documentation-only and must not promote, deploy or alter application/server code.
@@ -22,20 +22,32 @@ Updated: 2026-08-18
 - Browser validation does **not** prove physical iPhone GPS/MIC/IMU routing; that remains a separate field gate.
 
 ## v34.8 startup/cache-reset handoff
-- Current root `version.js` keeps release **v34.8 BETA** and advances build identity to **`2026-08-18e-cache-reset`**.
-- Startup now uses local `assets/motolab-start-v34.png`, displayed sharply on black with a release badge derived from `MOTOLAB_RELEASE` rather than stale hard-coded UI text.
+- The earlier startup/cache-reset root identity was **v34.8 BETA / `2026-08-18e-cache-reset`**.
+- Startup uses local `assets/motolab-start-v34.png`, displayed sharply on black with a release badge derived from `MOTOLAB_RELEASE` rather than stale hard-coded UI text.
 - `splash_boot.js` is `motolab-splash-boot-v2`: startup activation pre-fills a pending `?invite=` code from the link/session and tells the user when that invite was detected.
 - `32ec02580ad3264da91eaea10f7119ab65f9c199` rebuilt the Service Worker cache generation: a new cache namespace, current start image in the static set, network-first/reload treatment for JS/JSON/manifest/images, deletion of older MotoLab caches on activation, and an `MOTOLAB_SW_ACTIVE` message to clients.
-- `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligns the release build with `e-cache-reset`, reapplies dynamic release labels/title, registers SW with `updateViaCache: 'none'`, requests update/skip-waiting, and allows one session-scoped reload after the matching worker activates.
+- `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligned the release build with `e-cache-reset`, reapplied dynamic release labels/title, registered SW with `updateViaCache: 'none'`, requested update/skip-waiting, and allowed one session-scoped reload after the matching worker activates.
 - The six commits after the session-safe auth archive touched only startup/PWA assets and logic (`assets/motolab-start-v34.png`, `splash_boot.js`, `sw.js`, `version.js`); no measurement/RPM/RAW/gear-learning/run-acceptance/dyno algorithm file changed in that interval.
-- Real-device gate: verify an installed iPhone/PWA leaves the stale cache, shows the `e-cache-reset` shell and start image, reloads at most once for this build, preserves the session-safe login, and pre-fills invite links correctly.
+- The `e-cache-reset` field gate remains relevant under newer builds: installed iPhone/PWA must leave stale caches, show current shell/start image, reload at most once per build, preserve login and pre-fill invite links correctly.
+
+## v34.8 password authentication handoff
+- Current `version.js` identity is **v34.8 BETA / build `2026-08-18f-password-auth`**; checked application HEAD before this documentation update was `aa4914a52aecf753339b4cfc3d4742c93e313287`.
+- Product decision: every MotoLab user may choose an individual password. Device/session identity remains active in parallel; password auth is an additional login/recovery path, not a replacement for device binding.
+- `raw_sync_server/password_auth_server.js` adds password set/change and nickname + password login. Password storage uses random salt + Node `scrypt` (`scrypt-v1`), never plaintext, with timing-safe verification.
+- Password length is currently 8–128 characters. Setting/changing a password requires a valid linked device session.
+- Successful nickname/password login issues the normal signed device token and may attach a new deviceId to the same user. Blocked users remain denied.
+- `password_login.js` adds password login to startup/account UI, activation with a chosen password, and password change. Normal invite activation remains required for first activation.
+- `beta_auth_server.js` loads the password-auth module, startup can load the password client before splash handoff, and `sw.js` caches/loads `password_login` as part of the application modules.
+- Authentication-only change: no measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change was introduced by this line.
+- Security rule: user passwords and plaintext invite/admin/bootstrap/recovery codes must never be stored in public project-memory files.
+- Real-device/deployment gate: verify Railway is running the matching password-auth server, then test initial activation + password creation, ordinary password login, password change, second/new-device login, blocked-user refusal, PWA update persistence and coexistence with existing owner/device-session recovery.
 
 ## VäNä owner/admin recovery state
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
 - `167341692750b597ef99f691348aa42016303cc4`: adds hash-gated `owner_bootstrap_server.js`. Successful claim creates/restores `VäNä`, sets `status=active`, `role=admin`, binds the claiming device, marks the bootstrap consumed and issues a signed one-year device token.
 - `9af0fcd900ca354c58e8d75eb3016b6165220a1e`: loads owner bootstrap through `beta_auth_server.js` while retaining owner-device-session recovery.
 - `a9551311c2b658c1a162cd7ab5a8ff1679fffc92`: adds `/api/users/v1/owner-bootstrap-status` with readiness-only bootstrap state.
-- `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded`: updates the bootstrap hash to the current short one-time owner code. The plaintext code must not be committed to memory/docs or exposed to users other than through the intended recovery flow.
+- `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded`: updates the bootstrap hash to the current short one-time owner code. The plaintext code must not be committed to memory/docs or exposed outside the intended recovery flow.
 - `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`: allows one separate post-bootstrap owner recovery when the original bootstrap is already consumed and an admin already exists. Recovery rebinds/adds the requesting device to the existing admin, refreshes VäNä active/admin state and issues a new signed one-year device token.
 - The post-bootstrap recovery is itself one-time. It records `ownerBootstrapRecoveryConsumedAt` and the recovery device, and later attempts are refused. `/api/users/v1/owner-bootstrap-status` now also reports readiness-only `recoveryUsed`.
 - Bootstrap safety remains state-bound: ordinary nickname `VäNä` never grants admin rights; initial bootstrap still requires the configured secret and a deviceId; the recovery path does not create a repeatable or universal hidden admin backdoor.
@@ -149,8 +161,9 @@ Updated: 2026-08-18
 - Historical temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded unless a newer verified code change explicitly replaces it.
 
 ## Current validation priorities / unfinished work
-- Confirm root `main` v34.8 / `2026-08-18e-cache-reset` on the actual iPhone: stale-cache removal, startup image/release badge, at-most-one build-scoped refresh, invite prefill, GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
-- Confirm GitHub Pages → Railway user/owner auth end-to-end on the production origin.
+- Confirm root `main` v34.8 / `2026-08-18f-password-auth` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, invite prefill, password-login module, GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
+- Confirm GitHub Pages → Railway user/owner/password auth end-to-end on the production origin.
+- Verify initial invite activation + password creation, nickname/password login, password change, new-device binding and blocked-user refusal on real devices.
 - Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly.
 - Validate the `c47de47e…` session-safe auth path on the real iPhone/PWA: normal reload/update persistence, same-device owner recovery after a genuine 401, and preservation of local token/state when recovery cannot complete.
 - Validate v32.8 microphone-stability behavior on real hardware.
@@ -160,7 +173,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -175,4 +188,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, invite-link prefill, dynamic release identity, stale-cache replacement/one-build reload behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, invite-link prefill, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
