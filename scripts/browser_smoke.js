@@ -68,7 +68,10 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   await page.fill('#mlMetaIgnMap','A2');await page.fill('#mlMetaNotes','smoke post-run metadata');await page.click('#mlMetaSave');await sleep(250);
   const edited=await page.evaluate(()=>{const r=runs.find(x=>x.id==='smoke-a');return {map:r?.tuning?.ignitionMap,flag:r?.tuning?.metadataEditedAfterRun,data:r?.data?.length}});
   if(edited.map!=='A2'||edited.flag!==true||edited.data!==6) fail('Run metadata edit failed or measurement data changed: '+JSON.stringify(edited));
-  if(await page.locator('#runModal.show').count()) await page.click('#closeRun');
+  if(await page.locator('#runModal.show').count()){
+    await page.evaluate(()=>document.getElementById('closeRun')?.click());
+    await page.waitForFunction(()=>!document.getElementById('runModal')?.classList.contains('show'),{timeout:3000});
+  }
   await nav('settings');
   const accordions=page.locator('#screen-settings .panel.ml-accordion:not(.ml-hidden-user)');
   if(await accordions.count()<3) fail('Too few user settings accordions');
