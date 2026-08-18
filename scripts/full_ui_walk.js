@@ -94,12 +94,23 @@ const fail=m=>{throw new Error(m)};
   const profile=await page.evaluate(()=>{const original=getCurrentProfile().id;newProfile();const created=getCurrentProfile().id;const s=document.getElementById('profileSelect');s.value=original;s.dispatchEvent(new Event('change',{bubbles:true}));return {original,created,current:getCurrentProfile().id,stored:localStorage.getItem('motolab_v26_profile')}});
   if(profile.current!==profile.original||profile.stored!==profile.original)fail('profile selection did not persist '+JSON.stringify(profile));tested.push('profile create/select/persist');
   const userNav=page.locator('.bottomNav .ml-user-nav');
+  async function ensureUserMenu(){
+    const card=page.locator('.mlbm-card');
+    if(!await card.isVisible().catch(()=>false)){
+      await userNav.evaluate(el=>el.click());
+      await page.waitForSelector('.mlbm-card',{state:'visible',timeout:5000});
+    }
+  }
   if(await userNav.count()){
-    await userNav.click({force:true});await page.waitForSelector('.mlbm-card',{timeout:5000});
+    await ensureUserMenu();
     const acts=await page.locator('.mlbm-card [data-act]').evaluateAll(es=>es.map(e=>e.getAttribute('data-act')));
     for(const act of acts){
-      if(!act)continue;if(!await page.locator('.mlbm-card').count()){await userNav.click({force:true});await page.waitForSelector('.mlbm-card')}
-      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();if(await b.isVisible().catch(()=>false)){await b.evaluate(el=>el.click());await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays()}
+      if(!act)continue;
+      await ensureUserMenu();
+      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();
+      if(await b.isVisible().catch(()=>false)){
+        await b.evaluate(el=>el.click());await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays();
+      }
     }
   }
   await nav('measure');
