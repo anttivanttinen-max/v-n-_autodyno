@@ -57,7 +57,7 @@ const fail=m=>{throw new Error(m)};
     const n=await locator.count();if(!n)return false;
     const el=locator.first();if(!await el.isVisible().catch(()=>false))return false;
     const before=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
-    try{await el.click({force:true,timeout:4000});await sleep(140)}catch(e){fail('click failed '+label+': '+e.message)}
+    try{await el.scrollIntoViewIfNeeded().catch(()=>{});await el.click({force:true,timeout:4000});await sleep(140)}catch(e){fail('click failed '+label+': '+e.message)}
     const after=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
     tested.push(label+' '+JSON.stringify({before,after}));await assertClean(label);return true;
   }
@@ -65,7 +65,7 @@ const fail=m=>{throw new Error(m)};
     await nav(screen);
     const heads=page.locator(`#screen-${screen} .panel .phead[role="button"],#screen-${screen} .panel.ml-accordion > .phead`);
     for(let i=0;i<await heads.count();i++){
-      const h=heads.nth(i);if(await h.isVisible().catch(()=>false)){await h.click({force:true});await sleep(80);tested.push(`${screen}:accordion:${i}`);await assertClean(`${screen}:accordion:${i}`)}
+      const h=heads.nth(i);if(await h.isVisible().catch(()=>false)){await h.scrollIntoViewIfNeeded().catch(()=>{});await h.click({force:true});await sleep(80);tested.push(`${screen}:accordion:${i}`);await assertClean(`${screen}:accordion:${i}`)}
     }
     const buttons=page.locator(`#screen-${screen} button:visible`);
     const ids=await buttons.evaluateAll(es=>es.map((e,i)=>e.id||e.getAttribute('data-act')||e.getAttribute('data-screen')||e.textContent.trim().slice(0,40)||('button-'+i)));
@@ -80,7 +80,9 @@ const fail=m=>{throw new Error(m)};
   }
   await nav('analysis');
   for(let i=0;i<await page.locator('#mlAnalysisLaunch .ml-analysis-item').count();i++){
-    const x=page.locator('#mlAnalysisLaunch .ml-analysis-item').nth(i);await x.click({force:true});await sleep(120);tested.push('analysis:item:'+i);await assertClean('analysis:item:'+i);
+    const x=page.locator('#mlAnalysisLaunch .ml-analysis-item').nth(i);
+    await x.evaluate(el=>{el.scrollIntoView({block:'center'});el.click()});
+    await sleep(120);tested.push('analysis:item:'+i);await assertClean('analysis:item:'+i);
   }
   await page.selectOption('#mlRunA','walk-a');await page.selectOption('#mlRunB','walk-b');await page.click('#mlCompareAB',{force:true});
   const ab=(await page.locator('#mlABSummary').innerText()).toUpperCase();if(!ab.includes('MITATTU ERO')||!ab.includes('PÄÄSUUTIN'))fail('A/B comparison did not execute');tested.push('analysis:A/B compare');
@@ -97,12 +99,12 @@ const fail=m=>{throw new Error(m)};
     const acts=await page.locator('.mlbm-card [data-act]').evaluateAll(es=>es.map(e=>e.getAttribute('data-act')));
     for(const act of acts){
       if(!act)continue;if(!await page.locator('.mlbm-card').count()){await userNav.click({force:true});await page.waitForSelector('.mlbm-card')}
-      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();if(await b.isVisible().catch(()=>false)){await b.click({force:true});await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays()}
+      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();if(await b.isVisible().catch(()=>false)){await b.evaluate(el=>el.click());await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays()}
     }
   }
   await nav('measure');
   for(const id of ['gpsBtn','imuBtn','extMicBtn','autoBtn','manualBtn','stopBtn']){
-    const b=page.locator('#'+id);if(await b.count()&&await b.isVisible().catch(()=>false)){await b.click({force:true});await sleep(180);tested.push('measure-control:'+id);await assertClean('measure-control:'+id)}
+    const b=page.locator('#'+id);if(await b.count()&&await b.isVisible().catch(()=>false)){await b.evaluate(el=>el.click());await sleep(180);tested.push('measure-control:'+id);await assertClean('measure-control:'+id)}
   }
   const uncaught=errors.filter(x=>!benign(x));if(uncaught.length)fail('uncaught errors:\n'+uncaught.join('\n'));if(tested.length<20)fail('too few UI actions exercised: '+tested.length);
   console.log('V34_FULL_UI_WALK_OK',JSON.stringify({version:release.version,actions:tested.length,errors:errors.length,ab:true,metadata:true,profile:true,menus:true}));
