@@ -123,12 +123,15 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 ## VäNä owner/admin recovery after v34.8 promotion
 - After the v34.8 promotion, `main` added a **one-time VäNä owner bootstrap** for admin recovery.
 - Commit `167341692750b597ef99f691348aa42016303cc4` added `raw_sync_server/owner_bootstrap_server.js` with a hash-gated one-time activation path. A successful claim creates/restores nickname `VäNä`, sets `status=active` and `role=admin`, binds the claiming device, records owner-claim metadata, marks the bootstrap consumed and issues a signed one-year device token.
-- Safety properties in that implementation: bootstrap refuses after consumption, refuses when an admin already exists, requires configured `BETA_TOKEN_SECRET`, requires a deviceId, and ordinary nickname `VäNä` alone does not grant admin rights.
+- Original bootstrap safety: initial bootstrap refuses after consumption, refuses when an admin already exists, requires configured `BETA_TOKEN_SECRET`, requires a deviceId, and ordinary nickname `VäNä` alone does not grant admin rights.
 - Commit `9af0fcd900ca354c58e8d75eb3016b6165220a1e` explicitly loads the owner bootstrap through `beta_auth_server.js` while preserving the existing owner-device-session layer.
-- Commit `a9551311c2b658c1a162cd7ab5a8ff1679fffc92` added `/api/users/v1/owner-bootstrap-status`, exposing only readiness state (`armed`, `consumed`, `adminExists`) for operational recovery checks.
+- Commit `a9551311c2b658c1a162cd7ab5a8ff1679fffc92` added `/api/users/v1/owner-bootstrap-status` for operational recovery checks.
 - Commit `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded` changed the bootstrap hash to the current short one-time VäNä owner bootstrap code. **The plaintext recovery code must not be archived here or exposed in project memory.**
-- Current inspected `main/HEAD` before this documentation update was `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded`.
-- Remaining field check: confirm Railway is running the matching server commit/configuration, confirm bootstrap readiness/consumption state through the status endpoint as appropriate, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
+- Commit `df6e07477ccaf3e2a28c2c9deb82eed627ed660a` adds a separate **single post-bootstrap owner recovery** path for the case where bootstrap is already consumed and an admin exists. It rebinds/adds the claiming device to the existing admin, refreshes VäNä active/admin state, records recovery metadata and issues a new signed one-year device token.
+- That recovery is itself one-time: `ownerBootstrapRecoveryConsumedAt`/device metadata is stored and a second recovery attempt returns an already-used error. The status endpoint now also exposes readiness-only `recoveryUsed` state; it does not expose the recovery secret.
+- This changes the earlier safety wording: a consumed initial bootstrap no longer blocks the one explicitly allowed recovery attempt, but it still does not create a universal or repeatable admin backdoor.
+- Current inspected `main/HEAD` before this documentation update was `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`.
+- Remaining field check: confirm Railway is running the matching server commit/configuration, verify status including `recoveryUsed`, exercise recovery only if genuinely required, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
@@ -148,7 +151,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Treat root `main` as **v34.8 BETA / `2026-08-18c-final-ui-gear-auth`** unless a newer checked `version.js` says otherwise.
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
 - Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin.
-- Confirm one-time owner-bootstrap recovery works only as intended and that the resulting VäNä admin/device session persists across normal updates; never add a universal hidden admin backdoor.
+- Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
 - Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
