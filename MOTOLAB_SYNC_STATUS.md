@@ -155,6 +155,8 @@ Updated: 2026-08-18
 - Beta auth/user identity layers must not gain authority over measurement/RPM calculations.
 
 ## v32 microphone stability and diagnostics retained as regression requirements
+
+RPM-BT hardware V1 is separately defined under `hardware/rpm_bt_sensor/` as a non-contact inductive spark-lead pickup with protected 3.3 V pulse conditioning and ESP32-S3 BLE. Contact vibration/BT microphone is research/fallback only, GPS remains learning authority, and no production integration is authorized.
 - v32.6 introduced fresh-stream recovery through `stopAudio()` + `startAudio()`, bounded ~0.5 s → 1 s → 2 s → 5 s retry, telemetry and manual MIC recovery.
 - Field report showed repeated OFF/ON cycling; root cause was using `MOTOLAB_AUDIO_LAST?.t` as a destructive stale trigger without a reliable producer-backed timestamp.
 - v32.8 `sensor-persistence-v5` removed `audio_frames_stale` as a destructive reconnect reason. Live enabled track on active stream is authoritative; destructive recreation stays for genuinely non-live/ended tracks.

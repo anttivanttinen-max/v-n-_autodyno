@@ -1,4 +1,6 @@
-# RPM sensor v1 — firmware architecture and BLE protocol
+# RPM sensor — superseded dual-channel firmware concept
+
+> The implemented inductive V1 firmware and protocol are in [`hardware/rpm_bt_sensor/`](../../rpm_bt_sensor/FIRMWARE.md). This contact/RAW architecture is retained as an optional future research design, not V1 primary.
 
 ## Runtime architecture
 

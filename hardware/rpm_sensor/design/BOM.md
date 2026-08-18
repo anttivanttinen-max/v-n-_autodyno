@@ -1,4 +1,6 @@
-# RPM sensor v1 — hardware and BOM
+# RPM sensor — superseded contact-first BOM
+
+> Do not purchase from this historical BOM for V1. The exact inductive V1 BOM is [`hardware/rpm_bt_sensor/BOM.md`](../../rpm_bt_sensor/BOM.md). Contact accelerometer/piezo/BT microphone parts below are optional research only.
 
 ## Core node
 

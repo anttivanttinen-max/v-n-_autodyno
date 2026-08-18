@@ -127,114 +127,31 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Commit `9af0fcd900ca354c58e8d75eb3016b6165220a1e` explicitly loads the owner bootstrap through `beta_auth_server.js` while preserving the existing owner-device-session layer.
 - Commit `a9551311c2b658c1a162cd7ab5a8ff1679fffc92` added `/api/users/v1/owner-bootstrap-status` for operational recovery checks.
 - Commit `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded` changed the bootstrap hash to the current short one-time VäNä owner bootstrap code. **The plaintext recovery code must not be archived here or exposed in project memory.**
-- Commit `df6e07477ccaf3e2a28c2c9deb82eed627ed660a` adds a separate **single post-bootstrap owner recovery** path for the case where bootstrap is already consumed and an admin exists. It rebinds/adds the claiming device to the existing admin, refreshes VäNä active/admin state, records recovery metadata and issues a new signed one-year device token.
-- That recovery is itself one-time: `ownerBootstrapRecoveryConsumedAt`/device metadata is stored and a second recovery attempt returns an already-used error. The status endpoint now also exposes readiness-only `recoveryUsed` state; it does not expose the recovery secret.
-- This changes the earlier safety wording: a consumed initial bootstrap no longer blocks the one explicitly allowed recovery attempt, but it still does not create a universal or repeatable admin backdoor.
-- Remaining field check: confirm Railway is running the matching server commit/configuration, verify status including `recoveryUsed`, exercise recovery only if genuinely required, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
+- Commit `df6e07477ccaf3e2a28c2c9deb82eed627ed660a` adds a separate **single post-bootstrap owner recovery** path for the case where bootstrap is already consumed and an admin exists. It rebinds/adds the claiming device to the existing admin, refreshes VäNä active/admin state-��_-�G����ƭy� re-normalizes weights but caps confidence; clipping, prediction and source disagreement impose hard caps.
 
-## 2026-08-18 session-token loss regression and fix
-- Real phone report after the owner/session work: the app lost the saved login state and ejected the owner/admin user.
-- Root cause in `user_identity.js`: when `/api/users/v1/me` returned HTTP 401, `refresh()` immediately removed `motolab_v32_beta_token` from `localStorage` **before** proving that owner-device recovery could succeed. A transient/stale auth failure could therefore destroy the last locally retained session credential and leave the user logged out when recovery also failed.
-- Commit `c47de47eb67a00a131e6eea5f829a9879ba62ccb` changes identity module version to `motorlab-user-identity-v10-session-safe` and makes the 401 path non-destructive: it no longer deletes the saved token before recovery.
-- The same commit lets owner-device restoration be retried deliberately (`restoreOwnerDevice(true)`) instead of being permanently blocked by an earlier failed one-shot attempt in the same page lifetime.
-- Successful owner-device recovery still replaces the local token only after the server has actually returned a new valid token; failed recovery leaves the prior local token intact for diagnostics/retry instead of erasing it.
-- This is an auth/session persistence fix only; it did not alter measurement, RPM, RAW, run acceptance, gear learning or dyno logic.
-- Required field validation: on the real iPhone/PWA, verify an existing owner/admin session survives normal reload/update, verify a deliberately invalid/401 session can recover on the same bound device, and verify failed recovery does not silently erase the locally retained token or user state.
+Suggested caps: prediction <=35, contact-only without verified engine signature <=0 for learning, contact-only verified <=85, inductive-only with unknown pulses/rev <=60. Confidence calibration is later measured with reliability plots; thresholds remain configuration-versioned.
 
-## v34.8 startup image, invite-prefill and cache-reset maintenance — 2026-08-18
-- After the session-safe auth fix, `main` advanced by six startup/PWA commits to `10e8802774475b3871aa66c7b86f9ea2dc4d68fa`.
-- A new local start-screen asset is used from `assets/motolab-start-v34.png`; startup presents it sharply with `object-fit: contain` on black and a release badge sourced dynamically from `MOTOLAB_RELEASE`.
-- `splash_boot.js` advanced to `motolab-splash-boot-v2`: an `?invite=` link or pending session invite now pre-fills the startup activation code and tells the user that the invite was found, instead of requiring manual re-entry.
-- The release remains **v34.8 BETA**, but current `version.js` build identity is **`2026-08-18e-cache-reset`**.
-- `32ec02580ad3264da91eaea10f7119ab65f9c199` rebuilt the Service Worker cache generation: new cache namespace, current start image in static cache, network-first/reload handling for JS/JSON/manifest/image assets, deletion of older MotoLab caches during activation, and an SW-active message to clients.
-- `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligns `version.js` with the `e-cache-reset` build, keeps displayed version/title labels dynamic, registers the Service Worker with `updateViaCache: 'none'`, requests an update, skips a waiting worker, and permits a single session-scoped reload after the matching new SW becomes active.
-- These commits target stale-startup/cache/version-label behavior and invite usability; no measurement, RPM, RAW, gear-learning, run-acceptance or dyno algorithm change is present in the six-commit diff.
-- Real-phone follow-up: verify that an installed iPhone/PWA actually leaves the older cache, shows the `2026-08-18e-cache-reset` v34.8 shell/start screen, performs at most one automatic refresh for this build, preserves the session-safe owner login, and correctly pre-fills invite activation links.
-- No new RAW measurement finding was established by this startup/cache-reset interval.
+## GPS cross-validation and calibration
 
-## v34.8 password authentication — 2026-08-18
-- `main` advanced to **v34.8 BETA / build `2026-08-18f-password-auth`**. Current checked HEAD before this archive update was `aa4914a52aecf753339b4cfc3d4742c93e313287`.
-- Product decision: each MotoLab user may choose their own password. Existing device/session identity remains in place; password authentication is an additional login/recovery path rather than a replacement for device binding.
-- `raw_sync_server/password_auth_server.js` adds authenticated password set/change and nickname + password login endpoints. Passwords are never stored as plaintext: server storage uses a random salt plus Node `scrypt` (`scrypt-v1`) and timing-safe comparison.
-- Password length is currently 8–128 characters. A valid existing device session is required to set/change a password.
-- Password login requires nickname, password and deviceId. A successful login can bind a previously unseen device to the same user and issues the normal signed device token; blocked users remain refused.
-- `password_login.js` adds startup and account UI for password login, activation with chosen password, and password change. Activation still requires the normal invite flow; after activation the chosen password is stored through the authenticated password endpoint.
-- `beta_auth_server.js` loads the password-auth server, `version.js` can load the password client before splash handoff, and `sw.js` includes `password_login` in the application module/cache set.
-- Security rule: invite/admin/bootstrap/recovery plaintext codes and user passwords must not be copied into project-memory docs. The known owner/admin activation secret is intentionally omitted here even if mentioned in chat.
-- This work is authentication/account management only. No measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change was introduced by the password-auth commits.
-- Required field validation: confirm Railway actually deploys the matching server module, then test on real devices: initial invite activation + password creation, normal nickname/password login, password change, login on a second/new device, blocked-user refusal, persistence across PWA updates, and coexistence with the existing non-destructive owner/device-session recovery paths.
-- No new RAW measurement finding was established by this password-auth interval.
+GPS reference RPM is derived from speed plus selected gear using drivetrain/profile ratios or a saved gear calibration. During learning it is the authority, but only in steady, high-quality windows: valid accuracy, sufficient speed, known gear, no clutch slip/shift, and limited wheel slip/acceleration transients.
 
-## v34.8 invite-free self-registration — 2026-08-18
-- Checked `main` HEAD before this archive update: `6c70afab88bcb7a10231560c89b1634e96bca79e`. Root `version.js` identifies **v34.8 BETA / build `2026-08-18g-self-register`**.
-- Product decision changed first-time onboarding: ordinary users no longer need an invite link/code to create an account. They choose a nickname + password, register their current device, and enter `pending` state until the administrator approves them.
-- Commit `e5520b01e3700c36853b35af0d9f25902b96e7d9` adds `/api/users/v1/password-register`. New self-registered users are created with `status=pending`, `role=user`, `registrationSource=password_self_registration`, a `scrypt-v1` password record and the registering device bound to the account.
-- Registration validates/sanitizes nickname, enforces the existing 8–128 character password rule, requires `deviceId`, refuses duplicate nickname or a device already linked to another user, and adds in-memory rate limiting for registration/login attempts.
-- Commits `3bfee05d3ce7276dd29b5f2aa2d8fc28e525a54e`, `32fbf1cd3642abbfad9d1abcb707c7c150eb5bbc` and `09ce814c1512799717b817afe53c90dfce59fe80` replace the normal invite activation UI with **KIRJAUDU / REKISTERÖIDY**, add the self-registration client flow and refresh the build/cache identity.
-- Guest mode was removed from the startup flow in `6675c0d11eaf30acf0d0c0e34ac807d3ddbca618`; startup now requires an active account/session to leave the login gate. Owner/admin recovery remains a separate explicit recovery control and is not generalized to ordinary users.
-- `6c70afab88bcb7a10231560c89b1634e96bca79e` compacts the startup login panel for smaller phone viewports without changing measurement logic.
-- This onboarding/auth interval did **not** change measurement, RPM, RAW, run acceptance, gear learning or dyno algorithms, and established no new RAW measurement finding.
-- Required deployment/field validation: confirm Railway is running the matching self-registration backend; verify a new user becomes visible as `pending`, cannot obtain normal active-user behavior before approval, becomes usable after admin approval, can subsequently log in on the registered/new device according to password/device rules, and remains blocked when administratively blocked. Also verify owner recovery and the session-safe 401 behavior still work after the onboarding change.
-- UI field check: verify the compact login panel, keyboard/safe-area behavior and absence of the old guest/invite dependency on the actual installed phone/PWA.
+Calibration sequence:
 
-## Persistent Railway user storage, session retry, admin notifications and per-user RAW — 2026-08-18
-- Field inspection confirmed Railway is running with `DATA_DIR=/data` on the mounted persistent volume. `/data/users/registry.json` exists on the volume alongside user state data; the old root-level `/data/registry.json` was absent in the inspected container.
-- The inspected registry contained the VäNä owner/admin account as active and bound to the current iPhone device. A searched previous ordinary user (`Daniel`) was **not present** in this new persistent registry, so missing historical users must not be fabricated by hand; they must register again or be recovered only from real retained data.
-- `36126a412c7013f17df41044c3c95d9bb6362242` adds `raw_sync_server/storage_guard_server.js`. It always creates `/data/users` and, only when the new registry is absent and a valid legacy `/data/registry.json` exists, atomically migrates that legacy user database to `/data/users/registry.json`.
-- `d50ffba641a0902861b094ecbfdcd0db350ad047` loads the storage guard before auth modules, making the persistent user-store path explicit before authentication starts.
-- `096eaf37c83ed9cc4d47cb6df21030740510db10` adds `auth_session_guard.js`: a failed `MotoLabUser.refresh()` is retried after ~300 ms and ~900 ms, and simultaneous recovery attempts are collapsed into one shared recovery promise. This sits on top of the earlier non-destructive 401 behavior rather than deleting the local token.
-- `7cf018e4e3f80b38a48211fd983f6d6bbf7184ab` / `98d9e7c9e554fc8223573828dbfaae8e1fde2022` advanced the root identity/cache and loaded the session guard before password login under build `2026-08-18h-auth-session-persist`.
-- `c72a2c76213d59216889b5b5f330b31c1d1cc7ba` adds authenticated per-user RAW storage at `/api/users/v1/raw-chunk`. It accepts only an active signed user/device session and stores each chunk atomically beneath `/data/users/raw/<userId>/`, preserving userId, deviceId, received time, device label, module version and the original chunk object.
-- `d8e8e8fcbca6da00e69b4362d47a4a77d4b6e3aa` wires `user_raw_server.js` into the production beta-auth server stack, so the authenticated user RAW endpoint is actually loaded by that server path.
-- `fb4628bd85e501d0f4bf603b815f3604342411a1` changes `raw_sync.js` to `v34-user-raw-auto-sync-1`: when an active signed-in user exists, queued local RAW chunks are automatically sent to the authenticated user endpoint with the normal beta token; the existing manual endpoint/ingest-key path remains the fallback when automatic signed-in user sync is not available.
-- The user-requested new-user alert is now implemented. `14a1d509609f1f6d3d617337d668a3916c8da952` adds `admin_pending_notify.js`: active admins poll `/api/admin/v1/users` every 30 seconds, identify non-admin `pending` users, show an in-app approval banner, track already-seen userIds locally, and optionally issue a system/PWA notification after notification permission is granted.
-- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` loads the notification module in the Service Worker and adds notification-click handling that focuses/opens the app with `?adminUsers=1`, leading to the approval screen. `399784c6783a05f67d7e4df8cc2270ea042000f` advances the release to **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**.
-- Notification payloads contain approval-facing nickname/count information only; passwords, beta tokens and owner recovery secrets must remain excluded.
-- These changes are auth/storage/sync/account-notification infrastructure only. They establish no new RPM/RAW measurement accuracy result and do not change GPS MASTER, microphone authority, run acceptance, gear learning or dyno algorithms.
+1. Static health/noise check with engine off.
+2. Idle and stepped stationary holds to verify signal follows engine changes; if available compare with trusted service tach/inductive path.
+3. GPS-master road pulls in known gears; sensor remains shadow-only.
+4. Fit pulses-per-rev and contact harmonic mapping per vehicle/setup/mount. Never choose a multiplier merely because it makes one run agree.
+5. Validate on held-out runs and a remount before marking the calibration usable.
 
-## Data pipeline
-- MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
-- For an active signed-in user, `raw_sync.js` now automatically sends queued local RAW to the authenticated `/api/users/v1/raw-chunk` path; server storage is per-user under `/data/users/raw/<userId>/`.
-- The older/manual receiver flow and Railway → private `anttivanttinen-max/Motolab-data` mirror remain separate compatibility/research paths unless deliberately unified later.
-- Multi-phone/device data is separated by persistent device identity/labels.
-- GitHub data can be analyzed manually; an overnight trainer checks new RAW/research data.
-- Bad/non-improving models must not replace the accepted model; rollback history must be kept.
+## User-specific learning
 
-## Sensor / microphone UI decisions
-- Sensor ON/OFF preferences should persist across restarts.
-- Microphone choice should be directly reachable from home.
-- Known audio inputs should be selectable; unavailable selected devices must not silently fall back to a different microphone and be treated as the same sensor.
-- iOS may require a user gesture before opening audio; desired selection/state can persist while activation waits for a tap.
-- Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
+Learning state is keyed by user/profile, vehicle ID, setup signature, sensor hardware ID, firmware/algorithm version and mount ID. Store priors for pulses/rev, reliable band, harmonic preference, noise floor, gain and latency. Promotion requires diverse accepted sessions and held-out validation; rollback preserves the previous model. No cross-user sharing by default, and no learning from unverified audio, rejected frames, predicted samples, unknown gear, clutch slip or poor GPS.
 
-## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise.
-- Current application/server handoff before this documentation update is `fb4628bd85e501d0f4bf603b815f3604342411a1`.
-- Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
-- Confirm the GitHub Pages → Railway user/owner/password/self-registration auth path end-to-end on the actual deployed origin.
-- Validate self-registration → `pending` → admin approval → active login end-to-end and verify duplicate nickname/device and rate-limit behavior does not strand legitimate users.
-- Validate new-user notifications on the installed admin device: permission prompt behavior, in-app banner, 30-second polling, seen-user de-duplication, background/system notification where supported, notification tap/deep-link into approvals, and no credential/secret leakage.
-- Validate persistent-volume restart/redeploy behavior: `/data/users/registry.json`, per-user state and `/data/users/raw/<userId>/` must survive and remain mutually consistent.
-- Validate automatic signed-in user RAW sync end-to-end: local queue → authenticated endpoint → correct `/data/users/raw/<userId>/` file, retry/backoff after network loss, and no loss/deletion of local RAW before confirmed upload.
-- Validate the auth session retry guard on the installed phone: transient failures should not throw out a valid user, while genuinely invalid/blocked sessions must still fail cleanly.
-- Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
-- Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
-- Validate the `2026-08-18i-admin-pending-notify` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, password-login/self-registration/session-guard/notification module availability and compact login panel behavior.
-- Validate password creation/login/change and new-device binding on real devices; ensure password auth coexists with existing device/session recovery and blocked users cannot log in.
-- Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
-- Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
-- Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
-- Validate LIVE telemetry and v32.7 diagnostics persistence/replay without measurement-performance regression.
-- Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
-- Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
-- Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync interval.
+## Gear-learning compatibility
 
-## Deferred work explicitly parked
-- Automatic knock / ignition autotune.
-- Full Knowledge Base integration across every porting/pipe/carb/ignition tuning calculator.
-- Camera RPM remains disabled.
-- Native AirPods motion remains experimental until validated on a real device.
+The node publishes synchronized timestamps and source latency so MotoLab can join RPM evidence to GPS speed. In GPS-authority mode, gear learning remains GPS/profile-controlled. After separate approval, an accepted external reference could validate ratios, but it must never create a gear ratio from a harmonic candidate without GPS agreement and stable known-gear segments.
 
-## Project-wide durable-memory instruction
-When a MotoLab conversation contains information that would matter after that conversation ends, archive accepted decisions/constraints, measured tests/reference values, algorithm changes and reasons, regressions/fixes, build/version identity, unresolved/deferred work, RAW interpretation, deployment/sync architecture and cross-thread handoff notes. Full verbatim chat transcripts are not automatically available through the GitHub connector; structured project-relevant memory is the durable source of truth.
+## RAW evidence contract
+
+Preserve session metadata, monotonic/device time sync, calibration/config hashes, mount/setup identity, ADC rate/gain, waveform window references, spectral/autocorrelation candidates, inductive edges, selected RPM, runner-up, confidence components, rejection flags, GPS join fields, firmware resets and BLE loss counters. RAW is append-only for a session; derived algorithms write a new versioned result rather than rewriting observations.
+

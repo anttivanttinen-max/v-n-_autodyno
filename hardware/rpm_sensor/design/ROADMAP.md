@@ -1,4 +1,6 @@
-# RPM sensor — implementation roadmap
+# RPM sensor — superseded contact-first roadmap
+
+> The active non-contact inductive V1 roadmap is [`hardware/rpm_bt_sensor/ROADMAP.md`](../../rpm_bt_sensor/ROADMAP.md). Contact vibration and BT microphone remain research/fallback only.
 
 ## Phase 0 — evidence freeze (now)
 

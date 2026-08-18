@@ -22,7 +22,7 @@ During RPM learning:
 
 1. GPS speed + selected gear/drivetrain calibration remains the authority and controls displayed/recorded reference RPM.
 2. RPM-BT is shadow/reference evidence. Save synchronized deltas, ratio to GPS, confidence, flags and source.
-3. Gear learning may score RPM-BT only when `valid && learningEligible`, GPS quality is adequate, selected gear is known, acceleration/slip gates pass and timestamps are aligned. It may not replace GPS authority in this phase.
+3. Firmware `learningEligible` is always false in V1. A future host adapter may derive `learningEligible=true` only when the sensor is valid and calibrated, GPS quality is adequate, the selected gear is known, acceleration/shift/clutch/slip gates pass, timestamps are aligned, and external RPM agrees with the GPS reference inside a versioned threshold. It may not replace GPS authority in this phase.
 4. Audio/contact rows additionally require `engineValidated`; absence means `learningEligible=false` regardless of numeric confidence.
 5. Camera RPM remains disabled.
 

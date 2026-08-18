@@ -169,7 +169,9 @@ MeasurementV1 sample() {
   float jitter=(previousRawHz>0 && hz>0)?fabsf(hz-previousRawHz)/previousRawHz:1.0f; previousRawHz=hz;
   int conf=valid ? (int)(100.0f-fminf(60.0f,jitter*300.0f)) : 0;
   if(stableWindows<4) conf=min(conf,70); uint8_t signal=valid?(uint8_t)constrain(100-(int)(jitter*400),0,100):0;
-  if(valid)flags|=VALID; if(valid && conf>=80 && !(flags&(DROPOUT|JUMP_REJECTED)))flags|=LEARNING_ELIGIBLE;
+  // Firmware can prove only local signal validity. GPS/reference agreement is a
+  // host-side requirement, so V1 never asserts LEARNING_ELIGIBLE by itself.
+  if(valid)flags|=VALID;
   if(cfg.session)flags|=SESSION_ACTIVE;
   MeasurementV1 m{1,1,flags,++txSeq,nowMs,(uint16_t)(valid?constrain(lroundf(filteredRpm),0,65535):0),
     (uint8_t)constrain(conf,0,100),signal,hz,(uint16_t)constrain(lroundf(rawRpm),0,65535),rejectionCount};

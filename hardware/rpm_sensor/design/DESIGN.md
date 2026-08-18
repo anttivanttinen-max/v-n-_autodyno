@@ -1,4 +1,6 @@
-# VÄNÄ MotoLab external RPM reference — design v0.1
+# VÄNÄ MotoLab external RPM reference — superseded design note
+
+> **V1 decision (2026-08-18):** the primary sensor is now the non-contact inductive pickup wrapped around the insulated spark-plug lead. The buildable design, exact protection circuit, firmware and tester live in [`hardware/rpm_bt_sensor/`](../../rpm_bt_sensor/BUILD_ME.md). The contact-vibration and BT microphone material below is retained only as research history/fallback and is not V1 primary.
 
 ## Scope and non-negotiable rules
 
@@ -25,9 +27,11 @@ The preferred mechanical contact location is the cylinder/head stud extension nu
 | Hall sensor | Deterministic pulse source | Requires safe target/magnet and bracket; rotating-part and balance risk | Optional bench/reference only unless a safe existing target exists |
 | Optical sensor | Clean bench pulses | Dirt/light/line-of-sight and rotating marker make road use fragile | Dyno/bench calibration only |
 
-## Recommended first version
+## Historical recommendation (superseded)
 
-Build a small ESP32-S3 sensor node with two isolated acquisition paths:
+This earlier two-channel proposal is no longer the V1 build. The active V1 uses only the protected inductive pulse path; contact sensing may be evaluated separately later.
+
+The historical proposal was:
 
 1. Primary contact vibration: a low-mass, rigidly mounted analog accelerometer on an aluminium adapter at the extension nut. Prefer ADXL1002-class analog bandwidth when available; validate a lower-cost piezo/contact disc path in parallel before freezing the BOM.
 2. Secondary inductive pickup: non-invasive lead/coil pickup into protected Schmitt conditioning. It supplies pulse-period evidence and helps disambiguate 0.5x/1x/2x contact harmonics; it is not electrically connected to the ignition primary in v1.

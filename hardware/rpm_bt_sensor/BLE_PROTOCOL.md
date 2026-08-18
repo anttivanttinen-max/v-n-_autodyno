@@ -45,7 +45,7 @@ Limits: `pulsesPerRev` 0.25–8, RPM 100–30000, notify 1–20 Hz. Invalid valu
 
 ## Validity and learning contract
 
-- Inductive v1: `valid` requires recent accepted edges, plausible range and continuity quality. `learningEligible` requires valid + confidence >=80 + no dropout/jump flag in the current window.
+- Inductive v1: `valid` requires recent accepted edges, plausible range and continuity quality. Firmware V1 always leaves `learningEligible` clear because it cannot see the GPS/reference agreement. A future host adapter may derive learning eligibility only after all integration gates pass.
 - Contact/audio: `learningEligible` must remain false until an implementation has passed engine validation: harmonic-family agreement, level/SNR gate, continuity, engine-off rejection, and GPS-consistent evidence across a calibration window. Firmware v1 does not claim audio input.
 - Consumers must use flags, not `rpm != 0`, as authority. GPS remains authority during RPM learning regardless of these flags.
 

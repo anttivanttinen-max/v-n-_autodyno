@@ -1,0 +1,3 @@
+const http=require('http'),fs=require('fs'),path=require('path');
+const root=__dirname,types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
+http.createServer((req,res)=>{let p=req.url==='/'?'index.html':decodeURIComponent(req.url.slice(1));p=path.resolve(root,p);if(!p.startsWith(root)){res.writeHead(403).end();return}fs.readFile(p,(e,b)=>{if(e){res.writeHead(404).end('Not found');return}res.writeHead(200,{'Content-Type':types[path.extname(p)]||'application/octet-stream','Cache-Control':'no-store'});res.end(b)})}).listen(8765,'127.0.0.1',()=>console.log('MotoLab RPM-BT tester: http://127.0.0.1:8765'));

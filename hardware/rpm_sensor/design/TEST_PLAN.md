@@ -1,4 +1,6 @@
-# RPM sensor v1 — test plan and acceptance criteria
+# RPM sensor — historical contact-channel test plan
+
+> V1 acceptance now follows [`hardware/rpm_bt_sensor/TEST_PLAN.md`](../../rpm_bt_sensor/TEST_PLAN.md). Contact vibration and BT microphone steps below are optional research/fallback and must not be confused with the inductive V1 acceptance gate.
 
 ## Test hierarchy
 

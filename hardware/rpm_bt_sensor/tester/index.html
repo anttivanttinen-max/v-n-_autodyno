@@ -1,0 +1,7 @@
+<!doctype html><html lang="fi"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MotoLab RPM-BT Tester</title>
+<style>body{font:16px system-ui;background:#111;color:#eee;max-width:850px;margin:auto;padding:24px}button,input{font:inherit;padding:10px;margin:5px}button{background:#d22;color:#fff;border:0;border-radius:6px}.cards{display:flex;gap:12px;flex-wrap:wrap}.card{background:#222;padding:18px;border-radius:10px;min-width:150px}.big{font-size:2em;font-weight:700}pre{white-space:pre-wrap;background:#181818;padding:12px}label{display:inline-block}.ok{color:#6e6}.bad{color:#f77}</style>
+<h1>VÄNÄ MotoLab RPM-BT</h1><p>Chrome/Edge Windowsissa. Yhdistä, anna halutessasi vertailukierrosluku ja tallenna mittaus.</p>
+<button id="connect">Yhdistä anturi</button><button id="record" disabled>Aloita tallennus</button><button id="download" disabled>Lataa CSV + JSONL</button>
+<label>Vertailu-RPM <input id="reference" type="number" min="0" step="10" placeholder="esim. 3000"></label>
+<div class="cards"><div class="card">RPM<div id="rpm" class="big">–</div></div><div class="card">Luottamus<div id="confidence" class="big">–</div></div><div class="card">Pulssit<div id="hz" class="big">–</div></div><div class="card">Virhe<div id="error" class="big">–</div></div></div>
+<p id="state">Ei yhteyttä.</p><pre id="diag">–</pre><script src="tester.js"></script></html>
