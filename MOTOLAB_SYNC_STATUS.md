@@ -3,10 +3,10 @@
 Updated: 2026-08-18
 
 ## Current application line
-- Active root line on `main`: **v34.8 BETA / build `2026-08-18f-password-auth`**.
+- Active root line on `main`: **v34.8 BETA / build `2026-08-18g-self-register`**.
 - `version.js` is the release-identity source; Service Worker/app shell/cache identity must stay aligned with it.
-- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth maintenance advanced the build identity while retaining the v34.8 BETA release label.
-- Current application handoff before this documentation update: `aa4914a52aecf753339b4cfc3d4742c93e313287`.
+- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth/onboarding maintenance advanced the build identity while retaining the v34.8 BETA release label.
+- Current application handoff before this documentation update: `6c70afab88bcb7a10231560c89b1634e96bca79e`.
 - The earlier **v32.9.1 FIELD / `2026-08-17u-field-recovery`** line is now historical, not the active root release.
 - The locked approved v34 visual appearance remains the baseline. Functional fixes should preserve it unless UI design is explicitly reopened.
 - This recurring memory job is documentation-only and must not promote, deploy or alter application/server code.
@@ -28,19 +28,27 @@ Updated: 2026-08-18
 - `32ec02580ad3264da91eaea10f7119ab65f9c199` rebuilt the Service Worker cache generation: a new cache namespace, current start image in the static set, network-first/reload treatment for JS/JSON/manifest/images, deletion of older MotoLab caches on activation, and an `MOTOLAB_SW_ACTIVE` message to clients.
 - `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligned the release build with `e-cache-reset`, reapplied dynamic release labels/title, registered SW with `updateViaCache: 'none'`, requested update/skip-waiting, and allowed one session-scoped reload after the matching worker activates.
 - The six commits after the session-safe auth archive touched only startup/PWA assets and logic (`assets/motolab-start-v34.png`, `splash_boot.js`, `sw.js`, `version.js`); no measurement/RPM/RAW/gear-learning/run-acceptance/dyno algorithm file changed in that interval.
-- The `e-cache-reset` field gate remains relevant under newer builds: installed iPhone/PWA must leave stale caches, show current shell/start image, reload at most once per build, preserve login and pre-fill invite links correctly.
+- The `e-cache-reset` field gate remains relevant under newer builds: installed iPhone/PWA must leave stale caches, show current shell/start image, reload at most once per build and preserve login state.
 
 ## v34.8 password authentication handoff
-- Current `version.js` identity is **v34.8 BETA / build `2026-08-18f-password-auth`**; checked application HEAD before this documentation update was `aa4914a52aecf753339b4cfc3d4742c93e313287`.
+- Earlier password-auth identity was **v34.8 BETA / build `2026-08-18f-password-auth`** at application HEAD `aa4914a52aecf753339b4cfc3d4742c93e313287`.
 - Product decision: every MotoLab user may choose an individual password. Device/session identity remains active in parallel; password auth is an additional login/recovery path, not a replacement for device binding.
 - `raw_sync_server/password_auth_server.js` adds password set/change and nickname + password login. Password storage uses random salt + Node `scrypt` (`scrypt-v1`), never plaintext, with timing-safe verification.
 - Password length is currently 8–128 characters. Setting/changing a password requires a valid linked device session.
 - Successful nickname/password login issues the normal signed device token and may attach a new deviceId to the same user. Blocked users remain denied.
-- `password_login.js` adds password login to startup/account UI, activation with a chosen password, and password change. Normal invite activation remains required for first activation.
-- `beta_auth_server.js` loads the password-auth module, startup can load the password client before splash handoff, and `sw.js` caches/loads `password_login` as part of the application modules.
-- Authentication-only change: no measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change was introduced by this line.
 - Security rule: user passwords and plaintext invite/admin/bootstrap/recovery codes must never be stored in public project-memory files.
-- Real-device/deployment gate: verify Railway is running the matching password-auth server, then test initial activation + password creation, ordinary password login, password change, second/new-device login, blocked-user refusal, PWA update persistence and coexistence with existing owner/device-session recovery.
+
+## v34.8 self-registration handoff
+- Current root identity is **v34.8 BETA / build `2026-08-18g-self-register`**; checked application HEAD is `6c70afab88bcb7a10231560c89b1634e96bca79e`.
+- Ordinary first-time users no longer require an invite code. They register with nickname + password + current device and are created in `pending` state until administrator approval.
+- `e5520b01e3700c36853b35af0d9f25902b96e7d9` adds `/api/users/v1/password-register`. Self-registered accounts use `role=user`, `registrationSource=password_self_registration`, `scrypt-v1` password storage and a bound registering device.
+- Registration sanitizes nickname, requires 2+ characters, enforces 8–128 character password length, requires `deviceId`, refuses duplicate nickname or a device already linked to another account, and rate-limits registration/login attempts.
+- `3bfee05d3ce7276dd29b5f2aa2d8fc28e525a54e` changes the normal startup/account flow to **KIRJAUDU / REKISTERÖIDY** and hides the old invite activation controls for ordinary onboarding.
+- `32fbf1cd3642abbfad9d1abcb707c7c150eb5bbc` and `09ce814c1512799717b817afe53c90dfce59fe80` advance build/cache identity for the onboarding change.
+- `6675c0d11eaf30acf0d0c0e34ac807d3ddbca618` removes guest mode from startup. Owner/admin recovery remains an explicit separate recovery path rather than a normal registration privilege.
+- `6c70afab88bcb7a10231560c89b1634e96bca79e` compacts the login panel for phone viewports.
+- This line is onboarding/auth-only: no measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change and no new RAW measurement finding.
+- Deployment gate: Railway must run the matching backend before self-registration is considered live. Field-test registration → `pending` → admin approval → active login, duplicate nickname/device handling, blocked-user refusal, new-device password login, owner recovery and session-safe 401 behavior.
 
 ## VäNä owner/admin recovery state
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
@@ -161,9 +169,10 @@ Updated: 2026-08-18
 - Historical temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded unless a newer verified code change explicitly replaces it.
 
 ## Current validation priorities / unfinished work
-- Confirm root `main` v34.8 / `2026-08-18f-password-auth` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, invite prefill, password-login module, GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
-- Confirm GitHub Pages → Railway user/owner/password auth end-to-end on the production origin.
-- Verify initial invite activation + password creation, nickname/password login, password change, new-device binding and blocked-user refusal on real devices.
+- Confirm root `main` v34.8 / `2026-08-18g-self-register` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, password-login/self-registration module, compact login panel, GPS/MIC/IMU routing, sensor persistence, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
+- Confirm GitHub Pages → Railway user/owner/password/self-registration auth end-to-end on the production origin.
+- Verify self-registration produces `pending`, admin approval changes the account to usable/active state, ordinary login works afterward, duplicate nickname/device cases are handled clearly, and blocked users remain refused.
+- Verify password change/new-device binding and owner recovery still coexist correctly with the new onboarding flow.
 - Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly.
 - Validate the `c47de47e…` session-safe auth path on the real iPhone/PWA: normal reload/update persistence, same-device owner recovery after a genuine 401, and preservation of local token/state when recovery cannot complete.
 - Validate v32.8 microphone-stability behavior on real hardware.
@@ -173,7 +182,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -188,4 +197,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, invite-link prefill, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, invite-free self-registration with pending-admin approval, guest-mode removal, compact login-panel behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
