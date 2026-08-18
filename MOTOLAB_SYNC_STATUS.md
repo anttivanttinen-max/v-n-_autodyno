@@ -3,10 +3,10 @@
 Updated: 2026-08-18
 
 ## Current application line
-- Active root line on `main`: **v34.8 BETA / build `2026-08-18g-self-register`**.
+- Active root line on `main`: **v34.8 BETA / build `2026-08-18h-auth-session-persist`**.
 - `version.js` is the release-identity source; Service Worker/app shell/cache identity must stay aligned with it.
-- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth/onboarding maintenance advanced the build identity while retaining the v34.8 BETA release label.
-- Current application handoff before this documentation update: `6c70afab88bcb7a10231560c89b1634e96bca79e`.
+- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth/onboarding/session-persistence maintenance advanced the build identity while retaining the v34.8 BETA release label.
+- Current application/server handoff before this documentation update: `c72a2c76213d59216889b5b5f330b31c1d1cc7ba`.
 - The earlier **v32.9.1 FIELD / `2026-08-17u-field-recovery`** line is now historical, not the active root release.
 - The locked approved v34 visual appearance remains the baseline. Functional fixes should preserve it unless UI design is explicitly reopened.
 - This recurring memory job is documentation-only and must not promote, deploy or alter application/server code.
@@ -39,7 +39,7 @@ Updated: 2026-08-18
 - Security rule: user passwords and plaintext invite/admin/bootstrap/recovery codes must never be stored in public project-memory files.
 
 ## v34.8 self-registration handoff
-- Current root identity is **v34.8 BETA / build `2026-08-18g-self-register`**; checked application HEAD is `6c70afab88bcb7a10231560c89b1634e96bca79e`.
+- Earlier self-registration root identity was **v34.8 BETA / build `2026-08-18g-self-register`**; checked handoff was `6c70afab88bcb7a10231560c89b1634e96bca79e`.
 - Ordinary first-time users no longer require an invite code. They register with nickname + password + current device and are created in `pending` state until administrator approval.
 - `e5520b01e3700c36853b35af0d9f25902b96e7d9` adds `/api/users/v1/password-register`. Self-registered accounts use `role=user`, `registrationSource=password_self_registration`, `scrypt-v1` password storage and a bound registering device.
 - Registration sanitizes nickname, requires 2+ characters, enforces 8–128 character password length, requires `deviceId`, refuses duplicate nickname or a device already linked to another account, and rate-limits registration/login attempts.
@@ -48,7 +48,17 @@ Updated: 2026-08-18
 - `6675c0d11eaf30acf0d0c0e34ac807d3ddbca618` removes guest mode from startup. Owner/admin recovery remains an explicit separate recovery path rather than a normal registration privilege.
 - `6c70afab88bcb7a10231560c89b1634e96bca79e` compacts the login panel for phone viewports.
 - This line is onboarding/auth-only: no measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change and no new RAW measurement finding.
-- Deployment gate: Railway must run the matching backend before self-registration is considered live. Field-test registration → `pending` → admin approval → active login, duplicate nickname/device handling, blocked-user refusal, new-device password login, owner recovery and session-safe 401 behavior.
+
+## Persistent Railway user storage / auth-session guard / user RAW handoff
+- Field inspection confirmed the Railway service sees `DATA_DIR=/data` on the mounted persistent volume. `/data/users/registry.json` exists there and user state storage is present; the inspected root-level `/data/registry.json` did not exist.
+- The inspected registry contained the active VäNä owner/admin account bound to the current iPhone. A searched earlier ordinary user (`Daniel`) was absent, so missing historical accounts must not be invented manually; they must be recreated or recovered only from genuine retained data.
+- `36126a412c7013f17df41044c3c95d9bb6362242` adds `raw_sync_server/storage_guard_server.js`, which creates `/data/users` and can atomically migrate a valid legacy `/data/registry.json` into `/data/users/registry.json` only when the new registry is absent.
+- `d50ffba641a0902861b094ecbfdcd0db350ad047` loads that storage guard before the authentication stack.
+- `096eaf37c83ed9cc4d47cb6df21030740510db10` adds `auth_session_guard.js`: failed user refresh is retried after approximately 300 ms and 900 ms, and overlapping refresh recovery attempts share one promise. This supplements the earlier non-destructive 401 handling instead of deleting the local token.
+- `7cf018e4e3f80b38a48211fd983f6d6bbf7184ab` and `98d9e7c9e554fc8223573828dbfaae8e1fde2022` advance release/cache loading to **v34.8 BETA / build `2026-08-18h-auth-session-persist`** and place the session guard before password login.
+- `c72a2c76213d59216889b5b5f330b31c1d1cc7ba` adds `/api/users/v1/raw-chunk`. Only an active signed user/device session may write; chunks are stored atomically under `/data/users/raw/<userId>/` with user/device metadata and the original chunk payload preserved.
+- New product requirement: owner/admin should receive an **alert for newly registered users**, especially `pending` accounts waiting for approval. Delivery channel is still open; any implementation must avoid exposing passwords, session tokens or owner recovery secrets.
+- This interval changes auth/storage/sync infrastructure only. It does not change GPS MASTER, microphone authority, RPM calculation, run acceptance, gear learning or dyno algorithms and establishes no new RAW measurement finding.
 
 ## VäNä owner/admin recovery state
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
@@ -138,6 +148,7 @@ Updated: 2026-08-18
 - Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
 - Receiver/read secrets must never be committed to the public app repository.
 - Beta auth/user identity layers must not gain authority over measurement/RPM calculations.
+- Authenticated user RAW now also has a persistent Railway path under `/data/users/raw/<userId>/`; this is an additional user-scoped storage endpoint and does not replace the existing local-first research/raw mirror design unless explicitly integrated into that flow.
 
 ## v32 microphone stability and diagnostics retained as regression requirements
 - v32.6 introduced fresh-stream recovery through `stopAudio()` + `startAudio()`, bounded ~0.5 s → 1 s → 2 s → 5 s retry, telemetry and manual MIC recovery.
@@ -169,9 +180,12 @@ Updated: 2026-08-18
 - Historical temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded unless a newer verified code change explicitly replaces it.
 
 ## Current validation priorities / unfinished work
-- Confirm root `main` v34.8 / `2026-08-18g-self-register` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, password-login/self-registration module, compact login panel, GPS/MIC/IMU routing, sensor persistence, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
+- Confirm root `main` v34.8 / `2026-08-18h-auth-session-persist` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, password-login/self-registration/session-guard modules, compact login panel, GPS/MIC/IMU routing, sensor persistence, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
 - Confirm GitHub Pages → Railway user/owner/password/self-registration auth end-to-end on the production origin.
 - Verify self-registration produces `pending`, admin approval changes the account to usable/active state, ordinary login works afterward, duplicate nickname/device cases are handled clearly, and blocked users remain refused.
+- Implement and validate owner/admin notification of new/pending registrations; keep notification payload free of passwords, tokens and recovery secrets.
+- Verify persistent-volume behavior across restart/redeploy: `/data/users/registry.json`, user state and `/data/users/raw/<userId>/` must survive and remain consistent.
+- Verify the auth-session guard absorbs transient refresh failures without masking genuinely invalid, blocked or unapproved sessions.
 - Verify password change/new-device binding and owner recovery still coexist correctly with the new onboarding flow.
 - Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly.
 - Validate the `c47de47e…` session-safe auth path on the real iPhone/PWA: normal reload/update persistence, same-device owner recovery after a genuine 401, and preservation of local token/state when recovery cannot complete.
@@ -182,7 +196,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -197,4 +211,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, invite-free self-registration with pending-admin approval, guest-mode removal, compact login-panel behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, transient refresh retry behavior, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, invite-free self-registration with pending-admin approval, new-user notification safety, persistent `/data/users` registry/state storage, authenticated per-user RAW storage, guest-mode removal, compact login-panel behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
