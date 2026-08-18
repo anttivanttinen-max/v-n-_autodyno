@@ -38,6 +38,24 @@ USB transfer boundaries show the opening sequences as two occurrences of `61 F0 
 
 The dominant response form during polling is `3D xx`: `0x3D` occurs 484 times in the 964-byte concatenated response stream. Four additional/split `0x3D` status/handshake bytes occur around the non-poll commands. Each `0x64` poll is followed, in the stable main sections, by a two-byte response whose first byte is `0x3D` and second byte varies.
 
+Exactly 480 `xx` poll values are recovered from each read. The complete 480-byte value stream is byte-for-byte identical across the two unchanged-state reads (SHA-256 `9fc906d6f9141c79d4f217dadfcce1a56632e204a0c48f2c385145df11c181d0`). Within one read, however, values `0..239` and `240..479` are **not** identical. The two observed `61 00 00` selections and their exact page/region boundary semantics therefore remain an open hypothesis.
+
+## Initial read-block offsets
+
+Offsets below are zero-based within the full 480-byte poll-value stream. They are inferred by matching the settings visible after the successful read. Encoding claims are supported for this captured PCDI-10VT/firmware combination but remain firmware-scoped.
+
+| Offset(s) | Observed encoding | Visible setting match |
+|---|---|---|
+| `0..31` | 32 bytes, all `0x20` | empty description padded with spaces |
+| `47..66`, even little-endian pairs | ten tenths-of-degree values | Ignition Map 1 advances: `18.0, 25.5, 21.5, 16.5, 9.7, 4.0, 7.0, 9.0, 9.0, 9.0` |
+| `67..86`, even little-endian pairs | ten tenths-of-degree values | Ignition Map 2 advances: `18.0, 25.5, 22.5, 20.5, 14.5, 9.2, 4.5, 9.0, 9.0, 9.0` |
+| `107..116` | RPM divided by 100 | Map 1 RPM row: `2000, 2500, 7000, 9000, 10000, 11000, 11000, 14000, 15000, 16000` |
+| `117..126` | same sequence as `107..116` | duplicate Map 1 RPM sequence; semantic reason still unknown |
+| `127..136` | RPM divided by 100 | Map 2 RPM row: `2000, 2500, 6000, 7000, 9000, 10000, 11000, 14000, 15000, 16000` |
+| `137..139` | `06 06 07` | matches visible point counts 6 and 7; exact meaning/order of the duplicate `06` needs a controlled test |
+
+The disabled/reserve points are included in the stored ten-point arrays and must not be discarded merely because the current active point count is smaller.
+
 ## Confidence and limits
 
 Supported:
@@ -46,6 +64,8 @@ Supported:
 - deterministic equality of two unchanged reads;
 - repeated command order and request/response timing;
 - `0x64` polling and dominant `3D xx` response shape.
+- an identical complete 480-byte settings response across two unchanged-state reads;
+- map advance scaling as tenths of a degree and RPM scaling as hundreds for the offsets above.
 
 Probable:
 
@@ -57,6 +77,7 @@ Unknown:
 
 - semantic offsets for ignition maps, PV/YPVS curve, limiter and scalar settings;
 - whether integrity protection is present inside the 480 returned values;
+- whether the two `61 00 00` occurrences select distinct 240-byte regions, reset an address, or serve another purpose;
 - checksum/CRC algorithm and covered range;
 - whether all firmware versions use identical offsets and lengths.
 
@@ -65,5 +86,4 @@ No semantic field should be promoted above `tentative` until a controlled one-va
 ## Next evidence test
 
 Preserve this baseline, then—only after explicit approval—change one reversible, low-risk setting by the smallest UI step, capture `Program`, immediately capture `Read`, restore the baseline, and capture a final `Read`. Compare all returned data positions and any integrity bytes. Until then, continue read-only decoder work using the 480-value response sequence.
-
 
