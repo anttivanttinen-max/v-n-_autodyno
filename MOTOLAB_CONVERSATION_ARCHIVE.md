@@ -152,6 +152,19 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Real-phone follow-up: verify that an installed iPhone/PWA actually leaves the older cache, shows the `2026-08-18e-cache-reset` v34.8 shell/start screen, performs at most one automatic refresh for this build, preserves the session-safe owner login, and correctly pre-fills invite activation links.
 - No new RAW measurement finding was established by this startup/cache-reset interval.
 
+## v34.8 password authentication — 2026-08-18
+- `main` advanced to **v34.8 BETA / build `2026-08-18f-password-auth`**. Current checked HEAD before this archive update was `aa4914a52aecf753339b4cfc3d4742c93e313287`.
+- Product decision: each MotoLab user may choose their own password. Existing device/session identity remains in place; password authentication is an additional login/recovery path rather than a replacement for device binding.
+- `raw_sync_server/password_auth_server.js` adds authenticated password set/change and nickname + password login endpoints. Passwords are never stored as plaintext: server storage uses a random salt plus Node `scrypt` (`scrypt-v1`) and timing-safe comparison.
+- Password length is currently 8–128 characters. A valid existing device session is required to set/change a password.
+- Password login requires nickname, password and deviceId. A successful login can bind a previously unseen device to the same user and issues the normal signed device token; blocked users remain refused.
+- `password_login.js` adds startup and account UI for password login, activation with chosen password, and password change. Activation still requires the normal invite flow; after activation the chosen password is stored through the authenticated password endpoint.
+- `beta_auth_server.js` loads the password-auth server, `version.js` can load the password client before splash handoff, and `sw.js` includes `password_login` in the application module/cache set.
+- Security rule: invite/admin/bootstrap/recovery plaintext codes and user passwords must not be copied into project-memory docs. The known owner/admin activation secret is intentionally omitted here even if mentioned in chat.
+- This work is authentication/account management only. No measurement, RPM, RAW, run-acceptance, gear-learning or dyno algorithm change was introduced by the password-auth commits.
+- Required field validation: confirm Railway actually deploys the matching server module, then test on real devices: initial invite activation + password creation, normal nickname/password login, password change, login on a second/new device, blocked-user refusal, persistence across PWA updates, and coexistence with the existing non-destructive owner/device-session recovery paths.
+- No new RAW measurement finding was established by this password-auth interval.
+
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
 - Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
@@ -167,12 +180,13 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18e-cache-reset`** unless a newer checked `version.js` says otherwise.
+- Treat root `main` as **v34.8 BETA / `2026-08-18f-password-auth`** unless a newer checked `version.js` says otherwise.
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
-- Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin.
+- Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin, including password-auth endpoints.
 - Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
 - Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
-- Validate the `2026-08-18e-cache-reset` PWA transition on the actual installed iPhone: old cache removal, correct start image/version badge, at most one build-scoped automatic reload, and invite-link prefill.
+- Validate the `2026-08-18f-password-auth` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, invite-link prefill and password-login module availability.
+- Validate password creation/login/change and new-device binding on real devices; ensure password auth coexists with existing device/session recovery and blocked users cannot log in.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
 - Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
@@ -180,7 +194,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
