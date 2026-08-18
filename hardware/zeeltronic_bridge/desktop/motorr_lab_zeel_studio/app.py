@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MotoRLab Zeel Studio development UI for evidence-gated PCDI-10VT work."""
+"""MotorLab Zeel Studio development UI for evidence-gated PCDI-10VT work."""
 
 from __future__ import annotations
 
@@ -88,7 +88,7 @@ class MapChart(tk.Canvas):
 class ZeelStudio(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("VÄNÄ MotoRLab — Zeel Studio (DEV)")
+        self.title("VÄNÄ MotorLab — Zeel Studio (DEV)")
         self.geometry("1380x860")
         self.minsize(980, 680)
         self.configure(bg="#0b1218")
@@ -201,7 +201,7 @@ class ZeelStudio(tk.Tk):
         menubar.add_cascade(label="Näkymä", menu=view_menu)
 
         help_menu = tk.Menu(menubar, tearoff=False)
-        help_menu.add_command(label="MotoRLab Zeel Studion ohje", command=self.show_help)
+        help_menu.add_command(label="MotorLab Zeel Studion ohje", command=self.show_help)
         help_menu.add_command(label="Turvarajat", command=self.show_safety)
         help_menu.add_separator()
         help_menu.add_command(label="Tietoja", command=self.show_about)
@@ -217,7 +217,7 @@ class ZeelStudio(tk.Tk):
     def _build(self):
         header = ttk.Frame(self, padding=(20, 16))
         header.pack(fill="x")
-        ttk.Label(header, text="VÄNÄ MotoRLab", style="Title.TLabel").pack(side="left")
+        ttk.Label(header, text="VÄNÄ MotorLab", style="Title.TLabel").pack(side="left")
         ttk.Label(header, text="ZEEL STUDIO · DEV · EI TUOTANTOKÄYTTÖÖN", style="Muted.TLabel").pack(side="left", padx=16, pady=(8, 0))
         ttk.Button(header, text="Tarkista laite", command=self.inspect_device).pack(side="right")
         self.read_cdi_button = ttk.Button(header, text="Lue CDI", command=self.read_cdi, style="Accent.TButton")
@@ -410,13 +410,13 @@ class ZeelStudio(tk.Tk):
         messagebox.showinfo("Datan eheystarkistus", report)
 
     def show_help(self):
-        messagebox.showinfo("MotoRLab Zeel Studio", "1. Käynnistä USB-kaappaus.\n2. Tarkista Zeel-laite.\n3. Kytke CDI ja valitse Lue CDI.\n4. Tarkista RAW, SHA-256 ja laatumerkinnät.\n5. Tallenna versio ja vertaa aiempaan.\n\nKirjoitus CDI:lle ei ole käytössä.")
+        messagebox.showinfo("MotorLab Zeel Studio", "1. Käynnistä USB-kaappaus.\n2. Tarkista Zeel-laite.\n3. Kytke CDI ja valitse Lue CDI.\n4. Tarkista RAW, SHA-256 ja laatumerkinnät.\n5. Tallenna versio ja vertaa aiempaan.\n\nKirjoitus CDI:lle ei ole käytössä.")
 
     def show_safety(self):
         messagebox.showwarning("Turvarajat", "Sovellus toimii vain luku -tilassa. PROGRAM ja asetusten kirjoitus ovat lukittuina. GPS säilyy RPM-oppimisen auktoriteettina, kameran RPM-dataa ei käytetä ja raakaa audiota ei hyväksytä oppimiseen ennen moottorisignaalin todentamista.")
 
     def show_about(self):
-        messagebox.showinfo("Tietoja", "VÄNÄ MotoRLab — Zeel Studio\nKehitysversio\nRAW-first · read-only · audit trail")
+        messagebox.showinfo("Tietoja", "VÄNÄ MotorLab — Zeel Studio\nKehitysversio\nRAW-first · read-only · audit trail")
 
     def open_block(self):
         path = filedialog.askopenfilename(title="Valitse 480 tavun lukublokki", filetypes=[("Binary", "*.bin"), ("Kaikki", "*.*")])

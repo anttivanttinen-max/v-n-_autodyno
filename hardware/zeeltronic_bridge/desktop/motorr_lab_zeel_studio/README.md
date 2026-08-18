@@ -1,6 +1,6 @@
-# VÄNÄ MotoRLab — Zeel Studio (DEV)
+# VÄNÄ MotorLab — Zeel Studio (DEV)
 
-Erillinen kehityssovellus PCDI-10VT-aineiston lukemiseen, visualisointiin, versiointiin ja vertaamiseen. Se ei muuta tuotanto-MotoRLabia.
+Erillinen kehityssovellus PCDI-10VT-aineiston lukemiseen, visualisointiin, versiointiin ja vertaamiseen. Se ei muuta tuotanto-MotorLabia.
 
 ## Käynnistys
 
