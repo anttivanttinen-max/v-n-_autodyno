@@ -87,3 +87,16 @@ No semantic field should be promoted above `tentative` until a controlled one-va
 
 Preserve this baseline, then—only after explicit approval—change one reversible, low-risk setting by the smallest UI step, capture `Program`, immediately capture `Read`, restore the baseline, and capture a final `Read`. Compare all returned data positions and any integrity bytes. Until then, continue read-only decoder work using the 480-value response sequence.
 
+## First Program capture and unchanged-state readback
+
+An explicitly approved unchanged-settings `Program` was captured with the CDI disconnected from the motorcycle. ZeelProg reported green `ok`. The immediate following `Read` returned the exact original 480-byte baseline (zero mismatches; SHA-256 `9fc906d6f9141c79d4f217dadfcce1a56632e204a0c48f2c385145df11c181d0`).
+
+Program stream fingerprints:
+
+- PC to Zeel: 733 bytes, SHA-256 `c7d7f1933a92c857984a3e258d093b5342bc50c7957241eab3deba1ac70b8e83`;
+- Zeel to PC: 725 bytes, SHA-256 `c747df00a07711ef400d4fa1b025dbda94bfd45a053e8610d2d5bb53696d9b21`.
+
+The PC-to-Zeel stream has a strictly recognized structure: `61 F0 01`, sixteen `44 xx` writes, `61 F0 01`, sixteen `64` polls, `61 09 00`, 224 `44 xx` writes, `61 00 00`, 224 `64` polls, and final `41`. This extracts a 240-byte write payload with SHA-256 `3ce63c97c0d3c205f8574632ab982bb5f4220eb6bcdf7bb0c6c6f0790d7708c9`.
+
+This proves the unchanged-settings Program shape and successful readback for this device/firmware. It does not yet prove the semantic mapping between the 240-byte write payload and 480-byte read representation, nor any checksum/integrity field. Direct transport remains disabled until a controlled one-value delta is captured and restored.
+
