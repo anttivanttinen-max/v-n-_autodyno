@@ -3,15 +3,16 @@
 Updated: 2026-08-18
 
 ## Current application line
-- Active root line on `main`: **v34.8 BETA / build `2026-08-18c-final-ui-gear-auth`**.
+- Active root line on `main`: **v34.8 BETA / build `2026-08-18e-cache-reset`**.
 - `version.js` is the release-identity source; Service Worker/app shell/cache identity must stay aligned with it.
-- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate.
+- v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache maintenance advanced the build identity while retaining the v34.8 BETA release label.
+- Current startup/cache handoff commit before this documentation update: `10e8802774475b3871aa66c7b86f9ea2dc4d68fa`.
 - The earlier **v32.9.1 FIELD / `2026-08-17u-field-recovery`** line is now historical, not the active root release.
 - The locked approved v34 visual appearance remains the baseline. Functional fixes should preserve it unless UI design is explicitly reopened.
 - This recurring memory job is documentation-only and must not promote, deploy or alter application/server code.
 
 ## v34.8 final validation and promotion
-- Final v34.8 identity: **v34.8 BETA / `2026-08-18c-final-ui-gear-auth`**.
+- Original finalized v34.8 identity at promotion: **v34.8 BETA / `2026-08-18c-final-ui-gear-auth`**.
 - Final validated commit before promotion: `21c396cbb0a55bc33ea65f85db2c9b53bf4fced1`.
 - GitHub Actions run `32111288808` completed successfully.
 - Passed: application JavaScript syntax, server/validation-script syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, Browser + Service Worker smoke x2, and Full user UI walk.
@@ -19,6 +20,15 @@ Updated: 2026-08-18
 - Approved splash is present on first uncontrolled load and SW-controlled reloads. First uncontrolled load can bootstrap `user_identity.js` before SW control so owner/session lookup can start behind the splash.
 - User menu remains the home for Feedback & Messages, community, shared runs, Tester Merit, LIVE and invites; legacy floating feedback/admin-feedback controls are suppressed.
 - Browser validation does **not** prove physical iPhone GPS/MIC/IMU routing; that remains a separate field gate.
+
+## v34.8 startup/cache-reset handoff
+- Current root `version.js` keeps release **v34.8 BETA** and advances build identity to **`2026-08-18e-cache-reset`**.
+- Startup now uses local `assets/motolab-start-v34.png`, displayed sharply on black with a release badge derived from `MOTOLAB_RELEASE` rather than stale hard-coded UI text.
+- `splash_boot.js` is `motolab-splash-boot-v2`: startup activation pre-fills a pending `?invite=` code from the link/session and tells the user when that invite was detected.
+- `32ec02580ad3264da91eaea10f7119ab65f9c199` rebuilt the Service Worker cache generation: a new cache namespace, current start image in the static set, network-first/reload treatment for JS/JSON/manifest/images, deletion of older MotoLab caches on activation, and an `MOTOLAB_SW_ACTIVE` message to clients.
+- `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligns the release build with `e-cache-reset`, reapplies dynamic release labels/title, registers SW with `updateViaCache: 'none'`, requests update/skip-waiting, and allows one session-scoped reload after the matching worker activates.
+- The six commits after the session-safe auth archive touched only startup/PWA assets and logic (`assets/motolab-start-v34.png`, `splash_boot.js`, `sw.js`, `version.js`); no measurement/RPM/RAW/gear-learning/run-acceptance/dyno algorithm file changed in that interval.
+- Real-device gate: verify an installed iPhone/PWA leaves the stale cache, shows the `e-cache-reset` shell and start image, reloads at most once for this build, preserves the session-safe login, and pre-fills invite links correctly.
 
 ## VäNä owner/admin recovery state
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
@@ -139,7 +149,7 @@ Updated: 2026-08-18
 - Historical temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded unless a newer verified code change explicitly replaces it.
 
 ## Current validation priorities / unfinished work
-- Confirm root `main` v34.8 on the actual iPhone: GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
+- Confirm root `main` v34.8 / `2026-08-18e-cache-reset` on the actual iPhone: stale-cache removal, startup image/release badge, at-most-one build-scoped refresh, invite prefill, GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
 - Confirm GitHub Pages → Railway user/owner auth end-to-end on the production origin.
 - Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly.
 - Validate the `c47de47e…` session-safe auth path on the real iPhone/PWA: normal reload/update persistence, same-device owner recovery after a genuine 401, and preservation of local token/state when recovery cannot complete.
@@ -150,7 +160,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -165,4 +175,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, invite-link prefill, dynamic release identity, stale-cache replacement/one-build reload behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
