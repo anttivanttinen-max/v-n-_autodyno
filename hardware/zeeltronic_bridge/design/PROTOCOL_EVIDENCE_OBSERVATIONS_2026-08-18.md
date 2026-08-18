@@ -100,3 +100,17 @@ The PC-to-Zeel stream has a strictly recognized structure: `61 F0 01`, sixteen `
 
 This proves the unchanged-settings Program shape and successful readback for this device/firmware. It does not yet prove the semantic mapping between the 240-byte write payload and 480-byte read representation, nor any checksum/integrity field. Direct transport remains disabled until a controlled one-value delta is captured and restored.
 
+## Controlled Shift Light delta and restoration
+
+With the CDI disconnected from the motorcycle, Shift Light was changed from `10000` to `9900 rpm`, programmed successfully (`ok`), read back, restored to `10000 rpm`, programmed again, and read back a final time.
+
+The controlled delta changed exactly:
+
+- Program write payload offset `115`: `100` to `99`;
+- Read response offset `140`: `100` to `99`;
+- Read response offset `364`: `100` to `99`.
+
+No other payload or read-value positions changed. This is supported evidence that Shift Light uses units of 100 rpm, is stored once in the 240-byte Program payload, and appears twice in the 480-byte Read representation for this device/firmware.
+
+After restoration, the final Read had zero mismatches against the original baseline and the same SHA-256: `9fc906d6f9141c79d4f217dadfcce1a56632e204a0c48f2c385145df11c181d0`. The device is therefore back at the captured baseline state.
+
