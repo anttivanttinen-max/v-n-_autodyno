@@ -1,12 +1,14 @@
 (() => {
 'use strict';
-const MODULE='adaptive-rpm-learning-v1';
+const MODULE='adaptive-rpm-learning-v2';
 const MODEL_URL='./rpm-learning-model.json';
 const MODEL_KEY='motolab_v32_rpm_learning_model';
 const MODEL_META_KEY='motolab_v32_rpm_learning_meta';
+const CORRECTIONS=[.5,.75,1,1.25,2];
 const $a=id=>document.getElementById(id);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 let model=null,lastChosen=0,lastChosenAt=0,originalPost=null,patched=false;
+let stuckHistory=[];
 
 function safeJson(s,fallback=null){try{return JSON.parse(s)}catch{return fallback}}
 function median(a){if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2}
@@ -39,25 +41,43 @@ function latestCandidates(){
  return []
 }
 function expScore(err,scale){return Math.exp(-Math.max(0,err)/Math.max(1,scale))}
+function detectStuckBranch(audioRpm,gps,now){
+ if(!(audioRpm>0&&gps?.rpm>0))return {active:false};
+ stuckHistory.push({t:now,audio:+audioRpm,gps:+gps.rpm});
+ while(stuckHistory.length&&now-stuckHistory[0].t>900)stuckHistory.shift();
+ if(stuckHistory.length<5)return {active:false};
+ const first=stuckHistory[0],last=stuckHistory[stuckHistory.length-1],spanMs=last.t-first.t;
+ if(spanMs<500)return {active:false};
+ const aud=stuckHistory.map(x=>x.audio),gpsv=stuckHistory.map(x=>x.gps);
+ const audMid=median(aud)||audioRpm,gpsMid=median(gpsv)||gps.rpm;
+ const audSpread=(Math.max(...aud)-Math.min(...aud))/Math.max(1,audMid);
+ const gpsMove=Math.abs(last.gps-first.gps)/Math.max(1,gpsMid);
+ const gpsDir=Math.sign(last.gps-first.gps);
+ const active=audSpread<=.035&&gpsMove>=.10&&gpsDir!==0;
+ return {active,audSpread,gpsMove,gpsDir,spanMs}
+}
 function chooseCandidate(incoming){
  const candidates=latestCandidates().filter(c=>c.rpm>0),gps=gpsRef(),now=Date.now();
+ const stuck=detectStuckBranch(incoming.rpm||incoming.rawRpm||0,gps,now);
  if(!candidates.length){
    const b=bandFor(gps?.rpm||incoming.rpm||lastChosen||0),corr=+b?.correction||1;
-   if(corr!==1&&incoming.rpm>0)return {...incoming,rpm:incoming.rpm*corr,rawRpm:incoming.rawRpm||incoming.rpm,adaptiveCorrection:corr,adaptiveModel:true};
-   return incoming
+   if(corr!==1&&incoming.rpm>0)return {...incoming,rpm:incoming.rpm*corr,rawRpm:incoming.rawRpm||incoming.rpm,adaptiveCorrection:corr,adaptiveModel:true,stuckBranch:stuck.active};
+   return {...incoming,stuckBranch:stuck.active}
  }
  const expected=gps?.rpm||lastChosen||incoming.rpm||candidates[0].rpm;
  const band=bandFor(expected),preferred=+band?.correction||1,tolPct=clamp(+band?.tolerancePct||12,5,35);
  let scored=[];
  for(const c0 of candidates){
-   for(const corr of [1,.5,2]){
+   for(const corr of CORRECTIONS){
      const rpm=c0.rpm*corr;if(rpm<800||rpm>15000)continue;
      const spectral=clamp((c0.baseScore||c0.q||.2),0,1);
      const gpsScore=gps?expScore(Math.abs(rpm-gps.rpm),Math.max(180,gps.rpm*tolPct/100)):.5;
      const dt=lastChosenAt?clamp((now-lastChosenAt)/1000,.02,1):.1;
      const continuity=lastChosen?expScore(Math.abs(rpm-lastChosen),Math.max(260,lastChosen*(.07+dt*.08))):.65;
      const prior=expScore(Math.abs(corr-preferred),.32);
-     const score=spectral*.22+continuity*.33+prior*.17+(gps?gpsScore*.28:0);
+     const score=stuck.active
+       ? spectral*.18+continuity*.10+prior*.12+(gps?gpsScore*.60:0)
+       : spectral*.22+continuity*.33+prior*.17+(gps?gpsScore*.28:0);
      scored.push({rpm,corr,c:c0,score,gpsScore,continuity,prior})
    }
  }
@@ -65,7 +85,7 @@ function chooseCandidate(incoming){
  const best=scored[0],runner=scored.find(x=>Math.abs(x.rpm-best.rpm)>Math.max(160,best.rpm*.045));
  const gap=runner?clamp((best.score-runner.score)/Math.max(.01,best.score),0,1):1;
  lastChosen=best.rpm;lastChosenAt=now;
- return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0};
+ return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0,stuckBranch:stuck.active,stuckGpsMove:stuck.gpsMove||0,stuckAudioSpread:stuck.audSpread||0};
 }
 function patchMeasurementInput(){
  try{
@@ -89,7 +109,7 @@ function patchLearningRows(){
   const wrapped=function(s){
     const a=globalThis.MOTOLAB_AUDIO_LAST,p=globalThis.MOTOLAB_PHONE_RPM,ad=globalThis.MOTOLAB_ADAPTIVE_RPM;
     const before=learningBuffer?.length||0;orig(s);
-    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveModelVersion=model?.version||null}}catch{}
+    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveModelVersion=model?.version||null;row.stuckBranch=!!ad?.stuckBranch;row.stuckGpsMove=Number.isFinite(ad?.stuckGpsMove)?ad.stuckGpsMove:null;row.stuckAudioSpread=Number.isFinite(ad?.stuckAudioSpread)?ad.stuckAudioSpread:null}}catch{}
   };
   wrapped.__adaptivePatched=true;collectLearningSample=wrapped;return true
  }catch{return false}
@@ -98,16 +118,16 @@ function extractSamples(chunks){const out=[];for(const c of chunks||[]){if(Array
 function bestCorrection(row,gps){
  const cand=Array.isArray(row.audioCandidates)?row.audioCandidates.map(normalizeCandidate):[];
  let choices=[];
- if(cand.length){for(const c of cand)for(const corr of [.5,1,2]){const rpm=c.rpm*corr;if(rpm>0)choices.push({corr,rpm,err:Math.abs(rpm-gps)/gps*100})}}
+ if(cand.length){for(const c of cand)for(const corr of CORRECTIONS){const rpm=c.rpm*corr;if(rpm>0)choices.push({corr,rpm,err:Math.abs(rpm-gps)/gps*100})}}
  const observed=+row.micShadowRpm||+row.audioRpm||+row.audioRawRpm||0;
- if(observed>0)for(const corr of [.5,1,2])choices.push({corr,rpm:observed*corr,err:Math.abs(observed*corr-gps)/gps*100});
+ if(observed>0)for(const corr of CORRECTIONS)choices.push({corr,rpm:observed*corr,err:Math.abs(observed*corr-gps)/gps*100});
  choices.sort((a,b)=>a.err-b.err);return choices[0]||null
 }
 function trainFromSamples(samples){
  const usable=[];
  for(const r of samples){const gps=+r.gpsReferenceRpm||+r.speedRpm||0;if(gps<1000||gps>14000)continue;if(r.micLearningEligible===false)continue;const b=bestCorrection(r,gps);if(!b||b.err>35)continue;usable.push({gps,corr:b.corr,err:b.err})}
  const bands=[];
- for(let min=1000;min<14000;min+=500){const rows=usable.filter(x=>x.gps>=min&&x.gps<min+500);if(!rows.length)continue;const corrVotes=[.5,1,2].map(c=>({c,n:rows.filter(x=>x.corr===c).length})).sort((a,b)=>b.n-a.n);const corr=corrVotes[0].c,errs=rows.filter(x=>x.corr===corr).map(x=>x.err);bands.push({minRpm:min,maxRpm:min+500,correction:corr,tolerancePct:+clamp(percentile(errs,.9)||12,6,28).toFixed(1),samples:rows.length,medianErrorPct:+(median(errs)||0).toFixed(2),p90ErrorPct:+(percentile(errs,.9)||0).toFixed(2),agreement:+(corrVotes[0].n/rows.length).toFixed(3)})}
+ for(let min=1000;min<14000;min+=500){const rows=usable.filter(x=>x.gps>=min&&x.gps<min+500);if(!rows.length)continue;const corrVotes=CORRECTIONS.map(c=>({c,n:rows.filter(x=>x.corr===c).length})).sort((a,b)=>b.n-a.n);const corr=corrVotes[0].c,errs=rows.filter(x=>x.corr===corr).map(x=>x.err);bands.push({minRpm:min,maxRpm:min+500,correction:corr,tolerancePct:+clamp(percentile(errs,.9)||12,6,28).toFixed(1),samples:rows.length,medianErrorPct:+(median(errs)||0).toFixed(2),p90ErrorPct:+(percentile(errs,.9)||0).toFixed(2),agreement:+(corrVotes[0].n/rows.length).toFixed(3)})}
  return {schema:'motolab_rpm_learning_model_v1',version:'local-'+new Date().toISOString().replace(/[:.]/g,'-'),createdAt:new Date().toISOString(),baseline:'v32.4',source:'local_raw_replay',sampleCount:samples.length,usablePairs:usable.length,bands,acceptance:{minSamplesPerBand:20,maxMedianErrorPct:12,maxP90ErrorPct:24}}
 }
 function validateModel(m){const good=m.bands.filter(b=>b.samples>=5&&b.medianErrorPct<=15&&b.agreement>=.45);return {ok:good.length>=2,goodBands:good.length,totalBands:m.bands.length}}
@@ -125,15 +145,15 @@ function integrateGearLearning(){
 function paintStatus(t){const e=$a('adaptiveRpmStatus');if(e)e.textContent=t}
 function installUi(){
  if($a('adaptiveRpmPanel'))return true;const settings=$a('screen-settings');if(!settings)return false;
- const p=document.createElement('div');p.className='panel';p.id='adaptiveRpmPanel';p.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🧠</span> RPM OPPIMISMALLI</div><span class="tiny">${MODULE}</span></div><div class="statusbox">GPS-master opettaa mikrofonin candidate/harmoniset RPM-alueittain. Malli ohjaa vain mikrofonin shadow/candidate-valintaa; GPS-masterin auktoriteettia ei muuteta.</div><div class="form"><button id="adaptiveLoadModel" class="action gray full" type="button">LATAA HYVÄKSYTTY MALLI</button><button id="adaptiveReplayRaw" class="action full" type="button">AJA PAIKALLINEN RAW UUDELLEEN NYT</button></div><div id="adaptiveRpmStatus" class="statusbox">Oppimismallia alustetaan…</div>`;
+ const p=document.createElement('div');p.className='panel';p.id='adaptiveRpmPanel';p.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🧠</span> RPM OPPIMISMALLI</div><span class="tiny">${MODULE}</span></div><div class="statusbox">GPS-master opettaa mikrofonin candidate/harmoniset RPM-alueittain. Malli ohjaa vain mikrofonin shadow/candidate-valintaa; GPS-masterin auktoriteettia ei muuteta. 0.75×/1.25× välihaarat ja stuck-branch-valvonta ovat käytössä.</div><div class="form"><button id="adaptiveLoadModel" class="action gray full" type="button">LATAA HYVÄKSYTTY MALLI</button><button id="adaptiveReplayRaw" class="action full" type="button">AJA PAIKALLINEN RAW UUDELLEEN NYT</button></div><div id="adaptiveRpmStatus" class="statusbox">Oppimismallia alustetaan…</div>`;
  const anchor=$a('rawAutoSyncPanel')||settings.querySelector('.panel:last-of-type')||settings;anchor.insertAdjacentElement('afterend',p);
  $a('adaptiveLoadModel').onclick=()=>loadModel(true);$a('adaptiveReplayRaw').onclick=replayLocalRaw;return true
 }
 function boot(){
  const okUi=installUi(),okPost=patchMeasurementInput(),okRows=patchLearningRows(),okGear=integrateGearLearning();
  if(!(okUi&&okPost&&okRows&&okGear)){setTimeout(boot,250);return}
- loadModel(false).then(()=>paintStatus(`Valmis • malli ${model?.version||'baseline'} • ${model?.bands?.length||0} aluetta`));
- try{addLearningEvent('adaptive_rpm_learning_loaded',{module:MODULE})}catch{}
+ loadModel(false).then(()=>paintStatus(`Valmis • malli ${model?.version||'baseline'} • ${model?.bands?.length||0} aluetta • stuck guard v2`));
+ try{addLearningEvent('adaptive_rpm_learning_loaded',{module:MODULE,corrections:CORRECTIONS})}catch{}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
