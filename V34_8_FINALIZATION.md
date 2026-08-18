@@ -2,13 +2,14 @@
 
 Build: `2026-08-18c-final-ui-gear-auth`
 Branch: `dev/v34-rebuild`
-Validated commit before this note: `3e87d1ba018b230459ab7e4563115d8e2f559e91`
-Validation run: `32110775667`
+Validated commit: `21c396cbb0a55bc33ea65f85db2c9b53bf4fced1`
+Validation run: `32111288808`
 
 ## Completed
 
 - Approved splash is now part of the app startup path and is shown on the first uncontrolled load as well as Service Worker controlled reloads.
 - Splash uses local `assets/motorlab_splash_approved.webp`, has a minimum display time, safe centered login card and guest fallback.
+- On the first uncontrolled load, the splash bootstrap can load `user_identity.js` before the Service Worker takes control, so owner/session lookup can begin behind the splash instead of waiting for the first SW reload.
 - Existing owner/admin device session recovery remains wired through `owner_device_session_server.js`; `beta_auth_server.js` explicitly loads that module.
 - User menu remains the home for Feedback & Messages, community, shared runs, Tester Merit, LIVE and invites.
 - Legacy floating feedback/admin-feedback buttons are suppressed by `v34_runtime_fixes.js`.
@@ -23,7 +24,7 @@ Validation run: `32110775667`
 
 ## Validation
 
-GitHub Actions run `32110775667` completed successfully. Passed steps:
+GitHub Actions run `32111288808` completed successfully. Passed steps:
 
 - application JavaScript syntax
 - server and validation-script syntax
@@ -33,7 +34,7 @@ GitHub Actions run `32110775667` completed successfully. Passed steps:
 - Browser + Service Worker smoke x2
 - Full user UI walk
 
-Browser regression coverage includes splash/login safe area, Run A/B comparison, post-run metadata persistence, gear metadata editing without measurement-data mutation, centered gear confirmation colors/confirmation, phone candidate bridge, user-menu placement of feedback, profile selection, LIVE navigation and main menu runtime behavior.
+Browser regression coverage includes first-load splash, splash/login safe area, Run A/B comparison, post-run metadata persistence, gear metadata editing without measurement-data mutation, centered gear confirmation colors/confirmation, phone candidate bridge, user-menu placement of feedback, profile selection, LIVE navigation and main menu runtime behavior.
 
 ## Safety / release state
 
