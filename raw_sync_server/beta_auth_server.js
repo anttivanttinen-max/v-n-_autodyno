@@ -1,4 +1,13 @@
 'use strict';
+
+// Normalize the configured browser origin before loading modules that read it.
+// Railway variables are sometimes entered with a trailing slash or the full
+// GitHub Pages app path. CORS compares only the URL origin, so normalize it
+// once here and make every auth/user module see the same canonical value.
+const CANONICAL_PAGES_ORIGIN='https://anttivanttinen-max.github.io';
+const configuredOrigin=String(process.env.ALLOWED_ORIGIN||CANONICAL_PAGES_ORIGIN).trim();
+try{process.env.ALLOWED_ORIGIN=new URL(configuredOrigin).origin}catch{process.env.ALLOWED_ORIGIN=CANONICAL_PAGES_ORIGIN}
+
 require('./feedback_server');
 require('./owner_bootstrap_server');
 require('./user_server');
@@ -9,7 +18,7 @@ const crypto=require('crypto');
 const originalCreateServer=http.createServer.bind(http);
 const INGEST_KEY=String(process.env.INGEST_KEY||'');
 const BETA_SECRET=String(process.env.BETA_TOKEN_SECRET||'');
-const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||'https://anttivanttinen-max.github.io';
+const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||CANONICAL_PAGES_ORIGIN;
 
 function unb64(v){return Buffer.from(v,'base64url').toString('utf8')}
 function verify(token){
@@ -41,4 +50,4 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  }
  return listener(req,res)
 })};
-console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-bootstrap=first; owner-device-session=enabled`);
+console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-bootstrap=first; owner-device-session=enabled; origin=${ALLOWED_ORIGIN}`);
