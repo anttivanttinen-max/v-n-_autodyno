@@ -1,7 +1,7 @@
-importScripts('./version.js?build=2026-08-17w-v34-rebuild-swfix');
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.6-dev';
-const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.6 DEV';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-17w-v34-rebuild-swfix';
+importScripts('./version.js?build=2026-08-18a-run-analysis');
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.7';
+const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.7 BETA';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18a-run-analysis';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-rebuild-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 const MODULES=[
@@ -10,7 +10,7 @@ const MODULES=[
  'user_identity','user_features','feedback','community','merit','beta_menu','beta_release',
  'mic_authority','sensor_persistence','sensor_autostart','admin_test_tools','phone_rpm_smart','adaptive_rpm_learning',
  'trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard',
- 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n'
+ 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34'
 ];
 const STATIC=['manifest.webmanifest','bike.png','icon-192.png','icon-512.png','rpm-learning-model.json','vehicle_catalog.json','maintenance_catalog.json','version.js'];
 const bust=p=>'./'+p+'?v='+V+'&build='+B;
