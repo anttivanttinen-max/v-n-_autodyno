@@ -6,15 +6,13 @@ const fail=m=>{throw new Error(m)};
   const browser=await chromium.launch({headless:true,args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream']});
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'fi-FI',geolocation:{latitude:60.17,longitude:24.94},permissions:['geolocation']});
   const page=await context.newPage();
-  const errors=[],tested=[];
+  const errors=[],tested=[];let lastAction='boot';
   page.on('pageerror',e=>errors.push('pageerror: '+e.message));
   page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
   page.on('dialog',async d=>{try{await d.accept()}catch{}});
   await page.addInitScript(()=>{
     try{Object.defineProperty(navigator,'bluetooth',{configurable:true,value:{requestDevice:async()=>({name:'MotoLab Fake BT',gatt:{connect:async()=>({connected:true})}})}})}catch{}
     try{Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>({released:false,release:async()=>{}})}})}catch{}
-    try{Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{globalThis.__MOTOLAB_SHARE_CALLED__=true}})}catch{}
-    try{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{globalThis.__MOTOLAB_CLIPBOARD_CALLED__=true}}})}catch{}
   });
   await page.route('https://v-n-autodyno-production.up.railway.app/**',route=>{
     const req=route.request(),p=new URL(req.url()).pathname;
@@ -31,6 +29,7 @@ const fail=m=>{throw new Error(m)};
     else body={ok:true,items:[]};
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
   });
+  await page.route('https://example.test/**',route=>route.abort());
   const url=process.env.MOTOLAB_SMOKE_URL||'http://127.0.0.1:8080/';
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForFunction(()=>!!globalThis.MotoLabV34UI&&!!globalThis.MotoLabSimpleUI,{timeout:20000});
@@ -40,6 +39,11 @@ const fail=m=>{throw new Error(m)};
     await page.waitForSelector('#motolabBootSplash',{state:'detached',timeout:7000});
   }
   await page.waitForFunction(()=>!!globalThis.MotoLabRunAnalysis,{timeout:15000});
+  await page.evaluate(()=>{
+    try{Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{globalThis.__MOTOLAB_SHARE_CALLED__=true}})}catch{}
+    try{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{globalThis.__MOTOLAB_CLIPBOARD_CALLED__=true}}})}catch{}
+    if(globalThis.MotoLabUser)globalThis.MotoLabUser.createInvite=async()=>({url:'https://example.test/motolab-invite'});
+  });
   const release=await page.evaluate(()=>globalThis.MOTOLAB_RELEASE);
   if(release?.version!=='34.7')fail('unexpected version '+release?.version);
   await page.evaluate(()=>{
@@ -59,19 +63,21 @@ const fail=m=>{throw new Error(m)};
     await sleep(80);
   }
   async function nav(screen){
-    await clearOverlays();
+    await clearOverlays();lastAction='nav:'+screen;
+    if(!page.url().startsWith(url))fail(`left app before ${screen}: url=${page.url()} after ${lastAction}`);
     const b=page.locator(`.bottomNav .nav[data-screen="${screen}"]`).first();
-    if(!await b.count())fail('missing nav '+screen);
-    await b.click({force:true});await sleep(180);
-    const active=await page.locator('.screen.active').getAttribute('id');
-    if(active!=='screen-'+screen)fail('nav failed '+screen+' -> '+active);
+    if(!await b.count())fail('missing nav '+screen+' url='+page.url()+' last='+lastAction);
+    await b.evaluate(el=>el.click());await sleep(180);
+    const active=await page.evaluate(()=>document.querySelector('.screen.active')?.id||'');
+    if(active!=='screen-'+screen)fail(`nav failed ${screen} -> ${active||'(none)'} url=${page.url()} last=${lastAction}`);
     tested.push('nav:'+screen);
   }
-  function benign(x){return /favicon|Failed to load resource|NotFoundError|NotAllowedError|Bluetooth|media device|permission|404|smoke-test|example\.test/i.test(x)}
+  function benign(x){return /favicon|Failed to load resource|NotFoundError|NotAllowedError|Bluetooth|media device|permission|404|smoke-test|example\.test|ERR_FAILED/i.test(x)}
   async function assertClean(tag){const real=errors.filter(x=>!benign(x));if(real.length)fail(tag+' runtime errors:\n'+real.join('\n'))}
   async function clickAndVerify(locator,label){
     const n=await locator.count();if(!n)return false;
     const el=locator.first();if(!await el.isVisible().catch(()=>false))return false;
+    lastAction=label;
     const before=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
     try{await el.scrollIntoViewIfNeeded().catch(()=>{});await el.click({force:true,timeout:4000});await sleep(140)}catch(e){fail('click failed '+label+': '+e.message)}
     const after=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
@@ -81,7 +87,7 @@ const fail=m=>{throw new Error(m)};
     await nav(screen);
     const heads=page.locator(`#screen-${screen} .panel .phead[role="button"],#screen-${screen} .panel.ml-accordion > .phead`);
     for(let i=0;i<await heads.count();i++){
-      const h=heads.nth(i);if(await h.isVisible().catch(()=>false)){await h.scrollIntoViewIfNeeded().catch(()=>{});await h.click({force:true});await sleep(80);tested.push(`${screen}:accordion:${i}`);await assertClean(`${screen}:accordion:${i}`)}
+      const h=heads.nth(i);if(await h.isVisible().catch(()=>false)){lastAction=`${screen}:accordion:${i}`;await h.scrollIntoViewIfNeeded().catch(()=>{});await h.click({force:true});await sleep(80);tested.push(lastAction);await assertClean(lastAction)}
     }
     const buttons=page.locator(`#screen-${screen} button:visible`);
     const ids=await buttons.evaluateAll(es=>es.map((e,i)=>e.id||e.getAttribute('data-act')||e.getAttribute('data-screen')||e.textContent.trim().slice(0,40)||('button-'+i)));
@@ -96,9 +102,9 @@ const fail=m=>{throw new Error(m)};
   }
   await nav('analysis');
   for(let i=0;i<await page.locator('#mlAnalysisLaunch .ml-analysis-item').count();i++){
-    const x=page.locator('#mlAnalysisLaunch .ml-analysis-item').nth(i);
+    const x=page.locator('#mlAnalysisLaunch .ml-analysis-item').nth(i);lastAction='analysis:item:'+i;
     await x.evaluate(el=>{el.scrollIntoView({block:'center'});el.click()});
-    await sleep(120);tested.push('analysis:item:'+i);await assertClean('analysis:item:'+i);
+    await sleep(120);tested.push(lastAction);await assertClean(lastAction);
   }
   await page.selectOption('#mlRunA','walk-a');await page.selectOption('#mlRunB','walk-b');await page.click('#mlCompareAB',{force:true});
   const ab=(await page.locator('#mlABSummary').innerText()).toUpperCase();if(!ab.includes('MITATTU ERO')||!ab.includes('PÄÄSUUTIN'))fail('A/B comparison did not execute');tested.push('analysis:A/B compare');
@@ -121,20 +127,20 @@ const fail=m=>{throw new Error(m)};
     await ensureUserMenu();
     const acts=await page.locator('.mlbm-card [data-act]').evaluateAll(es=>es.map(e=>e.getAttribute('data-act')));
     for(const act of acts){
-      if(!act)continue;
+      if(!act)continue;lastAction='user-menu:'+act;
       await ensureUserMenu();
       const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();
       if(await b.isVisible().catch(()=>false)){
-        await b.evaluate(el=>el.click());await sleep(220);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays();
+        await b.evaluate(el=>el.click());await sleep(220);tested.push(lastAction);await assertClean(lastAction);await clearOverlays();
+        if(!page.url().startsWith(url))fail(`user action left app: ${act} url=${page.url()}`);
       }
     }
   }
-  tested.push('user-menu:invite-path-tested');
   await nav('measure');
   for(const id of ['gpsBtn','imuBtn','extMicBtn','autoBtn','manualBtn','stopBtn']){
-    const b=page.locator('#'+id);if(await b.count()&&await b.isVisible().catch(()=>false)){await b.evaluate(el=>el.click());await sleep(180);tested.push('measure-control:'+id);await assertClean('measure-control:'+id)}
+    const b=page.locator('#'+id);if(await b.count()&&await b.isVisible().catch(()=>false)){lastAction='measure-control:'+id;await b.evaluate(el=>el.click());await sleep(180);tested.push(lastAction);await assertClean(lastAction)}
   }
   const uncaught=errors.filter(x=>!benign(x));if(uncaught.length)fail('uncaught errors:\n'+uncaught.join('\n'));if(tested.length<20)fail('too few UI actions exercised: '+tested.length);
-  console.log('V34_FULL_UI_WALK_OK',JSON.stringify({version:release.version,actions:tested.length,errors:errors.length,ab:true,metadata:true,profile:true,menus:true,invite:true}));
+  console.log('V34_FULL_UI_WALK_OK',JSON.stringify({version:release.version,actions:tested.length,errors:errors.length,ab:true,metadata:true,profile:true,menus:true,invite:true,lastAction}));
   await browser.close();
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
