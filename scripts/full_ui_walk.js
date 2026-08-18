@@ -14,7 +14,21 @@ const fail=m=>{throw new Error(m)};
     try{Object.defineProperty(navigator,'bluetooth',{configurable:true,value:{requestDevice:async()=>({name:'MotoLab Fake BT',gatt:{connect:async()=>({connected:true})}})}})}catch{}
     try{Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>({released:false,release:async()=>{}})}})}catch{}
   });
-  await page.route('https://v-n-autodyno-production.up.railway.app/**',route=>route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"items":[],"user":null}'}));
+  await page.route('https://v-n-autodyno-production.up.railway.app/**',route=>{
+    const req=route.request(),p=new URL(req.url()).pathname;
+    let body={ok:true};
+    if(p==='/api/community/v1/issues')body={issues:[]};
+    else if(p==='/api/users/v1/me')body={user:{id:'walk-user',nickname:'UI WALK',status:'active',role:'tester'}};
+    else if(p==='/api/users/v1/contact')body={contact:null};
+    else if(p.includes('/community/v1/issue'))body={issue:{issueId:'walk-issue',title:'Testi',nickname:'UI WALK',category:'Ongelma',status:'open',sameCount:1,description:'Testi',comments:[]}};
+    else if(p.includes('/feedback'))body={items:[],messages:[],threads:[],feedback:[]};
+    else if(p.includes('/shares')||p.includes('/shared'))body={items:[],shares:[],runs:[]};
+    else if(p.includes('/merit'))body={items:[],merit:{score:0,level:'tester'}};
+    else if(p.includes('/invite'))body={url:'https://example.test/motolab-invite'};
+    else if(p.includes('/users/'))body={user:{id:'walk-user',nickname:'UI WALK',status:'active',role:'tester'},items:[],users:[]};
+    else body={ok:true,items:[]};
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
+  });
   const url=process.env.MOTOLAB_SMOKE_URL||'http://127.0.0.1:8080/';
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForFunction(()=>!!globalThis.MotoLabV34UI&&!!globalThis.MotoLabSimpleUI,{timeout:20000});
@@ -37,7 +51,7 @@ const fail=m=>{throw new Error(m)};
   });
   async function clearOverlays(){
     await page.evaluate(()=>{
-      for(const e of document.querySelectorAll('.modal.show,.fullchart.show'))e.classList.remove('show');
+      for(const e of document.querySelectorAll('.modal.show,.fullchart.show,.mlc-overlay,.mui-overlay,.mlf-overlay,.mlshare-overlay,.mlmerit-overlay'))e.remove?.();
       const bm=document.querySelector('.mlbm-overlay,.mlbm-backdrop');if(bm)bm.remove();
     });
     await sleep(80);
@@ -51,7 +65,7 @@ const fail=m=>{throw new Error(m)};
     if(active!=='screen-'+screen)fail('nav failed '+screen+' -> '+active);
     tested.push('nav:'+screen);
   }
-  function benign(x){return /favicon|Failed to load resource|NotFoundError|NotAllowedError|Bluetooth|media device|permission|404|smoke-test/i.test(x)}
+  function benign(x){return /favicon|Failed to load resource|NotFoundError|NotAllowedError|Bluetooth|media device|permission|404|smoke-test|example\.test/i.test(x)}
   async function assertClean(tag){const real=errors.filter(x=>!benign(x));if(real.length)fail(tag+' runtime errors:\n'+real.join('\n'))}
   async function clickAndVerify(locator,label){
     const n=await locator.count();if(!n)return false;
@@ -109,7 +123,7 @@ const fail=m=>{throw new Error(m)};
       await ensureUserMenu();
       const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();
       if(await b.isVisible().catch(()=>false)){
-        await b.evaluate(el=>el.click());await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays();
+        await b.evaluate(el=>el.click());await sleep(220);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays();
       }
     }
   }
