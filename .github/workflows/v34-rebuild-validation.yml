@@ -69,7 +69,7 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
-            -d '{"state":"success","context":"v34-rebuild-validation","description":"V34 rebuild validation passed"}'
+            -d '{"state":"success","context":"v34-rebuild-validation","description":"V34 rebuild validation passed","target_url":"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
       - name: Publish failed validation status
         if: failure()
         env:
@@ -80,4 +80,4 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
-            -d '{"state":"failure","context":"v34-rebuild-validation","description":"V34 rebuild validation failed"}'
+            -d '{"state":"failure","context":"v34-rebuild-validation","description":"V34 rebuild validation failed","target_url":"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
