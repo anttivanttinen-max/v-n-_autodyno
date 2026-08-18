@@ -75,10 +75,24 @@ for ($i = 0; $i -lt $clusters.Count; $i++) {
   $prefix = 'cluster_{0:D2}_frames_{1}-{2}' -f $number,$cluster[0].frame,$cluster[-1].frame
   $txHex = (($cluster | Where-Object direction -eq 'PC_TO_ZEEL').hex) -join ''
   $rxHex = (($cluster | Where-Object direction -eq 'ZEEL_TO_PC').hex) -join ''
+  $pollHex = (($cluster | Where-Object { $_.direction -eq 'ZEEL_TO_PC' -and $_.hex -match '^3d[0-9a-f]{2}$' } | ForEach-Object { $_.hex.Substring(2, 2) })) -join ''
   $tx = Convert-HexToBytes $txHex
   $rx = Convert-HexToBytes $rxHex
+  $poll = Convert-HexToBytes $pollHex
+  if ($null -eq $tx) { $tx = New-Object byte[] 0 }
+  if ($null -eq $rx) { $rx = New-Object byte[] 0 }
+  if ($null -eq $poll) { $poll = New-Object byte[] 0 }
   [IO.File]::WriteAllBytes((Join-Path $OutputDir ($prefix + '_pc_to_zeel.bin')), $tx)
   [IO.File]::WriteAllBytes((Join-Path $OutputDir ($prefix + '_zeel_to_pc.bin')), $rx)
+  [IO.File]::WriteAllBytes((Join-Path $OutputDir ($prefix + '_poll_values.bin')), $poll)
+  $halfLength = if (($poll.Length % 2) -eq 0) { [int]($poll.Length / 2) } else { 0 }
+  $halvesEqual = $false
+  if ($halfLength -gt 0) {
+    $halvesEqual = $true
+    for ($j = 0; $j -lt $halfLength; $j++) {
+      if ($poll[$j] -ne $poll[$j + $halfLength]) { $halvesEqual = $false; break }
+    }
+  }
   $summaries += [ordered]@{
     cluster = $number
     start_frame = $cluster[0].frame
@@ -89,6 +103,10 @@ for ($i = 0; $i -lt $clusters.Count; $i++) {
     zeel_to_pc_bytes = $rx.Length
     pc_to_zeel_sha256 = Get-Sha256Hex $tx
     zeel_to_pc_sha256 = Get-Sha256Hex $rx
+    poll_value_count = $poll.Length
+    poll_values_sha256 = Get-Sha256Hex $poll
+    repeated_half_length = $halfLength
+    repeated_halves_equal = $halvesEqual
   }
 }
 
