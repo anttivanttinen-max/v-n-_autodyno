@@ -6,9 +6,9 @@ Updated: 2026-08-18
 - Active root line on `main`: **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**.
 - `version.js` is the release-identity source; Service Worker/app shell/cache identity must stay aligned with it.
 - v34.8 was explicitly promoted to root `main` by commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` after the final validation gate; later startup/cache/auth/onboarding/session-persistence/admin-notification maintenance advanced the build identity while retaining the v34.8 BETA release label.
-- Current application/server handoff before this documentation update: `fb4628bd85e501d0f4bf603b815f3604342411a1`.
+- Checked `main` HEAD before this documentation update: `960bd80f1dad6e8e0418e804a337a642bbedb790` (`Sync admin notifications and automatic user RAW upload`). Its Railway commit status is **success**, so this HEAD supersedes the earlier failed deploy associated with `399784c6783a05f67d7a08dbf945a776ca3b6e91`.
 - The earlier **v32.9.1 FIELD / `2026-08-17u-field-recovery`** line is now historical, not the active root release.
-- The locked approved v34 visual appearance remains the baseline. Functional fixes should preserve it unless UI design is explicitly reopened.
+- The approved v34 visual style remains the baseline, but the menu/navigation implementation is **not** accepted as final: a field/user review found the current menus materially different from the previously approved menu mockup. The recovered mockup must now be treated as the binding navigation specification, not merely visual inspiration.
 - This recurring memory job is documentation-only and must not promote, deploy or alter application/server code.
 
 ## v34.8 final validation and promotion
@@ -60,9 +60,18 @@ Updated: 2026-08-18
 - `d8e8e8fcbca6da00e69b4362d47a4a77d4b6e3aa` wires `user_raw_server.js` into `beta_auth_server.js`, so the authenticated user RAW endpoint is part of the production auth/server stack.
 - `fb4628bd85e501d0f4bf603b815f3604342411a1` advances `raw_sync.js` to `v34-user-raw-auto-sync-1`: active signed-in users automatically send queued local RAW to the authenticated user endpoint with the normal beta token; manual receiver/ingest-key behavior remains a fallback compatibility path.
 - `14a1d509609f1f6d3d617337d668a3916c8da952` implements the requested owner/admin new-user notifications in `admin_pending_notify.js`. Active admins poll `/api/admin/v1/users` every 30 seconds, detect non-admin `pending` users, show an in-app approval banner, remember already-seen userIds locally and optionally create a system/PWA notification when permission has been granted.
-- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` adds the notification module to the Service Worker and notification-click handling that focuses/opens the app with `?adminUsers=1` so the approvals view can open. `399784c6783a05f67d7e4df8cc2270ea042000f` sets the active build to **`2026-08-18i-admin-pending-notify`**.
+- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` adds the notification module to the Service Worker and notification-click handling that focuses/opens the app with `?adminUsers=1` so the approvals view can open. `399784c6783a05f67d7a08dbf945a776ca3b6e91` sets the active build to **`2026-08-18i-admin-pending-notify`**.
+- `960bd80f1dad6e8e0418e804a337a642bbedb790` is the current production HEAD and has a successful Railway deployment status. This confirms deployment of the repository handoff, but it does not replace the remaining real-device functional checks below.
 - Notification content is approval-facing only (nickname/count); passwords, session tokens and owner recovery secrets remain excluded.
 - This interval changes auth/storage/sync/account-notification infrastructure only. It does not change GPS MASTER, microphone authority, RPM calculation, run acceptance, gear learning or dyno algorithms and establishes no new RAW measurement finding.
+
+## Approved menu/navigation baseline correction — 2026-08-18
+- User review found that the currently implemented menus were **not at all the menus that had been agreed**. This is a UI/navigation regression/specification mismatch, not a request to invent a new menu design.
+- The previously generated and approved reference image was recovered from the user file library as `MotoLab-sovelluksen käyttöliittymäesittely.png`. Its explicit section **“VALIKOT (AVATAAN YKSI KERRALLAAN)”** is now the binding master for navigation structure.
+- The master top-level menu hierarchy is: **Koti, Vedot, Pyörä / Profiili, Vertaa, Opi, Asetukset**. The mockup also defines their submenus and the rule that menu panels open one at a time.
+- Treat the mockup literally for menu order, grouping, visibility and submenu placement. Do not reinterpret it as merely a visual-style example.
+- Existing functionality should be moved under the correct agreed menu rather than discarded merely because the current placement is wrong. Developer/diagnostic functions should remain out of the ordinary-user surface unless the approved master explicitly exposes them.
+- No application code was changed by the archive job. Required next implementation step is a screen-by-screen audit of current v34.8 against the master mockup, followed by a correction proposal/preview before any production change.
 
 ## VäNä owner/admin recovery state
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
@@ -185,6 +194,7 @@ Updated: 2026-08-18
 
 ## Current validation priorities / unfinished work
 - Confirm root `main` v34.8 / `2026-08-18i-admin-pending-notify` on the actual iPhone: current build/cache transition, startup image/release badge, at-most-one build-scoped refresh, password-login/self-registration/session-guard/admin-notification modules, compact login panel, GPS/MIC/IMU routing, sensor persistence, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
+- Audit the current menu/navigation implementation screen-by-screen against `MotoLab-sovelluksen käyttöliittymäesittely.png`; restore the agreed **Koti / Vedot / Pyörä-Profiili / Vertaa / Opi / Asetukset** hierarchy, its approved submenus and the one-menu-at-a-time behavior before treating UI/navigation as complete.
 - Confirm GitHub Pages → Railway user/owner/password/self-registration auth end-to-end on the production origin.
 - Verify self-registration produces `pending`, admin approval changes the account to usable/active state, ordinary login works afterward, duplicate nickname/device cases are handled clearly, and blocked users remain refused.
 - Validate admin new-user alerts on the actual installed admin PWA: permission request, in-app banner, 30-second poll, seen-user de-duplication, system notification support, notification tap → approval view and no secret exposure.
@@ -201,7 +211,7 @@ Updated: 2026-08-18
 - Validate 500 rpm region learning and reject any accepted model that worsens a region.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
 - Preserve raw/top-candidate/harmonic information for replay/trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync/menu-baseline interval.
 
 ## Deferred work
 - Automatic knock / ignition autotune remains intentionally parked.
@@ -216,4 +226,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, transient refresh retry behavior, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, invite-free self-registration with pending-admin approval, admin pending-user notification behavior, persistent `/data/users` registry/state storage, authenticated per-user RAW storage and signed-in RAW auto-sync, guest-mode removal, compact login-panel behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety, non-destructive session-token handling on 401, transient refresh retry behavior, dynamic release identity, stale-cache replacement/one-build reload behavior, password-auth creation/login/change/new-device flow, invite-free self-registration with pending-admin approval, admin pending-user notification behavior, persistent `/data/users` registry/state storage, authenticated per-user RAW storage and signed-in RAW auto-sync, guest-mode removal, compact login-panel behavior, approved menu/navigation master hierarchy with one-menu-at-a-time behavior, and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
