@@ -14,7 +14,9 @@ Osta kaikki `BOM.csv`:ssä `TARVITAAN` merkityt osat. ESP32-S3 N16R8 on ehdollis
 
 ## 3. Lataa firmware
 
-Arduino IDE: asenna esp32 board package **3.3.11**, valitse tarkkaa korttia vastaava ESP32-S3-profiili, USB CDC On Boot `Enabled`, flash 16 MB ja PSRAM OPI 8 MB vain jos korttivalmistaja niin määrittää. Avaa `firmware/rpm_bt_sensor/rpm_bt_sensor.ino`, tarkista `PULSE_PIN`, käännä ja lataa. Ulkoisia Arduino-kirjastoja ei tarvita ESP32-core:n lisäksi.
+Arduino IDE: asenna esp32 board package **3.3.11**, valitse tarkkaa korttia vastaava ESP32-S3-profiili, USB CDC On Boot `Enabled`, flash 16 MB ja PSRAM OPI 8 MB vain jos korttivalmistaja niin määrittää. Avaa `firmware/rpm_bt_sensor/rpm_bt_sensor.ino`, tarkista `PULSE_PIN`, käännä ja lataa. Ulkoisia Arduino-kirjastoja ei tarvita ESP32-core:n lisäksi; firmware käyttää coren mukana tulevaa `BLE`-kirjastoa.
+
+Referenssikäännös on varmennettu Arduino-ESP32 3.3.11:llä FQBN-asetuksella `esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,USBMode=hwcdc,CDCOnBoot=cdc`. N16R8-korttivalmistajan omat flash/PSRAM/USB-valinnat ovat silti lopullinen auktoriteetti.
 
 ## 4. Asenna pickup
 
@@ -56,5 +58,4 @@ Kalibroi tasaisella kierrosluvulla GPS-auktoriteettiin tai luotettavaan huoltota
 ## Fyysinen luovutuslista
 
 Käyttäjän pitää: hankkia BOM-osat; varmistaa ESP32-kortin pinout; juottaa suojaus/piirinmuokkaus; tehdä 3–6 kierroksen eristetty pickup; asentaa suojattu kierretty pari, kotelo ja vedonpoisto; flashata firmware; suorittaa yllä olevat kahdeksan testiä; toimittaa CSV/JSONL/RAW sekä vertailuarvot hyväksyntää varten.
-
 
