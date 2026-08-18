@@ -11,6 +11,7 @@ try{process.env.ALLOWED_ORIGIN=new URL(configuredOrigin).origin}catch{process.en
 require('./feedback_server');
 require('./owner_bootstrap_server');
 require('./user_server');
+require('./password_auth_server');
 require('./owner_device_session_server');
 const http=require('http');
 const crypto=require('crypto');
@@ -50,4 +51,4 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  }
  return listener(req,res)
 })};
-console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-bootstrap=first; owner-device-session=enabled; origin=${ALLOWED_ORIGIN}`);
+console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; password-auth=enabled; owner-bootstrap=first; owner-device-session=enabled; origin=${ALLOWED_ORIGIN}`);
