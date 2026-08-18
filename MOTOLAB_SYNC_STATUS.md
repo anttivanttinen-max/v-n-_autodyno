@@ -24,10 +24,12 @@ Updated: 2026-08-18
 - After v34.8 promotion, `main` added a one-time owner bootstrap for safe VäNä admin recovery.
 - `167341692750b597ef99f691348aa42016303cc4`: adds hash-gated `owner_bootstrap_server.js`. Successful claim creates/restores `VäNä`, sets `status=active`, `role=admin`, binds the claiming device, marks the bootstrap consumed and issues a signed one-year device token.
 - `9af0fcd900ca354c58e8d75eb3016b6165220a1e`: loads owner bootstrap through `beta_auth_server.js` while retaining owner-device-session recovery.
-- `a9551311c2b658c1a162cd7ab5a8ff1679fffc92`: adds `/api/users/v1/owner-bootstrap-status` with readiness-only state (`armed`, `consumed`, `adminExists`).
+- `a9551311c2b658c1a162cd7ab5a8ff1679fffc92`: adds `/api/users/v1/owner-bootstrap-status` with readiness-only bootstrap state.
 - `fc1ae50fd0c6eeca05f6df8016fe89a92fb0aded`: updates the bootstrap hash to the current short one-time owner code. The plaintext code must not be committed to memory/docs or exposed to users other than through the intended recovery flow.
-- Bootstrap safety: it refuses after consumption, refuses when an admin already exists, requires configured `BETA_TOKEN_SECRET` and a deviceId, and nickname `VäNä` by itself never grants admin rights.
-- Current operational follow-up: verify the matching server code/config is actually deployed on Railway, inspect readiness/consumption state when needed, complete the owner claim if still pending, and verify the resulting owner/device session persists across normal PWA updates.
+- `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`: allows one separate post-bootstrap owner recovery when the original bootstrap is already consumed and an admin already exists. Recovery rebinds/adds the requesting device to the existing admin, refreshes VäNä active/admin state and issues a new signed one-year device token.
+- The post-bootstrap recovery is itself one-time. It records `ownerBootstrapRecoveryConsumedAt` and the recovery device, and later attempts are refused. `/api/users/v1/owner-bootstrap-status` now also reports readiness-only `recoveryUsed`.
+- Bootstrap safety remains state-bound: ordinary nickname `VäNä` never grants admin rights; initial bootstrap still requires the configured secret and a deviceId; the recovery path does not create a repeatable or universal hidden admin backdoor.
+- Current operational follow-up: verify the matching `df6e074…` server code/config is actually deployed on Railway, inspect bootstrap/recovery status when needed, use recovery only if genuinely required, and verify the resulting owner/device session persists across normal PWA updates.
 - Do not add or accept a universal hidden admin backdoor.
 
 ## v34.7 profile / analysis / post-run metadata work retained in v34.8
@@ -136,7 +138,7 @@ Updated: 2026-08-18
 ## Current validation priorities / unfinished work
 - Confirm root `main` v34.8 on the actual iPhone: GPS/MIC/IMU routing, sensor persistence, first-load splash/login, KÄYTTÄJÄ submenu clearance, centered gear popup, profile selector, LIVE navigation, Run A/B analysis and key controls.
 - Confirm GitHub Pages → Railway user/owner auth end-to-end on the production origin.
-- Verify the one-time owner bootstrap is deployed/configured correctly, then verify owner/admin session persistence across normal PWA updates.
+- Verify the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery are deployed/configured correctly, then verify owner/admin session persistence across normal PWA updates.
 - Validate v32.8 microphone-stability behavior on real hardware.
 - Validate v32.7 persistent diagnostics: abrupt termination, `previous_session_unclean`, queue/error persistence and RAW replay.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
@@ -159,4 +161,4 @@ Updated: 2026-08-18
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety and owner recovery rules; keep native AirPods motion experimental until validated on a real device.
+Before merging measurement or platform changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/RAW data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 Browser + Service Worker regression coverage, submenu/status clearance, first-load splash/session bootstrap, Run A/B comparison, post-run metadata immutability, gear-popup/gear-metadata checks, phone candidate bridge, user identity/admin-role safety and both one-time owner recovery gates; keep native AirPods motion experimental until validated on a real device.
