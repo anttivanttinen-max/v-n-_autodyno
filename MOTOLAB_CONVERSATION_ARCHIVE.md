@@ -165,6 +165,18 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Required field validation: confirm Railway actually deploys the matching server module, then test on real devices: initial invite activation + password creation, normal nickname/password login, password change, login on a second/new device, blocked-user refusal, persistence across PWA updates, and coexistence with the existing non-destructive owner/device-session recovery paths.
 - No new RAW measurement finding was established by this password-auth interval.
 
+## v34.8 invite-free self-registration — 2026-08-18
+- Checked `main` HEAD before this archive update: `6c70afab88bcb7a10231560c89b1634e96bca79e`. Root `version.js` identifies **v34.8 BETA / build `2026-08-18g-self-register`**.
+- Product decision changed first-time onboarding: ordinary users no longer need an invite link/code to create an account. They choose a nickname + password, register their current device, and enter `pending` state until the administrator approves them.
+- Commit `e5520b01e3700c36853b35af0d9f25902b96e7d9` adds `/api/users/v1/password-register`. New self-registered users are created with `status=pending`, `role=user`, `registrationSource=password_self_registration`, a `scrypt-v1` password record and the registering device bound to the account.
+- Registration validates/sanitizes nickname, enforces the existing 8–128 character password rule, requires `deviceId`, refuses duplicate nickname or a device already linked to another user, and adds in-memory rate limiting for registration/login attempts.
+- Commits `3bfee05d3ce7276dd29b5f2aa2d8fc28e525a54e`, `32fbf1cd3642abbfad9d1abcb707c7c150eb5bbc` and `09ce814c1512799717b817afe53c90dfce59fe80` replace the normal invite activation UI with **KIRJAUDU / REKISTERÖIDY**, add the self-registration client flow and refresh the build/cache identity.
+- Guest mode was removed from the startup flow in `6675c0d11eaf30acf0d0c0e34ac807d3ddbca618`; startup now requires an active account/session to leave the login gate. Owner/admin recovery remains a separate explicit recovery control and is not generalized to ordinary users.
+- `6c70afab88bcb7a10231560c89b1634e96bca79e` compacts the startup login panel for smaller phone viewports without changing measurement logic.
+- This onboarding/auth interval did **not** change measurement, RPM, RAW, run acceptance, gear learning or dyno algorithms, and established no new RAW measurement finding.
+- Required deployment/field validation: confirm Railway is running the matching self-registration backend; verify a new user becomes visible as `pending`, cannot obtain normal active-user behavior before approval, becomes usable after admin approval, can subsequently log in on the registered/new device according to password/device rules, and remains blocked when administratively blocked. Also verify owner recovery and the session-safe 401 behavior still work after the onboarding change.
+- UI field check: verify the compact login panel, keyboard/safe-area behavior and absence of the old guest/invite dependency on the actual installed phone/PWA.
+
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
 - Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
@@ -180,12 +192,13 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18f-password-auth`** unless a newer checked `version.js` says otherwise.
+- Treat root `main` as **v34.8 BETA / `2026-08-18g-self-register`** unless a newer checked `version.js` says otherwise.
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
-- Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin, including password-auth endpoints.
+- Confirm the GitHub Pages → Railway user/owner/password/self-registration auth path end-to-end on the actual deployed origin.
+- Validate self-registration → `pending` → admin approval → active login end-to-end and verify duplicate nickname/device and rate-limit behavior does not strand legitimate users.
 - Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
 - Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
-- Validate the `2026-08-18f-password-auth` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, invite-link prefill and password-login module availability.
+- Validate the `2026-08-18g-self-register` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, password-login/self-registration module availability and compact login panel behavior.
 - Validate password creation/login/change and new-device binding on real devices; ensure password auth coexists with existing device/session recovery and blocked users cannot log in.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
@@ -194,7 +207,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
