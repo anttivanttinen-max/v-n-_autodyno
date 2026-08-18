@@ -117,7 +117,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - GitHub Actions run `32111288808` completed successfully: application JS syntax, server/validation-script syntax, static rebuild validation x3, identity/server integration x3, measurement invariant markers, Browser + Service Worker smoke x2 and Full user UI walk all passed.
 - Browser regression coverage includes first-load splash, splash/login safe area, Run A/B comparison, post-run metadata persistence, gear metadata editing without measurement-data mutation, centered gear confirmation colors/confirmation, phone candidate bridge, user-menu feedback placement, profile selection, LIVE navigation and main-menu runtime behavior.
 - Commit `a37013ef85b4b089f7544a7a8753d8ca2d8670d9` explicitly **promoted v34.8 BETA to root `main` while preserving project-memory files**.
-- Current root `version.js` on `main` therefore identifies v34.8 BETA / `2026-08-18c-final-ui-gear-auth`; v32.9.1 is no longer the active root release line.
+- Root `version.js` initially identified v34.8 BETA / `2026-08-18c-final-ui-gear-auth`; later startup/cache-reset maintenance advanced the build identity without changing the v34.8 release label.
 - This promotion does not by itself prove physical iPhone GPS/MIC/IMU routing; hardware validation remains separate.
 
 ## VäNä owner/admin recovery after v34.8 promotion
@@ -130,7 +130,6 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Commit `df6e07477ccaf3e2a28c2c9deb82eed627ed660a` adds a separate **single post-bootstrap owner recovery** path for the case where bootstrap is already consumed and an admin exists. It rebinds/adds the claiming device to the existing admin, refreshes VäNä active/admin state, records recovery metadata and issues a new signed one-year device token.
 - That recovery is itself one-time: `ownerBootstrapRecoveryConsumedAt`/device metadata is stored and a second recovery attempt returns an already-used error. The status endpoint now also exposes readiness-only `recoveryUsed` state; it does not expose the recovery secret.
 - This changes the earlier safety wording: a consumed initial bootstrap no longer blocks the one explicitly allowed recovery attempt, but it still does not create a universal or repeatable admin backdoor.
-- Current inspected `main/HEAD` before this documentation update was `df6e07477ccaf3e2a28c2c9deb82eed627ed660a`.
 - Remaining field check: confirm Railway is running the matching server commit/configuration, verify status including `recoveryUsed`, exercise recovery only if genuinely required, and verify the resulting owner device session persists across normal PWA updates. Do not treat repository code alone as proof that Railway deployment/state is correct.
 
 ## 2026-08-18 session-token loss regression and fix
@@ -140,8 +139,18 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - The same commit lets owner-device restoration be retried deliberately (`restoreOwnerDevice(true)`) instead of being permanently blocked by an earlier failed one-shot attempt in the same page lifetime.
 - Successful owner-device recovery still replaces the local token only after the server has actually returned a new valid token; failed recovery leaves the prior local token intact for diagnostics/retry instead of erasing it.
 - This is an auth/session persistence fix only; it did not alter measurement, RPM, RAW, run acceptance, gear learning or dyno logic.
-- Current inspected `main/HEAD` after this fix is `c47de47eb67a00a131e6eea5f829a9879ba62ccb`.
 - Required field validation: on the real iPhone/PWA, verify an existing owner/admin session survives normal reload/update, verify a deliberately invalid/401 session can recover on the same bound device, and verify failed recovery does not silently erase the locally retained token or user state.
+
+## v34.8 startup image, invite-prefill and cache-reset maintenance — 2026-08-18
+- After the session-safe auth fix, `main` advanced by six startup/PWA commits to `10e8802774475b3871aa66c7b86f9ea2dc4d68fa`.
+- A new local start-screen asset is used from `assets/motolab-start-v34.png`; startup presents it sharply with `object-fit: contain` on black and a release badge sourced dynamically from `MOTOLAB_RELEASE`.
+- `splash_boot.js` advanced to `motolab-splash-boot-v2`: an `?invite=` link or pending session invite now pre-fills the startup activation code and tells the user that the invite was found, instead of requiring manual re-entry.
+- The release remains **v34.8 BETA**, but current `version.js` build identity is **`2026-08-18e-cache-reset`**.
+- `32ec02580ad3264da91eaea10f7119ab65f9c199` rebuilt the Service Worker cache generation: new cache namespace, current start image in static cache, network-first/reload handling for JS/JSON/manifest/image assets, deletion of older MotoLab caches during activation, and an SW-active message to clients.
+- `10e8802774475b3871aa66c7b86f9ea2dc4d68fa` aligns `version.js` with the `e-cache-reset` build, keeps displayed version/title labels dynamic, registers the Service Worker with `updateViaCache: 'none'`, requests an update, skips a waiting worker, and permits a single session-scoped reload after the matching new SW becomes active.
+- These commits target stale-startup/cache/version-label behavior and invite usability; no measurement, RPM, RAW, gear-learning, run-acceptance or dyno algorithm change is present in the six-commit diff.
+- Real-phone follow-up: verify that an installed iPhone/PWA actually leaves the older cache, shows the `2026-08-18e-cache-reset` v34.8 shell/start screen, performs at most one automatic refresh for this build, preserves the session-safe owner login, and correctly pre-fills invite activation links.
+- No new RAW measurement finding was established by this startup/cache-reset interval.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
@@ -158,11 +167,12 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18c-final-ui-gear-auth`** unless a newer checked `version.js` says otherwise.
+- Treat root `main` as **v34.8 BETA / `2026-08-18e-cache-reset`** unless a newer checked `version.js` says otherwise.
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
 - Confirm the GitHub Pages → Railway user/owner auth path end-to-end on the actual deployed origin.
 - Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
 - Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
+- Validate the `2026-08-18e-cache-reset` PWA transition on the actual installed iPhone: old cache removal, correct start image/version badge, at most one build-scoped automatic reload, and invite-link prefill.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
 - Real-device validate v32.8 microphone stability logic retained under newer lines: no false OFF/ON storm while still recovering a genuinely ended track.
@@ -170,7 +180,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
