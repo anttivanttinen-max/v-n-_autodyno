@@ -19,6 +19,7 @@ DEFAULT_BLOCK = WORK_DIR / "analyzer_restore_snapshot" / "cluster_10_frames_5304
 BRIDGE = WORK_DIR / "ZeelProg-SafeProgramBridge.ps1"
 READ_BRIDGE = WORK_DIR / "ZeelProg-ControlBridge.ps1"
 ANALYZER = WORK_DIR / "Analyze-ZeelUsbPcapRead.ps1"
+CAPTURE_STARTER = WORK_DIR / "Start-MotoLabZeelUsbCapture.ps1"
 CAPTURE_DIR = Path.home() / "Documents" / "MotoLab" / "ZeelCapture"
 LIVE_READ_DIR = APP_DIR / "live_reads"
 VERSION_DIR = APP_DIR / "versions"
@@ -103,6 +104,7 @@ class ZeelStudio(tk.Tk):
         self.quality_var = tk.StringVar(value="Ei dataa")
         self.capture_var = tk.StringVar(value="Ei tarkistettu")
         self._styles()
+        self._build_menu()
         self._build()
         if DEFAULT_BLOCK.exists():
             self.load_block(DEFAULT_BLOCK, set_baseline=True)
@@ -125,6 +127,93 @@ class ZeelStudio(tk.Tk):
         style.configure("Treeview", background="#101820", fieldbackground="#101820", foreground="#d8e3ea", rowheight=28)
         style.configure("Treeview.Heading", background="#253744", foreground="white")
 
+    def _build_menu(self):
+        menubar = tk.Menu(self)
+
+        file_menu = tk.Menu(menubar, tearoff=False)
+        file_menu.add_command(label="Avaa 480 B lukublokki…", command=self.open_block, accelerator="Ctrl+O")
+        file_menu.add_command(label="Tallenna nykyinen versio", command=self.save_version, accelerator="Ctrl+S")
+        file_menu.add_command(label="Avaa lähdekansio", command=self.open_source_folder)
+        file_menu.add_separator()
+        file_menu.add_command(label="Sulje", command=self.destroy, accelerator="Alt+F4")
+        menubar.add_cascade(label="Tiedosto", menu=file_menu)
+
+        connection_menu = tk.Menu(menubar, tearoff=False)
+        connection_menu.add_command(label="Päivitä yhteystila", command=self.refresh_environment, accelerator="F5")
+        connection_menu.add_command(label="Tarkista Zeel-laite", command=self.inspect_device)
+        connection_menu.add_command(label="Lue CDI turvallisesti", command=self.read_cdi, accelerator="Ctrl+R")
+        connection_menu.add_separator()
+        connection_menu.add_command(label="Bluetooth-silta — ei käytössä", state="disabled")
+        connection_menu.add_command(label="Wi-Fi-silta — odottaa ESP32-testiä", state="disabled")
+        menubar.add_cascade(label="Yhteys", menu=connection_menu)
+
+        device_menu = tk.Menu(menubar, tearoff=False)
+        device_menu.add_command(label="Laitteen tunnistus", command=self.inspect_device)
+        device_menu.add_command(label="Lue kaikki asetukset", command=self.read_cdi)
+        device_menu.add_separator()
+        device_menu.add_command(label="Kirjoita asetukset — LUKITTU", state="disabled")
+        device_menu.add_command(label="PROGRAM — LUKITTU", state="disabled")
+        device_menu.add_command(label="Palauta snapshot — ei vielä käytössä", state="disabled")
+        menubar.add_cascade(label="CDI-laite", menu=device_menu)
+
+        maps_menu = tk.Menu(menubar, tearoff=False)
+        maps_menu.add_command(label="Sytytyskartta 1", command=lambda: self._select_tab(0))
+        maps_menu.add_command(label="Sytytyskartta 2", command=lambda: self._select_tab(0))
+        maps_menu.add_command(label="YPVS / PV -käyrä", command=lambda: self._select_tab(1))
+        maps_menu.add_command(label="Limiter", command=lambda: self._select_tab(1))
+        maps_menu.add_command(label="Shift Light", command=lambda: self._select_tab(1))
+        maps_menu.add_separator()
+        maps_menu.add_command(label="Muokkaus — LUKITTU", state="disabled")
+        menubar.add_cascade(label="Kartat", menu=maps_menu)
+
+        versions_menu = tk.Menu(menubar, tearoff=False)
+        versions_menu.add_command(label="Tallenna versio", command=self.save_version)
+        versions_menu.add_command(label="Vertaa tiedostoon…", command=self.compare_file)
+        versions_menu.add_command(label="Näytä versiot ja erot", command=lambda: self._select_tab(2))
+        versions_menu.add_command(label="Päivitä versioluettelo", command=self.refresh_versions)
+        versions_menu.add_separator()
+        versions_menu.add_command(label="Rollback — vaatii varmennetun snapshotin", state="disabled")
+        menubar.add_cascade(label="Versiot", menu=versions_menu)
+
+        capture_menu = tk.Menu(menubar, tearoff=False)
+        capture_menu.add_command(label="Näytä RAW ja todistusaineisto", command=lambda: self._select_tab(3))
+        capture_menu.add_command(label="Päivitä USBPcap-tila", command=self.refresh_environment)
+        capture_menu.add_command(label="Avaa kaappauskansio", command=self.open_capture_folder)
+        capture_menu.add_separator()
+        capture_menu.add_command(label="Käynnistä kaappaus", command=self.start_capture)
+        capture_menu.add_command(label="Pysäytä kaappaus — käsin vahvistettava", state="disabled")
+        menubar.add_cascade(label="Kaappaus", menu=capture_menu)
+
+        tools_menu = tk.Menu(menubar, tearoff=False)
+        tools_menu.add_command(label="Tarkista datan eheys", command=self.verify_current_data)
+        tools_menu.add_command(label="Näytä auditointiloki", command=lambda: self._select_tab(4))
+        tools_menu.add_command(label="Päivitä auditointiloki", command=self.refresh_audit)
+        tools_menu.add_separator()
+        tools_menu.add_command(label="Autotune-ehdotukset — suunnitteluvaihe", state="disabled")
+        tools_menu.add_command(label="Protokollan kenttäkartoitus — vain analyysi", state="disabled")
+        menubar.add_cascade(label="Työkalut", menu=tools_menu)
+
+        view_menu = tk.Menu(menubar, tearoff=False)
+        for index, label in enumerate(("Sytytyskartat", "YPVS / PV", "Versiot ja erot", "RAW ja todistusaineisto", "Auditointi", "Turvallinen kirjoitus")):
+            view_menu.add_command(label=label, command=lambda tab=index: self._select_tab(tab))
+        view_menu.add_separator()
+        view_menu.add_command(label="Päivitä kaikki", command=self.refresh_all, accelerator="Ctrl+F5")
+        menubar.add_cascade(label="Näkymä", menu=view_menu)
+
+        help_menu = tk.Menu(menubar, tearoff=False)
+        help_menu.add_command(label="MotoRLab Zeel Studion ohje", command=self.show_help)
+        help_menu.add_command(label="Turvarajat", command=self.show_safety)
+        help_menu.add_separator()
+        help_menu.add_command(label="Tietoja", command=self.show_about)
+        menubar.add_cascade(label="Ohje", menu=help_menu)
+
+        self.configure(menu=menubar)
+        self.bind_all("<Control-o>", lambda _event: self.open_block())
+        self.bind_all("<Control-s>", lambda _event: self.save_version())
+        self.bind_all("<Control-r>", lambda _event: self.read_cdi())
+        self.bind_all("<F5>", lambda _event: self.refresh_environment())
+        self.bind_all("<Control-F5>", lambda _event: self.refresh_all())
+
     def _build(self):
         header = ttk.Frame(self, padding=(20, 16))
         header.pack(fill="x")
@@ -144,6 +233,7 @@ class ZeelStudio(tk.Tk):
             ttk.Label(box, textvariable=variable, style="Card.TLabel").pack(anchor="w")
 
         notebook = ttk.Notebook(self)
+        self.notebook = notebook
         notebook.pack(fill="both", expand=True, padx=20, pady=(0, 12))
         self.maps_tab = ttk.Frame(notebook, padding=14)
         self.pv_tab = ttk.Frame(notebook, padding=14)
@@ -282,6 +372,51 @@ class ZeelStudio(tk.Tk):
         VERSION_DIR.mkdir(parents=True, exist_ok=True)
         bins = sorted(VERSION_DIR.glob("*.bin"), key=lambda p: p.stat().st_mtime, reverse=True)
         self.version_var.set(f"Tallennettuja versioita: {len(bins)}" + (f" · uusin {bins[0].name}" if bins else ""))
+
+    def _select_tab(self, index: int):
+        self.notebook.select(index)
+
+    def refresh_all(self):
+        self.refresh_environment(); self.refresh_versions(); self.refresh_audit()
+        self._log("Kaikki näkymät päivitetty.")
+
+    def open_capture_folder(self):
+        CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
+        os.startfile(CAPTURE_DIR)
+
+    def start_capture(self):
+        if not CAPTURE_STARTER.exists():
+            messagebox.showerror("Kaappaustyökalu puuttuu", str(CAPTURE_STARTER)); return
+        try:
+            subprocess.Popen(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(CAPTURE_STARTER)], creationflags=subprocess.CREATE_NO_WINDOW)
+            self._log("USB-kaappauksen käynnistys pyydetty.")
+            self._audit("capture_start_requested", str(CAPTURE_STARTER))
+            self.after(1500, self.refresh_environment)
+        except OSError as error:
+            messagebox.showerror("Kaappaus ei käynnistynyt", str(error))
+
+    def verify_current_data(self):
+        if self.raw is None or self.model is None:
+            messagebox.showinfo("Ei dataa", "Avaa ensin 480 tavun lukublokki."); return
+        checks = {
+            "Koko on 480 tavua": len(self.raw) == BLOCK_SIZE,
+            "SHA-256 täsmää": sha256(self.raw) == self.model["raw_sha256"],
+            "Shift Light -peiliarvo täsmää": self.model["shift_light_rpm"] == self.model["shift_light_mirror_rpm"],
+            "Kartta 1 sisältää 10 pistettä": len(self.model["ignition_map_1"]) == 10,
+            "Kartta 2 sisältää 10 pistettä": len(self.model["ignition_map_2"]) == 10,
+        }
+        report = "\n".join(("✓ " if passed else "✗ ") + name for name, passed in checks.items())
+        self._audit("integrity_checked", json.dumps(checks, ensure_ascii=False))
+        messagebox.showinfo("Datan eheystarkistus", report)
+
+    def show_help(self):
+        messagebox.showinfo("MotoRLab Zeel Studio", "1. Käynnistä USB-kaappaus.\n2. Tarkista Zeel-laite.\n3. Kytke CDI ja valitse Lue CDI.\n4. Tarkista RAW, SHA-256 ja laatumerkinnät.\n5. Tallenna versio ja vertaa aiempaan.\n\nKirjoitus CDI:lle ei ole käytössä.")
+
+    def show_safety(self):
+        messagebox.showwarning("Turvarajat", "Sovellus toimii vain luku -tilassa. PROGRAM ja asetusten kirjoitus ovat lukittuina. GPS säilyy RPM-oppimisen auktoriteettina, kameran RPM-dataa ei käytetä ja raakaa audiota ei hyväksytä oppimiseen ennen moottorisignaalin todentamista.")
+
+    def show_about(self):
+        messagebox.showinfo("Tietoja", "VÄNÄ MotoRLab — Zeel Studio\nKehitysversio\nRAW-first · read-only · audit trail")
 
     def open_block(self):
         path = filedialog.askopenfilename(title="Valitse 480 tavun lukublokki", filetypes=[("Binary", "*.bin"), ("Kaikki", "*.*")])

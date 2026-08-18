@@ -12,6 +12,18 @@ Sovellus avaa oletuksena paikallisen, lopulliseen baselineen palautetun 480 tavu
 
 ## Nykyiset ominaisuudet
 
+### Valikot
+
+- **Tiedosto:** avaa RAW-blokki, tallenna versio, avaa lähdekansio ja sulje
+- **Yhteys:** päivitä yhteys, tarkista laite ja suorita turvallinen CDI-luku
+- **CDI-laite:** tunnistus ja kaikkien asetusten luku; kirjoitus, Program ja rollback näkyvät lukittuina
+- **Kartat:** sytytyskartat, YPVS/PV, limiter ja Shift Light
+- **Versiot:** tallennus, vertailu, versioluettelo ja rollback-varaus
+- **Kaappaus:** RAW-näkymä, USBPcap-tila, kaappauskansio ja kaappauksen käynnistys
+- **Työkalut:** eheystarkistus, auditointi sekä varaukset autotunelle ja protokollakartoitukselle
+- **Näkymä:** suora siirtyminen jokaiseen välilehteen ja kaikkien tilojen päivitys
+- **Ohje:** käyttöohje, turvarajat ja versiotiedot
+
 - PCDI-10VT:n laitetilan tarkistus ZeelProg-sillan kautta
 - Ignition Map #1 ja #2 graafisesti ja taulukkona
 - Shift Light -peilien yhdenmukaisuuden tarkistus
