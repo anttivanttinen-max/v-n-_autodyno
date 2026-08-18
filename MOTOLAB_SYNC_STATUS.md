@@ -1,11 +1,13 @@
 # VÄNÄ MotoLab — shared development sync status
 
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 ## Current application line
 - Active published line on `main`: **v32.9.1 FIELD / build `2026-08-17u-field-recovery`**.
 - Field-recovery release identity was created without changing measurement logic, then the Service Worker was changed to force a clean field-recovery cache and clear older MotoLab/MotorLab caches on activation.
-- `main` contains documentation-only memory commits above the application line; do not infer a newer published application build from those archive commits.
+- `main` contains documentation-only memory commits and repository-cleanup commits above the application line; do not infer a newer published application build from those commits.
+- Before this sync update, `main/HEAD` was `0ac6230584d210d2c61c9f178c38e5b2c103e3e1`; the later archive/status commits are documentation-only.
+- The 2026-08-18 cleanup removed the obsolete duplicate `ty/` tester copy, obsolete one-off patch workflows and old v31 patch/zip artifacts without changing the root published build identity.
 - v32.9 remains the LIVE telemetry base beneath the field-recovery identity; v32.8 microphone-stability correction and v32.7 persistent diagnostics are preserved.
 - `version.js` is the release-identity source and the Service Worker/app shell must stay aligned with it.
 - v31 remains the historical core baseline; v32.x modules are integrated into the published PWA shell.
@@ -13,11 +15,12 @@ Updated: 2026-08-17
 - Current temporary GPS power calibration in `dyno_curve_v2.js` remains **1.07** (`v32-dyno-curve-2.2`); the earlier 1.85 experiment is superseded.
 
 ## Separate v34 line — do not confuse with main
-- v34 remains separate and is **not** the currently published `main` field line.
+- v34 remains separate and is **not** the currently published root `main` field line.
 - Older release branch `release/v34.0-2026-08-17` remains at `58d270274b979847fd760f7681818d9e7034b2ec` / v34.0 build `2026-08-17o-rebuild-ui-i18n`.
-- Current inspected rebuild work is newer: **`dev/v34-rebuild` at `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0`**. Its app identity remains **v34.6 DEV / build `2026-08-17w-v34-rebuild-swfix`**; the two newer commits adjust user-submenu layering and its browser regression test rather than changing release identity.
+- `dev/v34-rebuild` has advanced beyond the earlier v34.6 handoff. Current inspected release identity is **v34.7 BETA / build `2026-08-18b-splash-run-analysis`**.
+- v34.7 retains the approved splash/login startup work and locked visual baseline while adding functional run-analysis/profile fixes.
 - User decision: the completed v34 visual appearance is finished and **locked as the approved visual baseline**. Functional work should preserve that appearance unless UI design is explicitly reopened.
-- v34 has not been promoted/installed by the memory job; explicit promotion approval and remaining real-device validation are still required.
+- v34 has not been promoted/installed by the memory job; explicit promotion approval and remaining validation are still required.
 
 ## v34.6 DEV validation / Service Worker fix
 - Chromium + Service Worker browser smoke testing is part of the v34 rebuild validation flow.
@@ -30,8 +33,19 @@ Updated: 2026-08-17
 - A phone UI report identified the **KÄYTTÄJÄ submenu overlapping the notification/status area**.
 - Commit `cd244ecad4902229d0c4d17a3460e3ab2e1e7d5e` changes `beta_menu.js` to `motolab-beta-menu-v4`, adds safe-area-aware top clearance, bounds menu height with `100dvh`, and keeps toast/status layering above the menu without redesigning the approved UI.
 - Commit `ae6f10036be8152f14ddef1b5afe1c8d1c2229d0` extends the 390×844 browser smoke test and explicitly fails if the submenu top is inside the notification/status clearance (`menuBox.y < 88`).
-- No combined CI status is published for `ae6f100`; therefore preserve the earlier green `f203b3e` validation record and treat the newer overlap fix as code/test-complete but still needing an actual-phone confirmation or later green CI run.
-- The separate v34 login/Railway auth-origin issue remains unresolved by these submenu commits.
+- Preserve the earlier green `f203b3e` validation record; the later v34.7 gate must be treated separately and should not be called green without an explicit later CI result.
+
+## v34.7 profile / analysis / post-run metadata work
+- Bike/profile selection is fixed so the selected bike immediately becomes and remains the active profile.
+- Analysis now exposes explicit **Run A / Run B** selectors so two different stored runs can be selected directly for comparison.
+- A/B comparison evaluates measured power/torque together with stored tuning/setup differences instead of treating a single run as the only analysis target.
+- Run tuning/setup metadata may be completed or corrected after the run.
+- Post-run editing is metadata-only: it must never rewrite `run.data`, RAW/source-specific samples or learning data. Edited fields carry post-run origin/timestamp information.
+- Comparison must warn about different bike profiles, gears, quality or setup signatures and must not claim tuning causation where the runs are not sufficiently comparable.
+- Browser validation now covers splash/login handoff, real bike-profile selection, A/B comparison and post-run metadata persistence without measurement-data mutation. A full UI-walk script is present to exercise buttons, menus and key flows.
+- Production/fallback shells are intended to use the allowed GitHub Pages origin with the Railway backend, avoiding the previous different-origin/CDN auth-CORS failure mode.
+- v34.7 promotion gate remains: static validation, identity/server tests, measurement invariants and Chromium + Service Worker smoke must all pass before promotion. Do not assume that gate is green until a later explicit result confirms it.
+- Physical iPhone GPS/MIC/IMU routing still requires real-device validation; browser automation cannot prove hardware routing.
 
 ## Measurement strategy
 - Road-test / learning work uses **GPS MASTER + MIC LEARN** unless a specific explicit test mode says otherwise.
@@ -66,6 +80,7 @@ Updated: 2026-08-17
 - Existing local RAW history can be replayed through newer learning logic instead of requiring only new road data after every algorithm change.
 - Auto Gear Learn remains present, but GPS MASTER + MIC LEARN must not let microphone shadow RPM gain gear-learning authority.
 - The overnight trainer may publish a replacement model only after validation; bad/non-improving models must be rejected and rollback history kept in `Motolab-data`.
+- Historical sweep/test/ZIP datasets should be reprocessed through the newest accepted detection/learning plan before model validation is considered complete.
 
 ## Full-trip 3rd-gear GPS + MIC research
 - `trip_research.js` provides the **3. VAIHTEEN GPS + MIC TUTKIMUSAJO** flow.
@@ -147,6 +162,7 @@ Updated: 2026-08-17
 - Development comparisons should primarily show change relative to the **previous MotoLab pull**, treated as the 100% reference.
 - PerfExpert results may be compared against the same previous MotoLab reference.
 - Compare peak power, peak torque and useful-range/curve performance, not only one peak point.
+- v34.7 additionally supports direct stored-run **Run A / Run B** selection. This is complementary to the previous-pull development reference rule; comparability warnings are required when profile/gear/quality/setup differ materially.
 
 ## Contact RPM reference
 - Preferred historical contact mounting: extension nut + aluminium shim + tightly coupled BT earbud/contact microphone.
@@ -160,14 +176,16 @@ Updated: 2026-08-17
 
 ## Current validation priorities
 - Keep `main` v32.9.1 FIELD stable while v34 validation remains separate.
-- Preserve the green Chromium + Service Worker smoke result from `f203b3e` and keep the submenu-overlap assertion added at `ae6f100`.
-- Resolve and real-device validate the v34 GitHub Pages/Railway login-auth origin path end-to-end; submenu fixes do not prove login works.
-- Confirm the v34 user submenu clears the notification/status area on the actual phone viewport.
-- Real-device validate v34 on iPhone for GPS/microphone behavior before promotion; browser smoke does not prove hardware sensor behavior.
+- Validate the v34.7 bike/profile selector, Run A/B comparison and post-run setup metadata editing; prove edits do not mutate measurement/RAW/learning data.
+- Run the v34.7 promotion gate: static validation, identity/server tests, measurement invariants, Chromium + Service Worker smoke and the full UI walk. Do not promote on partial success.
+- Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance and key buttons/menus on the actual phone viewport.
+- Confirm the GitHub Pages -> Railway auth path end-to-end on the production origin and do not reintroduce the earlier different-origin/CDN CORS failure.
+- Real-device validate v34 on iPhone for GPS/MIC/IMU behavior before promotion; browser smoke does not prove hardware sensor behavior.
 - Real-device validate v32.8 microphone stability: no false OFF/ON cycle while still recovering a genuinely ended track.
 - Real-device validate LIVE navigation and telemetry on the v32.9.1 field line without measurement-performance regression.
 - Confirm LIVE GPS/MIC/IMU/RAW/SYNC traffic lights match actual states and that queue/error details are readable.
 - Validate v32.7 diagnostics on a real iPhone: confirm errors/queue transitions survive reload, `previous_session_unclean` appears after an abrupt termination, and retained diagnostic events replay into RAW.
+- Reprocess available historical sweep/test/ZIP RAW data through the newest accepted RPM detection/learning plan.
 - Validate adaptive candidate tracking against GPS across acceleration, steady throttle and deceleration.
 - Validate 500 rpm region learning and ensure no region gets worse when a model is accepted.
 - Validate Auto Gear Learn interaction without weakening GPS MASTER authority.
@@ -186,4 +204,4 @@ Updated: 2026-08-17
 - Before new implementation work, check current `main`, this status, the conversation archive and relevant technical notes.
 
 ## Regression rule
-Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 browser/Service Worker smoke regression coverage, v34 user-submenu notification-area clearance assertion, and keep native AirPods motion experimental until validated on a real device.
+Before merging measurement changes, preserve GPS, GPS MASTER + MIC LEARN, GPS ONLY, explicit phone-mic modes, continuous ARM AUTO multi-pull capture, AutoRide, manual run recording, run persistence, profiles, Knowledge Base, learning/raw data and RAW JSON export, RAW replay, full-trip research capture, automatic research/RAW sync, vehicle lookup, maintenance, compact Settings UI, DT startup profile, release identity/version validation, PWA update behavior, persistent diagnostics, v32.8 microphone-stability correction, LIVE technical inspection, v34 browser/Service Worker smoke regression coverage, v34 user-submenu notification-area clearance assertion, v34.7 Run A/B and post-run metadata immutability checks, and keep native AirPods motion experimental until validated on a real device.
