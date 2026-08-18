@@ -16,10 +16,10 @@ Do not connect an ignition-primary, CDI, coil-negative, spark-plug lead, or any 
 - `TEST_PROTOCOL.md` — calibration and numeric acceptance gates
 - `MOTOLAB_INTEGRATION.md` — proposed shadow-only sensor-hub boundary
 - `diagrams/` — printable SVG wiring and mounting drawings
+- `PLACEMENT_GUIDE.md` — breadboard and perfboard placement, exact DIP-14 pins
 - `firmware/rpm_bt_sensor/` — Arduino-ESP32 3.3.11 firmware
 - `tools/windows/` — BLE logger, replay/calibration test, and one-click launchers
 
 ## Safety boundary
 
 This is a development reference instrument. GPS remains the RPM-learning authority. Contact/audio may set `learningEligible` only after its engine-sound validation gate passes. Camera RPM remains disabled. No production MotoLab file is changed here.
-
