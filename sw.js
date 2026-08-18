@@ -1,7 +1,7 @@
-importScripts('./version.js?build=2026-08-18b-splash-run-analysis');
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.7';
-const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.7 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18b-splash-run-analysis';
+importScripts('./version.js?build=2026-08-18c-final-ui-gear-auth');
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.8';
+const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.8 BETA';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18c-final-ui-gear-auth';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-rebuild-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 const MODULES=[
@@ -11,7 +11,7 @@ const MODULES=[
  'user_identity','user_features','feedback','community','merit','beta_menu','beta_release',
  'mic_authority','sensor_persistence','sensor_autostart','admin_test_tools','phone_rpm_smart','adaptive_rpm_learning',
  'trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard',
- 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34'
+ 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34','v34_runtime_fixes'
 ];
 const STATIC=['manifest.webmanifest','bike.png','icon-192.png','icon-512.png','rpm-learning-model.json','vehicle_catalog.json','maintenance_catalog.json','version.js','assets/motorlab_splash_approved.webp'];
 const bust=p=>'./'+p+'?v='+V+'&build='+B;
@@ -37,7 +37,6 @@ const SPLASH=`<style id="motolabBootSplashStyle">
 function inject(html){
  html=html.replace(/<script src=["']\.\/version\.js[^"']*["']><\/script>/i,`<script src="./version.js?v=${V}&build=${B}"></script>`);
  html=html.replace(/<link rel=["']manifest["'] href=["'][^"']+["']>/i,`<link rel="manifest" href="./manifest.webmanifest?v=${V}&build=${B}">`);
- // Do not regex-rewrite inline JavaScript. Splash is inserted as inert HTML only.
  if(!html.includes('motolabBootSplash'))html=html.replace('<body>','<body>'+SPLASH);
  const tags=[];for(const n of MODULES)if(!new RegExp(`(?:\\/|\\.)${n}\\.js(?:[?"'])`).test(html))tags.push(`<script src="./${n}.js?v=${V}&build=${B}"></script>`);
  if(!html.includes('motolabFullVersion'))html=html.replace('<body>',`<body><div id="motolabFullVersion" style="position:sticky;top:0;z-index:99990;text-align:center;padding:5px 8px;background:#08090b;border-bottom:1px solid #2b1419;color:#8f949c;font:800 8px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">VÄNÄ MotorLab ${LABEL} • ${BUILD}</div>`);
