@@ -1,0 +1,8 @@
+param([string]$Port='',[string]$BaseDir="$env:USERPROFILE\Documents\MotoLab\ZeelCapture",[int]$SecondsPerBaud=3)
+$ErrorActionPreference='Stop';$rates=9600,19200,38400,57600,115200,230400,460800,921600
+if(-not$Port){try{$d=Get-PnpDevice -Class Ports -PresentOnly|?{$_.InstanceId-match'VID_0403&PID_6001'}|select -First1;if($d.FriendlyName-match'\((COM\d+)\)'){$Port=$Matches[1]}}catch{}}
+if(-not$Port){throw'Zeeltronic FTDI 0403:6001 -porttia ei löytynyt.'}
+$dir=Join-Path$BaseDir('baud_probe_'+(Get-Date -Format'yyyy-MM-dd_HH-mm-ss'));New-Item -ItemType Directory -Force$dir|Out-Null;$res=@()
+foreach($b in$rates){$bytes=New-Object Collections.Generic.List[byte];$sp=[IO.Ports.SerialPort]::new($Port,$b,[IO.Ports.Parity]::None,8,[IO.Ports.StopBits]::One);$sp.DtrEnable=$false;$sp.RtsEnable=$false;$sp.ReadTimeout=50;try{$sp.Open();$end=(Get-Date).AddSeconds($SecondsPerBaud);while((Get-Date)-lt$end){$n=$sp.BytesToRead;if($n-gt0){$buf=New-Object byte[]$n;$r=$sp.Read($buf,0,$n);for($i=0;$i-lt$r;$i++){$bytes.Add($buf[$i])}};Start-Sleep -Milliseconds20}}finally{try{$sp.Close()}catch{};$sp.Dispose()};$a=$bytes.ToArray();[IO.File]::WriteAllBytes((Join-Path$dir("$b.raw")),$a);$res+=[pscustomobject]@{baud=$b;bytes=$a.Length;hex_preview=if($a.Length){([BitConverter]::ToString($a,0,[Math]::Min($a.Length,64))).Replace('-',' ')}else{''}}}
+$res|Export-Csv -NoTypeInformation -Encoding UTF8(Join-Path$dir'results.csv');$res|ConvertTo-Json|Set-Content -Encoding UTF8(Join-Path$dir'results.json');$res|Format-Table -AutoSize
+Write-Host"Read-only baud probe valmis: $dir"
