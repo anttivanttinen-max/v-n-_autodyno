@@ -1,6 +1,6 @@
 # Komponenttien sijoittelu koekytkentä- ja juotosreikälevylle
 
-Näissä kuvissa oletetaan **74HC14 DIP-14**. Jos piirisi on SMD-kotelossa tai moduulina, älä seuraa DIP-jalkojen numeroita. Lähetä osasta kuva ennen rakentamista.
+Näissä kuvissa esitetään **74HC14 DIP-14** -toteutus. Käytettävän fyysisen kotelon ja jalkajärjestyksen lähtötietona käytetään käyttäjän jo toimittamaa Partcon osalistaa ja projektin aiempia osakuvia; samoja tietoja ei pyydetä uudelleen. Jos listan tarkka osa on eri kotelossa, DIP-jalkanumeroita ei sovelleta siihen sellaisenaan, vaan sijoittelukuva tehdään kyseisen osan datasheetin mukaan.
 
 - [Koekytkentälevyn sijoittelukuva](diagrams/breadboard_74hc14.svg)
 - [Juotosreikälevyn komponentti- ja kuparipuoli](diagrams/perfboard_74hc14.svg)
@@ -48,4 +48,3 @@ Tarkista silti oman valmistajasi datasheet ennen juottamista. Jos käytät break
 - J2 3V3 → ESP32 3V3
 
 Pickup− liittyy paikalliseen GND:hen vain tällä suojapiirilevyllä. Pickup-johtoa ei yhdistetä moottoriin, CDI:hin, puolan miinukseen tai tulpanjohtimen metalliin.
-
