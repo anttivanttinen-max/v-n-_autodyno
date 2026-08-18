@@ -1,3 +1,0 @@
-{"truth":3000,"estimated":3000,"errorPct":0,"conf":0.678,"fp":0.955,"gap":0.091,"runner":5952,"f0":64,"type":"synthetic"}
-{"truth":5000,"estimated":4965,"errorPct":0.7,"conf":0.484,"fp":0.801,"gap":0.006,"runner":4167,"f0":88.89,"type":"synthetic"}
-{"truthApprox":6600,"estimated":6591,"errorPctApprox":0.136,"confidencePct":92.2,"f0HzRange":[109,112],"harmonicsHz":[220,330,440,550,660],"type":"real_contact_reference","mount":"extension_nut_aluminium_shim_bt_earbud","label":"7000","calibrationSet":"extension_nut_v1"}
