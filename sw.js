@@ -1,10 +1,10 @@
-importScripts('./version.js?build=2026-08-18f-password-auth');
+importScripts('./version.js?build=2026-08-18g-self-register');
 
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.8';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.8 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18f-password-auth';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18g-self-register';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
-const CACHE='vana-motorlab-v34-8-f-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
+const CACHE='vana-motorlab-v34-8-g-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
 const MODULES=[
  'splash_boot',
