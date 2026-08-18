@@ -20,6 +20,7 @@ KNOWN_RANGES = {
     "ignition_map_1_rpm": range(107, 127),
     "ignition_map_2_rpm": range(127, 137),
     "point_counts": range(137, 140),
+    "shift_light_rpm_div_100": (140, 364),
 }
 
 
