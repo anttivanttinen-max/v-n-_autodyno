@@ -1,10 +1,10 @@
 {
   "name": "vana-motolab-raw-sync-server",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "start": "node -r ./beta_auth_server.js -r ./user_features_server.js -r ./community_server.js -r ./merit_server.js -r ./owner_device_session_server.js server.js",
+    "start": "node -r ./storage_guard_server.js -r ./beta_auth_server.js -r ./user_features_server.js -r ./community_server.js -r ./merit_server.js -r ./owner_device_session_server.js server.js",
     "test:identity": "node ./test_identity_flow.js"
   },
   "engines": {
