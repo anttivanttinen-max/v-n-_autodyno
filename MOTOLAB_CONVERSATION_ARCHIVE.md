@@ -177,20 +177,25 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Required deployment/field validation: confirm Railway is running the matching self-registration backend; verify a new user becomes visible as `pending`, cannot obtain normal active-user behavior before approval, becomes usable after admin approval, can subsequently log in on the registered/new device according to password/device rules, and remains blocked when administratively blocked. Also verify owner recovery and the session-safe 401 behavior still work after the onboarding change.
 - UI field check: verify the compact login panel, keyboard/safe-area behavior and absence of the old guest/invite dependency on the actual installed phone/PWA.
 
-## Persistent Railway user storage, session retry guard and per-user RAW — 2026-08-18
+## Persistent Railway user storage, session retry, admin notifications and per-user RAW — 2026-08-18
 - Field inspection confirmed Railway is running with `DATA_DIR=/data` on the mounted persistent volume. `/data/users/registry.json` exists on the volume alongside user state data; the old root-level `/data/registry.json` was absent in the inspected container.
 - The inspected registry contained the VäNä owner/admin account as active and bound to the current iPhone device. A searched previous ordinary user (`Daniel`) was **not present** in this new persistent registry, so missing historical users must not be fabricated by hand; they must register again or be recovered only from real retained data.
 - `36126a412c7013f17df41044c3c95d9bb6362242` adds `raw_sync_server/storage_guard_server.js`. It always creates `/data/users` and, only when the new registry is absent and a valid legacy `/data/registry.json` exists, atomically migrates that legacy user database to `/data/users/registry.json`.
 - `d50ffba641a0902861b094ecbfdcd0db350ad047` loads the storage guard before auth modules, making the persistent user-store path explicit before authentication starts.
 - `096eaf37c83ed9cc4d47cb6df21030740510db10` adds `auth_session_guard.js`: a failed `MotoLabUser.refresh()` is retried after ~300 ms and ~900 ms, and simultaneous recovery attempts are collapsed into one shared recovery promise. This sits on top of the earlier non-destructive 401 behavior rather than deleting the local token.
-- `7cf018e4e3f80b38a48211fd983f6d6bbf7184ab` / `98d9e7c9e554fc8223573828dbfaae8e1fde2022` advance the root identity/cache and load the guard before password login. Current release identity after these changes is **v34.8 BETA / build `2026-08-18h-auth-session-persist`**.
+- `7cf018e4e3f80b38a48211fd983f6d6bbf7184ab` / `98d9e7c9e554fc8223573828dbfaae8e1fde2022` advanced the root identity/cache and loaded the session guard before password login under build `2026-08-18h-auth-session-persist`.
 - `c72a2c76213d59216889b5b5f330b31c1d1cc7ba` adds authenticated per-user RAW storage at `/api/users/v1/raw-chunk`. It accepts only an active signed user/device session and stores each chunk atomically beneath `/data/users/raw/<userId>/`, preserving userId, deviceId, received time, device label, module version and the original chunk object.
-- Product requirement newly recorded: the owner/admin needs **notifications when a new user registers**, especially when a user enters `pending` and needs approval. Delivery mechanism is not yet chosen/implemented; it must not leak passwords, tokens or owner recovery secrets.
-- These changes are auth/storage/sync infrastructure only. They establish no new RPM/RAW measurement accuracy result and do not change GPS MASTER, microphone authority, run acceptance, gear learning or dyno algorithms.
+- `d8e8e8fcbca6da00e69b4362d47a4a77d4b6e3aa` wires `user_raw_server.js` into the production beta-auth server stack, so the authenticated user RAW endpoint is actually loaded by that server path.
+- `fb4628bd85e501d0f4bf603b815f3604342411a1` changes `raw_sync.js` to `v34-user-raw-auto-sync-1`: when an active signed-in user exists, queued local RAW chunks are automatically sent to the authenticated user endpoint with the normal beta token; the existing manual endpoint/ingest-key path remains the fallback when automatic signed-in user sync is not available.
+- The user-requested new-user alert is now implemented. `14a1d509609f1f6d3d617337d668a3916c8da952` adds `admin_pending_notify.js`: active admins poll `/api/admin/v1/users` every 30 seconds, identify non-admin `pending` users, show an in-app approval banner, track already-seen userIds locally, and optionally issue a system/PWA notification after notification permission is granted.
+- `54357bd3a26bc1dc46d7e4df8cc2270ea042000f` loads the notification module in the Service Worker and adds notification-click handling that focuses/opens the app with `?adminUsers=1`, leading to the approval screen. `399784c6783a05f67d7e4df8cc2270ea042000f` advances the release to **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**.
+- Notification payloads contain approval-facing nickname/count information only; passwords, beta tokens and owner recovery secrets must remain excluded.
+- These changes are auth/storage/sync/account-notification infrastructure only. They establish no new RPM/RAW measurement accuracy result and do not change GPS MASTER, microphone authority, run acceptance, gear learning or dyno algorithms.
 
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
-- Railway mirrors received RAW into private `anttivanttinen-max/Motolab-data`.
+- For an active signed-in user, `raw_sync.js` now automatically sends queued local RAW to the authenticated `/api/users/v1/raw-chunk` path; server storage is per-user under `/data/users/raw/<userId>/`.
+- The older/manual receiver flow and Railway → private `anttivanttinen-max/Motolab-data` mirror remain separate compatibility/research paths unless deliberately unified later.
 - Multi-phone/device data is separated by persistent device identity/labels.
 - GitHub data can be analyzed manually; an overnight trainer checks new RAW/research data.
 - Bad/non-improving models must not replace the accepted model; rollback history must be kept.
@@ -203,16 +208,18 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root `main` as **v34.8 BETA / `2026-08-18h-auth-session-persist`** unless a newer checked `version.js` says otherwise.
+- Treat root `main` as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise.
+- Current application/server handoff before this documentation update is `fb4628bd85e501d0f4bf603b815f3604342411a1`.
 - Preserve the locked approved v34 appearance; fix functional regressions without redesign unless UI design is explicitly reopened.
 - Confirm the GitHub Pages → Railway user/owner/password/self-registration auth path end-to-end on the actual deployed origin.
 - Validate self-registration → `pending` → admin approval → active login end-to-end and verify duplicate nickname/device and rate-limit behavior does not strand legitimate users.
+- Validate new-user notifications on the installed admin device: permission prompt behavior, in-app banner, 30-second polling, seen-user de-duplication, background/system notification where supported, notification tap/deep-link into approvals, and no credential/secret leakage.
 - Validate persistent-volume restart/redeploy behavior: `/data/users/registry.json`, per-user state and `/data/users/raw/<userId>/` must survive and remain mutually consistent.
-- Validate the new auth session retry guard on the installed phone: transient failures should not throw out a valid user, while genuinely invalid/blocked sessions must still fail cleanly.
-- Add a safe owner/admin notification path for newly registered/pending users and validate that an approval-needed event is visible without exposing credentials or secrets.
+- Validate automatic signed-in user RAW sync end-to-end: local queue → authenticated endpoint → correct `/data/users/raw/<userId>/` file, retry/backoff after network loss, and no loss/deletion of local RAW before confirmed upload.
+- Validate the auth session retry guard on the installed phone: transient failures should not throw out a valid user, while genuinely invalid/blocked sessions must still fail cleanly.
 - Confirm the initial one-time owner bootstrap and the separate one-time post-bootstrap recovery each work only under their intended state conditions; verify the resulting VäNä admin/device session persists across normal updates and never generalize the mechanism into a reusable hidden admin backdoor.
 - Validate the `c47de47e…` session-safe 401 path on the actual iPhone/PWA: normal update persistence, same-device owner recovery, and no destructive token removal when recovery fails.
-- Validate the `2026-08-18h-auth-session-persist` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, password-login/self-registration module availability and compact login panel behavior.
+- Validate the `2026-08-18i-admin-pending-notify` PWA transition on the actual installed iPhone: old cache removal, correct build identity, at most one build-scoped automatic reload, password-login/self-registration/session-guard/notification module availability and compact login panel behavior.
 - Validate password creation/login/change and new-device binding on real devices; ensure password auth coexists with existing device/session recovery and blocked users cannot log in.
 - Re-check splash/login handoff, KÄYTTÄJÄ submenu/status-area clearance, centered gear popup, profile selector, Run A/B analysis and key buttons/menus on the actual phone viewport.
 - Real-device validate v34.8 GPS/MIC/IMU behavior; browser automation cannot validate physical sensor routing.
@@ -221,7 +228,7 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
