@@ -1,6 +1,7 @@
 'use strict';
 require('./feedback_server');
 require('./user_server');
+require('./owner_device_session_server');
 const http=require('http');
 const crypto=require('crypto');
 
@@ -43,4 +44,4 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  }
  return listener(req,res)
 })};
-console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server`);
+console.log(`MotoLab beta auth compatibility layer: ${BETA_SECRET?'enabled':'not configured'}; activation=user_server; owner-device-session=enabled`);
