@@ -10,7 +10,7 @@ const BETA_SECRET=String(process.env.BETA_TOKEN_SECRET||'');
 const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||'https://anttivanttinen-max.github.io';
 const USERS_FILE=path.join(DATA_DIR,'users','registry.json');
 const OWNER_NICKNAME='VäNä';
-const OWNER_BOOTSTRAP_HASH='a06d049c865ff8a3f974a40e517e232db5bfdc3e30692a94db85d772abe7de7a';
+const OWNER_BOOTSTRAP_HASH='e2cc0c77481e14d8c36b3fd952d7ea99b129ecf0d4898f68b5f6fe5c82d4d3e3';
 
 function hash(v){return crypto.createHash('sha256').update(String(v||'')).digest('hex')}
 function eq(a,b){const aa=Buffer.from(String(a||'')),bb=Buffer.from(String(b||''));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb)}
