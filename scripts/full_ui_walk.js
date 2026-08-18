@@ -26,7 +26,6 @@ const fail=m=>{throw new Error(m)};
   await page.waitForFunction(()=>!!globalThis.MotoLabRunAnalysis,{timeout:15000});
   const release=await page.evaluate(()=>globalThis.MOTOLAB_RELEASE);
   if(release?.version!=='34.7')fail('unexpected version '+release?.version);
-
   await page.evaluate(()=>{
     const p=getCurrentProfile();
     const pts=g=>[2500,3500,4500,5500,6500,7500,8500].map((rpm,i)=>({rpm,hp:(4+i*2)*g,nm:(7+i)*g,kmh:25+i*9}));
@@ -36,7 +35,6 @@ const fail=m=>{throw new Error(m)};
     ];
     renderRuns();renderAnalysis();globalThis.MotoLabRunAnalysis.refresh();
   });
-
   async function clearOverlays(){
     await page.evaluate(()=>{
       for(const e of document.querySelectorAll('.modal.show,.fullchart.show'))e.classList.remove('show');
@@ -54,21 +52,15 @@ const fail=m=>{throw new Error(m)};
     tested.push('nav:'+screen);
   }
   function benign(x){return /favicon|Failed to load resource|NotFoundError|NotAllowedError|Bluetooth|media device|permission|404|smoke-test/i.test(x)}
-  async function assertClean(tag){
-    const real=errors.filter(x=>!benign(x));
-    if(real.length)fail(tag+' runtime errors:\n'+real.join('\n'));
-  }
+  async function assertClean(tag){const real=errors.filter(x=>!benign(x));if(real.length)fail(tag+' runtime errors:\n'+real.join('\n'))}
   async function clickAndVerify(locator,label){
     const n=await locator.count();if(!n)return false;
     const el=locator.first();if(!await el.isVisible().catch(()=>false))return false;
     const before=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
     try{await el.click({force:true,timeout:4000});await sleep(140)}catch(e){fail('click failed '+label+': '+e.message)}
     const after=await page.evaluate(()=>({active:document.querySelector('.screen.active')?.id||'',modals:[...document.querySelectorAll('.modal.show,.fullchart.show')].map(x=>x.id),body:document.body.className}));
-    tested.push(label+' '+JSON.stringify({before,after}));
-    await assertClean(label);
-    return true;
+    tested.push(label+' '+JSON.stringify({before,after}));await assertClean(label);return true;
   }
-
   for(const screen of ['measure','runs','analysis','settings']){
     await nav(screen);
     const heads=page.locator(`#screen-${screen} .panel .phead[role="button"],#screen-${screen} .panel.ml-accordion > .phead`);
@@ -78,59 +70,41 @@ const fail=m=>{throw new Error(m)};
     const buttons=page.locator(`#screen-${screen} button:visible`);
     const ids=await buttons.evaluateAll(es=>es.map((e,i)=>e.id||e.getAttribute('data-act')||e.getAttribute('data-screen')||e.textContent.trim().slice(0,40)||('button-'+i)));
     for(const id of ids){
-      await nav(screen);
-      let target;
-      if(id.startsWith('button-')) continue;
-      target=page.locator(`#screen-${screen} button`).filter({hasText:id}).first();
-      if(await page.locator('#'+CSS.escape(id)).count())target=page.locator('#'+CSS.escape(id));
+      await nav(screen);if(id.startsWith('button-'))continue;
+      let target=page.locator(`#screen-${screen} button`).filter({hasText:id}).first();
+      const byId=page.locator(`[id="${String(id).replace(/"/g,'\\"')}"]`);
+      if(await byId.count())target=byId.first();
       if(!await target.count())continue;
-      await clickAndVerify(target,`${screen}:button:${id}`);
-      await clearOverlays();
+      await clickAndVerify(target,`${screen}:button:${id}`);await clearOverlays();
     }
   }
-
   await nav('analysis');
   for(let i=0;i<await page.locator('#mlAnalysisLaunch .ml-analysis-item').count();i++){
     const x=page.locator('#mlAnalysisLaunch .ml-analysis-item').nth(i);await x.click({force:true});await sleep(120);tested.push('analysis:item:'+i);await assertClean('analysis:item:'+i);
   }
-  await page.selectOption('#mlRunA','walk-a');await page.selectOption('#mlRunB','walk-b');
-  await page.click('#mlCompareAB',{force:true});
-  const ab=(await page.locator('#mlABSummary').innerText()).toUpperCase();
-  if(!ab.includes('MITATTU ERO')||!ab.includes('PÄÄSUUTIN'))fail('A/B comparison did not execute');
-  tested.push('analysis:A/B compare');
-  await page.evaluate(()=>globalThis.MotoLabRunAnalysis.editRun('walk-a'));
-  await page.waitForSelector('#mlRunEditModal.show');
+  await page.selectOption('#mlRunA','walk-a');await page.selectOption('#mlRunB','walk-b');await page.click('#mlCompareAB',{force:true});
+  const ab=(await page.locator('#mlABSummary').innerText()).toUpperCase();if(!ab.includes('MITATTU ERO')||!ab.includes('PÄÄSUUTIN'))fail('A/B comparison did not execute');tested.push('analysis:A/B compare');
+  await page.evaluate(()=>globalThis.MotoLabRunAnalysis.editRun('walk-a'));await page.waitForSelector('#mlRunEditModal.show');
   await page.fill('#mlMetaIgnMap','WALK-C');await page.fill('#mlMetaNotes','full ui walk edit');await page.click('#mlMetaSave',{force:true});
   const edit=await page.evaluate(()=>{const r=runs.find(x=>x.id==='walk-a');return [r?.tuning?.ignitionMap,r?.notes,r?.data?.length,r?.tuning?.metadataEditedAfterRun]});
-  if(edit[0]!=='WALK-C'||edit[1]!=='full ui walk edit'||edit[2]!==7||edit[3]!==true)fail('metadata edit produced wrong result '+JSON.stringify(edit));
-  tested.push('run metadata save');
-
+  if(edit[0]!=='WALK-C'||edit[1]!=='full ui walk edit'||edit[2]!==7||edit[3]!==true)fail('metadata edit produced wrong result '+JSON.stringify(edit));tested.push('run metadata save');
   await nav('settings');
-  const profile=await page.evaluate(()=>{
-    const original=getCurrentProfile().id;newProfile();const created=getCurrentProfile().id;const s=document.getElementById('profileSelect');s.value=original;s.dispatchEvent(new Event('change',{bubbles:true}));return {original,created,current:getCurrentProfile().id,stored:localStorage.getItem('motolab_v26_profile')};
-  });
-  if(profile.current!==profile.original||profile.stored!==profile.original)fail('profile selection did not persist '+JSON.stringify(profile));
-  tested.push('profile create/select/persist');
-
+  const profile=await page.evaluate(()=>{const original=getCurrentProfile().id;newProfile();const created=getCurrentProfile().id;const s=document.getElementById('profileSelect');s.value=original;s.dispatchEvent(new Event('change',{bubbles:true}));return {original,created,current:getCurrentProfile().id,stored:localStorage.getItem('motolab_v26_profile')}});
+  if(profile.current!==profile.original||profile.stored!==profile.original)fail('profile selection did not persist '+JSON.stringify(profile));tested.push('profile create/select/persist');
   const userNav=page.locator('.bottomNav .ml-user-nav');
   if(await userNav.count()){
     await userNav.click({force:true});await page.waitForSelector('.mlbm-card',{timeout:5000});
     const acts=await page.locator('.mlbm-card [data-act]').evaluateAll(es=>es.map(e=>e.getAttribute('data-act')));
     for(const act of acts){
-      if(!act)continue;
-      if(!await page.locator('.mlbm-card').count()){await userNav.click({force:true});await page.waitForSelector('.mlbm-card')}
-      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();
-      if(await b.isVisible().catch(()=>false)){await b.click({force:true});await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays()}
+      if(!act)continue;if(!await page.locator('.mlbm-card').count()){await userNav.click({force:true});await page.waitForSelector('.mlbm-card')}
+      const b=page.locator(`.mlbm-card [data-act="${act}"]`).first();if(await b.isVisible().catch(()=>false)){await b.click({force:true});await sleep(140);tested.push('user-menu:'+act);await assertClean('user-menu:'+act);await clearOverlays()}
     }
   }
-
   await nav('measure');
   for(const id of ['gpsBtn','imuBtn','extMicBtn','autoBtn','manualBtn','stopBtn']){
     const b=page.locator('#'+id);if(await b.count()&&await b.isVisible().catch(()=>false)){await b.click({force:true});await sleep(180);tested.push('measure-control:'+id);await assertClean('measure-control:'+id)}
   }
-
-  const uncaught=errors.filter(x=>!benign(x));if(uncaught.length)fail('uncaught errors:\n'+uncaught.join('\n'));
-  if(tested.length<20)fail('too few UI actions exercised: '+tested.length);
+  const uncaught=errors.filter(x=>!benign(x));if(uncaught.length)fail('uncaught errors:\n'+uncaught.join('\n'));if(tested.length<20)fail('too few UI actions exercised: '+tested.length);
   console.log('V34_FULL_UI_WALK_OK',JSON.stringify({version:release.version,actions:tested.length,errors:errors.length,ab:true,metadata:true,profile:true,menus:true}));
   await browser.close();
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
