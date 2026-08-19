@@ -1,6 +1,6 @@
 # VÄNÄ MotoLab — conversation archive and durable project memory
 
-Updated: 2026-08-18
+Updated: 2026-08-19
 
 ## Purpose and archiving rule
 This file is the durable GitHub memory for MotoLab development conversations. Important decisions, test results, constraints, implementation notes, unfinished work, data-analysis findings and cross-thread handoff notes must be retained here so they are not lost when a chat ends.
@@ -202,6 +202,17 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Developer/diagnostic functionality should remain out of the ordinary-user surface unless the approved menu master explicitly exposes it; deep technical state remains primarily under LIVE where applicable.
 - No application code was changed by this archive job. Remaining work is to prepare the menu correction against the master, preview/verify it screen-by-screen, and only then perform any application change under the normal explicit-approval rule.
 
+## MotoLab Contact Analyzer v1 — 2026-08-19
+- Checked repository `main` HEAD before this archive update: `6b12419f1f5b2cb79c4cd8e43b54c6d240d5ed5b`, merged from PR #19 (`Add MotoLab Contact Analyzer v1`). Its parent is the previous documentation HEAD `d35a8bbefc223ced6e81847bc0fe65eda4a8ff5a`; therefore this is the only new repository change after the prior archive handoff.
+- The active production application identity itself is unchanged: root `version.js` still reports **v34.8 BETA / build `2026-08-18i-admin-pending-notify`**. The analyzer is a standalone research tool and is **not integrated into production MotoLab**.
+- PR #19 added a Windows/Python contact-sensor research application under `tools/motolab_contact_analyzer` with WAV, CSV, RAW/PCM and ZIP import; filtering; FFT; spectrogram; RPM estimation; knock/transient candidates; manual `NORMAL` / `KNOCK` / `MECHANICAL_HIT` / `UNKNOWN` annotations; batch analysis; JSON/CSV export; deterministic demo generation; tests and documentation.
+- Safety rule is explicit and must be preserved: a numerically plausible RPM or attractive spectrum does **not** prove the capture is real engine vibration. `engine_signal_accepted` stays false until the signal is independently verified as genuine engine contact data **and** the automatic quality gate passes. Knock detections are research candidates only and must never become automatic tuning commands.
+- PR validation recorded **5 pytest tests passed**, WAV and CSV batch smoke tests passed, Tk/Matplotlib GUI startup smoke passed and Python `compileall` passed.
+- The v1 RPM estimator currently selects the strongest frequency in the configured RPM band per window, so a harmonic can still beat the fundamental. This is a known research limitation and is consistent with the project's existing requirement to preserve harmonic/candidate context rather than trust one strongest peak.
+- Knock frequency limits are not universal: they depend on engine geometry, sensor/mounting and sample rate. Bluetooth codec detection is not automatic; analysis starts from decoded PCM. V1 does not train a classifier and does not write production MotoLab learning models or vehicle tuning.
+- This merge establishes **no new field/RAW accuracy result**. Existing verified contact references (including the extension-nut + aluminium-shim mounting and ~6600 rpm / 6591 rpm strong reference) remain the evidence baseline until real captures are imported and independently verified in the analyzer.
+- Next research work: run genuine verified contact captures through the analyzer, compare estimated RPM against `reference_rpm`/GPS where available, inspect harmonic failures and transient candidates, retain human annotations for regression work, and only promote findings to production-learning logic after repeatable validation.
+
 ## Data pipeline
 - MotoLab stores RAW locally first and syncs new chunks to Railway when configured.
 - For an active signed-in user, `raw_sync.js` now automatically sends queued local RAW to the authenticated `/api/users/v1/raw-chunk` path; server storage is per-user under `/data/users/raw/<userId>/`.
@@ -218,8 +229,8 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Settings/maintenance sections should remain compact/collapsible; deep technical state belongs primarily under LIVE.
 
 ## Current implementation direction / unfinished validation
-- Treat root application line as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise.
-- Current application/server handoff before this documentation update is `960bd80f1dad6e8e0418e804a337a642bbedb790`; later documentation-only commits do not change the deployed application identity.
+- Treat root application line as **v34.8 BETA / `2026-08-18i-admin-pending-notify`** unless a newer checked `version.js` says otherwise. Repository HEAD may be newer due to documentation or standalone research-tool work without changing the deployed app identity.
+- Current checked repository HEAD for this update is `6b12419f1f5b2cb79c4cd8e43b54c6d240d5ed5b`; the last confirmed production application/server handoff remains `960bd80f1dad6e8e0418e804a337a642bbedb790` unless a newer deployment is separately verified.
 - Preserve the approved v34 visual style, but correct menu/navigation against `MotoLab-sovelluksen käyttöliittymäesittely.png`; do not treat the current menu hierarchy as accepted.
 - Audit current menus screen-by-screen against the approved master: **Koti / Vedot / Pyörä-Profiili / Vertaa / Opi / Asetukset**, their approved submenus and one-menu-at-a-time behavior.
 - Confirm the GitHub Pages → Railway user/owner/password/self-registration auth path end-to-end on the actual deployed origin.
@@ -238,8 +249,9 @@ This file is the durable GitHub memory for MotoLab development conversations. Im
 - Validate LIVE telemetry and v32.7 diagnostics persistence/replay without measurement-performance regression.
 - Validate adaptive candidate tracking, 500 rpm band learning and Auto Gear Learn interaction without weakening GPS MASTER.
 - Reprocess the available historical sweep/test/ZIP RAW datasets through the newest accepted RPM detection/learning plan before treating model validation as complete.
+- Run independently verified contact-sensor captures through `tools/motolab_contact_analyzer`, compare against real reference RPM, and use harmonic/transient/annotation results only as research evidence until repeatable validation supports any production algorithm change.
 - Preserve all raw/top-candidate/harmonic information for replay and trainer evaluation.
-- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync/menu-baseline interval.
+- No new RAW measurement finding was established during the v34.8 promotion/owner-recovery/session-token/startup-cache/password-auth/self-registration/persistent-storage/session-guard/admin-notification/user-RAW-sync/menu-baseline or Contact Analyzer v1 merge interval.
 
 ## Deferred work explicitly parked
 - Automatic knock / ignition autotune.
