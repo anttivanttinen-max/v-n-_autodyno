@@ -1,10 +1,13 @@
 (() => {
 'use strict';
-const MODULE='adaptive-rpm-learning-v2';
+const MODULE='adaptive-rpm-learning-v2.1-donoharm';
 const MODEL_URL='./rpm-learning-model.json';
 const MODEL_KEY='motolab_v32_rpm_learning_model';
 const MODEL_META_KEY='motolab_v32_rpm_learning_meta';
 const CORRECTIONS=[.5,.75,1,1.25,2];
+const INTERMEDIATE_CORRECTIONS=new Set([.75,1.25]);
+const INTERMEDIATE_GPS_GAIN=.08;
+const INTERMEDIATE_WEAK_1X_GPS=.50;
 const $a=id=>document.getElementById(id);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 let model=null,lastChosen=0,lastChosenAt=0,originalPost=null,patched=false;
@@ -56,6 +59,18 @@ function detectStuckBranch(audioRpm,gps,now){
  const active=audSpread<=.035&&gpsMove>=.10&&gpsDir!==0;
  return {active,audSpread,gpsMove,gpsDir,spanMs}
 }
+function guardIntermediateBranch(best,scored,gps,stuck){
+ if(!best||!INTERMEDIATE_CORRECTIONS.has(best.corr))return best;
+ const oneX=scored.find(x=>x.corr===1);
+ if(!oneX)return best;
+ if(stuck?.active)return best;
+ if(!gps)return {...oneX,guardedFrom:best.corr,guardReason:'no-gps-intermediate-block'};
+ const gpsGain=best.gpsScore-oneX.gpsScore;
+ const strongGpsEvidence=gpsGain>=INTERMEDIATE_GPS_GAIN&&best.score>=oneX.score;
+ const weakOneX=oneX.gpsScore<INTERMEDIATE_WEAK_1X_GPS&&gpsGain>=INTERMEDIATE_GPS_GAIN/2;
+ if(strongGpsEvidence||weakOneX)return best;
+ return {...oneX,guardedFrom:best.corr,guardReason:'intermediate-do-no-harm'};
+}
 function chooseCandidate(incoming){
  const candidates=latestCandidates().filter(c=>c.rpm>0),gps=gpsRef(),now=Date.now();
  const stuck=detectStuckBranch(incoming.rpm||incoming.rawRpm||0,gps,now);
@@ -82,10 +97,10 @@ function chooseCandidate(incoming){
    }
  }
  scored.sort((a,b)=>b.score-a.score);if(!scored.length)return incoming;
- const best=scored[0],runner=scored.find(x=>Math.abs(x.rpm-best.rpm)>Math.max(160,best.rpm*.045));
+ const rawBest=scored[0],best=guardIntermediateBranch(rawBest,scored,gps,stuck),runner=scored.find(x=>Math.abs(x.rpm-best.rpm)>Math.max(160,best.rpm*.045));
  const gap=runner?clamp((best.score-runner.score)/Math.max(.01,best.score),0,1):1;
  lastChosen=best.rpm;lastChosenAt=now;
- return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0,stuckBranch:stuck.active,stuckGpsMove:stuck.gpsMove||0,stuckAudioSpread:stuck.audSpread||0};
+ return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0,adaptiveGuardedFrom:best.guardedFrom||0,adaptiveGuardReason:best.guardReason||null,stuckBranch:stuck.active,stuckGpsMove:stuck.gpsMove||0,stuckAudioSpread:stuck.audSpread||0};
 }
 function patchMeasurementInput(){
  try{
@@ -109,7 +124,7 @@ function patchLearningRows(){
   const wrapped=function(s){
     const a=globalThis.MOTOLAB_AUDIO_LAST,p=globalThis.MOTOLAB_PHONE_RPM,ad=globalThis.MOTOLAB_ADAPTIVE_RPM;
     const before=learningBuffer?.length||0;orig(s);
-    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveModelVersion=model?.version||null;row.stuckBranch=!!ad?.stuckBranch;row.stuckGpsMove=Number.isFinite(ad?.stuckGpsMove)?ad.stuckGpsMove:null;row.stuckAudioSpread=Number.isFinite(ad?.stuckAudioSpread)?ad.stuckAudioSpread:null}}catch{}
+    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveModelVersion=model?.version||null;row.adaptiveGuardedFrom=Number.isFinite(ad?.adaptiveGuardedFrom)?ad.adaptiveGuardedFrom:null;row.adaptiveGuardReason=ad?.adaptiveGuardReason||null;row.stuckBranch=!!ad?.stuckBranch;row.stuckGpsMove=Number.isFinite(ad?.stuckGpsMove)?ad.stuckGpsMove:null;row.stuckAudioSpread=Number.isFinite(ad?.stuckAudioSpread)?ad.stuckAudioSpread:null}}catch{}
   };
   wrapped.__adaptivePatched=true;collectLearningSample=wrapped;return true
  }catch{return false}
@@ -145,15 +160,15 @@ function integrateGearLearning(){
 function paintStatus(t){const e=$a('adaptiveRpmStatus');if(e)e.textContent=t}
 function installUi(){
  if($a('adaptiveRpmPanel'))return true;const settings=$a('screen-settings');if(!settings)return false;
- const p=document.createElement('div');p.className='panel';p.id='adaptiveRpmPanel';p.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🧠</span> RPM OPPIMISMALLI</div><span class="tiny">${MODULE}</span></div><div class="statusbox">GPS-master opettaa mikrofonin candidate/harmoniset RPM-alueittain. Malli ohjaa vain mikrofonin shadow/candidate-valintaa; GPS-masterin auktoriteettia ei muuteta. 0.75×/1.25× välihaarat ja stuck-branch-valvonta ovat käytössä.</div><div class="form"><button id="adaptiveLoadModel" class="action gray full" type="button">LATAA HYVÄKSYTTY MALLI</button><button id="adaptiveReplayRaw" class="action full" type="button">AJA PAIKALLINEN RAW UUDELLEEN NYT</button></div><div id="adaptiveRpmStatus" class="statusbox">Oppimismallia alustetaan…</div>`;
+ const p=document.createElement('div');p.className='panel';p.id='adaptiveRpmPanel';p.innerHTML=`<div class="phead"><div class="ptitle"><span class="r">🧠</span> RPM OPPIMISMALLI</div><span class="tiny">${MODULE}</span></div><div class="statusbox">GPS-master opettaa mikrofonin candidate/harmoniset RPM-alueittain. Malli ohjaa vain mikrofonin shadow/candidate-valintaa; GPS-masterin auktoriteettia ei muuteta. 0.75×/1.25× välihaarat, stuck-branch-valvonta ja do-no-harm-guard ovat käytössä.</div><div class="form"><button id="adaptiveLoadModel" class="action gray full" type="button">LATAA HYVÄKSYTTY MALLI</button><button id="adaptiveReplayRaw" class="action full" type="button">AJA PAIKALLINEN RAW UUDELLEEN NYT</button></div><div id="adaptiveRpmStatus" class="statusbox">Oppimismallia alustetaan…</div>`;
  const anchor=$a('rawAutoSyncPanel')||settings.querySelector('.panel:last-of-type')||settings;anchor.insertAdjacentElement('afterend',p);
  $a('adaptiveLoadModel').onclick=()=>loadModel(true);$a('adaptiveReplayRaw').onclick=replayLocalRaw;return true
 }
 function boot(){
  const okUi=installUi(),okPost=patchMeasurementInput(),okRows=patchLearningRows(),okGear=integrateGearLearning();
  if(!(okUi&&okPost&&okRows&&okGear)){setTimeout(boot,250);return}
- loadModel(false).then(()=>paintStatus(`Valmis • malli ${model?.version||'baseline'} • ${model?.bands?.length||0} aluetta • stuck guard v2`));
- try{addLearningEvent('adaptive_rpm_learning_loaded',{module:MODULE,corrections:CORRECTIONS})}catch{}
+ loadModel(false).then(()=>paintStatus(`Valmis • malli ${model?.version||'baseline'} • ${model?.bands?.length||0} aluetta • stuck guard v2.1 do-no-harm`));
+ try{addLearningEvent('adaptive_rpm_learning_loaded',{module:MODULE,corrections:CORRECTIONS,intermediateGpsGain:INTERMEDIATE_GPS_GAIN})}catch{}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
