@@ -11,7 +11,7 @@ const MODULES=[
  'diagnostics','vehicle_catalog_finland_v2_loader','vehicle_lookup','technical_specs','maintenance',
  'gps_master_learning','raw_sync','dyno_curve_v2','ui_compact','default_dt','trip_research','research_sync',
  'user_identity','auth_session_guard','admin_pending_notify','password_login','user_features','feedback','community','merit','beta_menu','beta_release',
- 'mic_authority','sensor_persistence','sensor_autostart','admin_test_tools','phone_rpm_smart','adaptive_rpm_learning',
+ 'mic_authority','sensor_persistence','sensor_autostart','admin_test_tools','phone_rpm_smart','adaptive_rpm_learning','rpm_harmonic_gps_guard',
  'trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard',
  'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34','v34_runtime_fixes'
 ];
