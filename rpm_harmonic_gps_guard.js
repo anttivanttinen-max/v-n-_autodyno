@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const MODULE='rpm-harmonic-gps-guard-v1';
+const MODULE='rpm-harmonic-gps-guard-v2';
 const MIN_RPM=1200,MAX_RPM=13000;
 let patched=false,originalPost=null;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -17,7 +17,7 @@ function micLooksUsable(){
  const p=phoneState();
  if(!p)return false;
  const conf=+p.conf||0,level=+p.level||0,h=+p.harmonics||0;
- return conf>=.25&&level>.0007&&h>=2;
+ return conf>=.20&&level>.0007&&h>=2;
 }
 function candidates(msg,gps){
  const out=[];
