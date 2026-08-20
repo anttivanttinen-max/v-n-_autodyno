@@ -1,8 +1,9 @@
 (() => {
 'use strict';
-const VERSION='motolab-v34-runtime-fixes-v1';
+const VERSION='motolab-v34-runtime-fixes-v2-research-sync';
 const $=id=>document.getElementById(id);
-let savePatched=false,candidateBridge=false;
+let savePatched=false,candidateBridge=false,researchSyncBusy=false,researchSyncTimer=null;
+const RESEARCH_DB='VanaMotoLabResearch',RESEARCH_DB_VERSION=1,RESEARCH_SENT_KEY='motolab_research_raw_sent_v1';
 
 function hideFloatingFeedback(){
  for(const id of ['motolabFeedbackBtn','motolabAdminFeedbackBtn'])$(id)?.remove();
@@ -65,11 +66,45 @@ function installCandidateBridge(){
   window.dispatchEvent(new CustomEvent('motolab-audio-candidates',{detail}));
  },{passive:true});
 }
+function researchRequest(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function openResearchDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(RESEARCH_DB,RESEARCH_DB_VERSION);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function readResearchStore(db,name){if(!db.objectStoreNames.contains(name))return[];return researchRequest(db.transaction(name,'readonly').objectStore(name).getAll())}
+function researchSent(){try{return new Set(JSON.parse(localStorage.getItem(RESEARCH_SENT_KEY)||'[]'))}catch{return new Set()}}
+function saveResearchSent(done){try{localStorage.setItem(RESEARCH_SENT_KEY,JSON.stringify([...done].slice(-20000)))}catch{}}
+function researchUserReady(){const u=globalThis.MotoLabUser?.user;return !!(u&&u.status==='active'&&localStorage.getItem('motolab_v32_beta_token'))}
+async function sendResearchRow(store,row){
+ const server=globalThis.MotoLabUser?.productionServer||'https://v-n-autodyno-production.up.railway.app';
+ const token=localStorage.getItem('motolab_v32_beta_token')||'';
+ const safeId=String(row?.id||('row-'+Date.now())).replace(/[^a-zA-Z0-9._-]/g,'_');
+ const chunk={id:`research-${store}-${safeId}`,schema:'motolab_research_raw_bridge_v1',sourceDb:RESEARCH_DB,sourceStore:store,recoveredAt:new Date().toISOString(),payload:row};
+ const response=await fetch(server+'/api/users/v1/raw-chunk',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','X-MotoLab-Beta-Token':token},body:JSON.stringify({moduleVersion:VERSION,deviceLabel:navigator.platform||'iPhone',chunk})});
+ if(!response.ok)throw Error('Research RAW sync HTTP '+response.status);
+}
+async function syncResearchRaw(){
+ if(researchSyncBusy||!researchUserReady())return;
+ researchSyncBusy=true;
+ try{
+  const db=await openResearchDb(),done=researchSent();
+  for(const store of ['sessions','timelineChunks']){
+   const rows=await readResearchStore(db,store);
+   for(const row of rows){
+    const key=`${store}:${row.id}`;if(done.has(key))continue;
+    await sendResearchRow(store,row);done.add(key);saveResearchSent(done);
+   }
+  }
+  db.close();
+ }catch(e){console.warn('[MotoLab research RAW sync]',e)}finally{researchSyncBusy=false}
+}
+function scheduleResearchSync(delay=1200){clearTimeout(researchSyncTimer);researchSyncTimer=setTimeout(syncResearchRaw,delay)}
 function boot(){
  hideFloatingFeedback();installCandidateBridge();
  let n=0;const t=setInterval(()=>{hideFloatingFeedback();patchSaveRun();ensureGearEditor();if(++n>160)clearInterval(t)},250);
  const mo=new MutationObserver(()=>{hideFloatingFeedback();ensureGearEditor()});mo.observe(document.documentElement,{childList:true,subtree:true});
+ scheduleResearchSync(1800);setInterval(syncResearchRaw,60000);
+ document.addEventListener('motorlab-user-ready',()=>scheduleResearchSync(500));
+ window.addEventListener('online',()=>scheduleResearchSync(500));
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleResearchSync(500)});
 }
-globalThis.MotoLabV34RuntimeFixes={version:VERSION,patchSaveRun,ensureGearEditor,confirmedGear};
+globalThis.MotoLabV34RuntimeFixes={version:VERSION,patchSaveRun,ensureGearEditor,confirmedGear,syncResearchRaw};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
