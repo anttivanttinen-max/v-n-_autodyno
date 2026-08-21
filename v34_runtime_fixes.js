@@ -72,6 +72,9 @@ async function readResearchStore(db,name){if(!db.objectStoreNames.contains(name)
 function researchSent(){try{return new Set(JSON.parse(localStorage.getItem(RESEARCH_SENT_KEY)||'[]'))}catch{return new Set()}}
 function saveResearchSent(done){try{localStorage.setItem(RESEARCH_SENT_KEY,JSON.stringify([...done].slice(-20000)))}catch{}}
 function researchUserReady(){const u=globalThis.MotoLabUser?.user;return !!(u&&u.status==='active'&&localStorage.getItem('motolab_v32_beta_token'))}
+function isAdmin(){try{const u=globalThis.MotoLabUser?.user;return u?.role==='admin'&&u?.status==='active'}catch{return false}}
+async function researchRawSummary(){let db;try{db=await openResearchDb();const done=researchSent(),sessions=await readResearchStore(db,'sessions'),timelineChunks=await readResearchStore(db,'timelineChunks');return {sessions:sessions.length,timelineChunks:timelineChunks.length,sessionsMarkedSent:sessions.filter(x=>done.has(`sessions:${x.id}`)).length,timelineChunksMarkedSent:timelineChunks.filter(x=>done.has(`timelineChunks:${x.id}`)).length}}finally{db?.close()}}
+function rawRecoveryText(x){return `Paikallinen: sessions ${x.sessions} • timelineChunks ${x.timelineChunks}\nJo lähetystilaan merkitty: sessions ${x.sessionsMarkedSent} • timelineChunks ${x.timelineChunksMarkedSent}`}
 async function sendResearchRow(store,row){
  const server=globalThis.MotoLabUser?.productionServer||'https://v-n-autodyno-production.up.railway.app';
  const token=localStorage.getItem('motolab_v32_beta_token')||'';
@@ -81,10 +84,13 @@ async function sendResearchRow(store,row){
  if(!response.ok)throw Error('Research RAW sync HTTP '+response.status);
 }
 async function syncResearchRaw(){
- if(researchSyncBusy||!researchUserReady())return;
+ let before;try{before=await researchRawSummary()}catch(e){return {before:{sessions:0,timelineChunks:0,sessionsMarkedSent:0,timelineChunksMarkedSent:0},after:{sessions:0,timelineChunks:0,sessionsMarkedSent:0,timelineChunksMarkedSent:0},sentThisRun:{sessions:0,timelineChunks:0},error:String(e?.message||e)}}const report={before,after:before,sentThisRun:{sessions:0,timelineChunks:0},error:null};
+ if(researchSyncBusy){report.error='RAW-palaute on jo käynnissä.';return report}
+ if(!researchUserReady()){report.error='Aktiivinen käyttäjäistunto puuttuu.';return report}
  researchSyncBusy=true;
+ let db;
  try{
-  const db=await openResearchDb(),done=researchSent();
+  db=await openResearchDb();const done=researchSent();
   for(const store of ['sessions','timelineChunks']){
    const rows=await readResearchStore(db,store);
    for(const row of rows){
@@ -92,14 +98,17 @@ async function syncResearchRaw(){
     await sendResearchRow(store,row);done.add(key);saveResearchSent(done);
    }
   }
-  db.close();
- }catch(e){console.warn('[MotoLab research RAW sync]',e)}finally{researchSyncBusy=false}
+  report.after=await researchRawSummary();report.sentThisRun={sessions:Math.max(0,report.after.sessionsMarkedSent-before.sessionsMarkedSent),timelineChunks:Math.max(0,report.after.timelineChunksMarkedSent-before.timelineChunksMarkedSent)};
+ }catch(e){report.error=String(e?.message||e);console.warn('[MotoLab research RAW sync]',e);try{report.after=await researchRawSummary()}catch{}}
+ finally{db?.close();researchSyncBusy=false}
+ return report;
 }
 function scheduleResearchSync(delay=1200){clearTimeout(researchSyncTimer);researchSyncTimer=setTimeout(syncResearchRaw,delay)}
+function ensureRawRecoveryUi(){const settings=$('screen-settings');if(!settings||!isAdmin()){$('mlRawRecoveryPanel')?.remove();return false}if($('mlRawRecoveryPanel'))return true;const panel=document.createElement('div');panel.id='mlRawRecoveryPanel';panel.className='panel';panel.innerHTML='<div class="phead"><div class="ptitle"><span class="r">⚕</span> ADMIN / DIAGNOSTIIKKA</div><span class="tiny">RAW</span></div><div class="statusbox"><b>MANUAALINEN RAW-PALAUTUS</b><div class="tiny" style="margin-top:5px">Ajaa Research RAW -synkan heti ja näyttää VanaMotoLabResearchin sessions- ja timelineChunks-rivit. GPS-, RPM- ja gear-logiikkaan ei kosketa.</div></div><button id="mlRawRecoveryRun" class="action full" type="button">MANUAALINEN RAW-PALAUTUS</button><div id="mlRawRecoveryStatus" class="statusbox">Luetaan paikallista RAW-tilaa…</div>';settings.appendChild(panel);const out=$('mlRawRecoveryStatus'),run=$('mlRawRecoveryRun');const refresh=async()=>{const summary=await researchRawSummary();out.textContent=rawRecoveryText(summary)+(!summary.sessions&&!summary.timelineChunks?'\n\nEI PALAUTETTAVAA PAIKALLISTA RAW-DATAA.':'')};run.onclick=async()=>{run.disabled=true;out.textContent='MANUAALINEN RAW-PALAUTUS käynnissä…';try{const report=await globalThis.MotoLabV34RuntimeFixes.syncResearchRaw(),empty=!report.after.sessions&&!report.after.timelineChunks;out.textContent=`ENNEN\n${rawRecoveryText(report.before)}\n\nJÄLKEEN\n${rawRecoveryText(report.after)}\n\nTÄLLÄ AJOLLA LÄHETETTY\nsessions ${report.sentThisRun.sessions} • timelineChunks ${report.sentThisRun.timelineChunks}${report.error?`\n\nVIRHE: ${report.error}`:''}${empty?'\n\nEI PALAUTETTAVAA PAIKALLISTA RAW-DATAA.':'\n\nRAW-PALAUTUS VALMIS.'}`}catch(e){out.textContent='VIRHE: '+(e?.message||e)}finally{run.disabled=false}};refresh().catch(e=>{out.textContent='VIRHE: '+(e?.message||e)});return true}
 function boot(){
  hideFloatingFeedback();installCandidateBridge();
- let n=0;const t=setInterval(()=>{hideFloatingFeedback();patchSaveRun();ensureGearEditor();if(++n>160)clearInterval(t)},250);
- const mo=new MutationObserver(()=>{hideFloatingFeedback();ensureGearEditor()});mo.observe(document.documentElement,{childList:true,subtree:true});
+ let n=0;const t=setInterval(()=>{hideFloatingFeedback();patchSaveRun();ensureGearEditor();ensureRawRecoveryUi();if(++n>160)clearInterval(t)},250);
+ const mo=new MutationObserver(()=>{hideFloatingFeedback();ensureGearEditor();ensureRawRecoveryUi()});mo.observe(document.documentElement,{childList:true,subtree:true});
  scheduleResearchSync(1800);setInterval(syncResearchRaw,60000);
  document.addEventListener('motorlab-user-ready',()=>scheduleResearchSync(500));
  window.addEventListener('online',()=>scheduleResearchSync(500));
