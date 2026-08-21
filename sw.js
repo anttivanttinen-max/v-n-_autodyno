@@ -1,8 +1,8 @@
-importScripts('./version.js?build=2026-08-18i-admin-pending-notify');
+importScripts('./version.js?build=2026-08-21-raw-rescue-fast-wake');
 
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.8';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.8 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-18i-admin-pending-notify';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-08-21-raw-rescue-fast-wake';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-8-i-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
