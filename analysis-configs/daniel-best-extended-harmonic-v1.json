@@ -1,0 +1,18 @@
+{
+  "schema": "motolab_legacy_replay_config_v1",
+  "version": "daniel-best-extended-harmonic-v1",
+  "truth": {
+    "fields": ["gpsReferenceRpm", "speedRpm"],
+    "minRpm": 1000,
+    "maxRpm": 14000
+  },
+  "sources": ["audioRpm", "audioRawRpm"],
+  "candidateMultipliers": [0.3333333333333333, 0.5, 0.6666666666666666, 1.0, 1.5, 2.0, 3.0],
+  "selection": {
+    "requireAnySourcePositive": true,
+    "excludeMicLearningEligibleFalse": false
+  },
+  "reportAcceptanceBandsPct": [5, 8, 10, 12, 15, 20],
+  "origin": "Best-performing candidate family from Daniel RAW comparison: selected + raw audio with 1/3x, 1/2x, 2/3x, 1x, 1.5x, 2x, 3x branches.",
+  "method": "Offline GPS-master oracle replay: for each valid sample, build candidates from each positive source multiplied by each configured multiplier and choose the candidate with minimum absolute percent error to GPS reference. Used for cross-dataset capability comparison, not live RPM selection."
+}
