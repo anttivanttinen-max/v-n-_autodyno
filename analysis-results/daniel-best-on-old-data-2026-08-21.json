@@ -1,0 +1,41 @@
+{
+  "schema": "motolab_cross_dataset_replay_result_v1",
+  "createdAt": "2026-08-21",
+  "purpose": "Run old RAW data using the best Daniel-data extended harmonic candidate family before applying it elsewhere.",
+  "input": {
+    "file": "VANA_MotoLab_learning_data_1786976540783(1).zip",
+    "sha256": "a14ce3b667b6732b35bf62639484bc974ae088fe012dbc31c4ee7d17f3294ac2",
+    "samples": 63522,
+    "chunks": 307,
+    "sessionsTotal": 34
+  },
+  "config": "analysis-configs/daniel-best-extended-harmonic-v1.json",
+  "metrics": {
+    "validGpsAudioPairs": 2008,
+    "sessionsUsed": 4,
+    "medianErrorPct": 5.323764838659187,
+    "meanErrorPct": 6.302586044972821,
+    "p90ErrorPct": 13.080912460560548,
+    "p95ErrorPct": 15.458015551419667,
+    "within5Pct": 47.908366533864545,
+    "within8Pct": 66.68326693227091,
+    "within10Pct": 77.04183266932272,
+    "within12Pct": 85.30876494023904,
+    "within15Pct": 94.12350597609561,
+    "within20Pct": 99.800796812749
+  },
+  "chosenMultiplierCounts": {
+    "1.0": 518,
+    "0.6666666666666666": 511,
+    "0.5": 298,
+    "1.5": 279,
+    "2.0": 164,
+    "0.3333333333333333": 127,
+    "3.0": 111
+  },
+  "chosenSourceCounts": {
+    "audioRpm": 1185,
+    "audioRawRpm": 823
+  },
+  "note": "Offline GPS-master oracle comparison. This measures whether the same harmonic candidate family contains the correct RPM on old data; it is not a claim about live autonomous selector accuracy."
+}
