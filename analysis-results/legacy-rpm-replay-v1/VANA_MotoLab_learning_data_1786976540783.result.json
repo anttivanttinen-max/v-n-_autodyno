@@ -1,0 +1,33 @@
+{
+  "schema": "motolab_legacy_replay_result_v1",
+  "replayVersion": "legacy-rpm-replay-v1",
+  "source": {
+    "file": "VANA_MotoLab_learning_data_1786976540783(1).zip",
+    "sha256": "a14ce3b667b6732b35bf62639484bc974ae088fe012dbc31c4ee7d17f3294ac2",
+    "zipMember": "VANA_MotoLab_learning_data_1786976540783.json",
+    "app": "VÄNÄ MotoLab 32.5",
+    "exported": "2026-08-17T14:22:20.209Z",
+    "schema": "learning_export_v2",
+    "algorithmVersion": {"rpm":"rpm-v31-candidate-gap","fusion":"fusion-v31-integrity","learning":"learning-raw-v2"},
+    "totalChunks": 307,
+    "totalSamples": 63522
+  },
+  "configPath": "analysis-configs/legacy-rpm-replay-v1.json",
+  "toolPath": "tools/replay_legacy_baseline.py",
+  "metrics": {
+    "validPairs": 2008,
+    "sessions": 4,
+    "medianErrorPct": 5.162948353209385,
+    "meanErrorPct": 6.015026256575898,
+    "p90ErrorPct": 12.440729363981198,
+    "p95ErrorPct": 13.959021963650736,
+    "acceptancePct": {"5":48.95418326693227,"8":68.72509960159363,"10":79.33266932270917,"12":87.699203187251,"15":96.16533864541833,"20":100.0},
+    "sourceCounts": {"audioRpm":1186,"audioRawRpm":822},
+    "multiplierCounts": {"0.25":23,"0.3333333333333333":116,"0.5":286,"0.6666666666666666":511,"1.0":514,"1.5":278,"2.0":153,"3.0":83,"4.0":44}
+  },
+  "provenance": {
+    "historicalRuntimeSource": "archive/pre-cleanup-2026-08-18/ty/index.html + phone_rpm_smart.js + adaptive_rpm_learning.js",
+    "historicalRuntimeNotes": "v32.4 runtime used audioHighConf .62, audioMidConf .34, slipThreshold .18 and speedRpmMinKmh 12. Phone Smart Tracker used .5/1/2 branches, continuity, GPS assist and jump protection. Adaptive replay trained 500-rpm bands from GPS-master and audio candidates using .5/1/2 corrections.",
+    "important": "This frozen v1 reproduces the high-performing offline harmonic-oracle comparison previously used in analysis. It does not claim to reproduce live phone_rpm_smart.js frame-by-frame because original PCM/FFT frames are not present in this ZIP. The historical runtime source is separately preserved and must remain available for exact live-method reconstruction when suitable PCM/spectrum data exists."
+  }
+}
