@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.8",label:"v34.8 BETA",build:"2026-08-22-raw-ui-light"};
+globalThis.MOTOLAB_RELEASE={version:"34.8",label:"v34.8 BETA",build:"2026-08-22-raw-ui-instant-v2"};
 (() => {
  if(typeof document==='undefined')return;
  const BUILD=globalThis.MOTOLAB_RELEASE.build;
