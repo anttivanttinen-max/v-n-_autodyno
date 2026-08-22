@@ -25,6 +25,10 @@ const CORE=[...MODULES.map(n=>bust(n+'.js')),...STATIC.map(bust)];
 function inject(html){
  html=html.replace(/<script src=["']\.\/version\.js[^"']*["']><\/script>/i,`<script src="./version.js?v=${V}&build=${B}"></script>`);
  html=html.replace(/<link rel=["']manifest["'] href=["'][^"']+["']>/i,`<link rel="manifest" href="./manifest.webmanifest?v=${V}&build=${B}">`);
+ html=html.replace('run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})','run=pre.filter(x=>x.g>=cfg.autoSensitivity);accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})');
+ html=html.replace('if(recording){\n   run.push(s);','if(recording){\n   if(mode!=="auto"||g>=.03)run.push(s);');
+ html=html.replace('if(data.length<12){postMessage({type:"state",state:"TOO SHORT"});return}','if(data.length<12){postMessage({type:"state",state:"TOO SHORT"});if(keepAuto)setTimeout(()=>postMessage({type:"state",state:"ARMED"}),250);return}');
+ html=html.replace('$("armBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();addLearningEvent("arm_auto");measurementWorker.postMessage({type:"arm"})}}','$("armBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){measurementTrace=[];handleEngineState("ARMED");measurementWorker.postMessage({type:"arm"});requestWake();pushConfig();addLearningEvent("arm_auto");if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig()}}');
  const tags=[];
  for(const n of MODULES){
    if(!new RegExp(`(?:\\/|\\.)${n}\\.js(?:[?"'])`).test(html))tags.push(`<script src="./${n}.js?v=${V}&build=${B}"></script>`);
