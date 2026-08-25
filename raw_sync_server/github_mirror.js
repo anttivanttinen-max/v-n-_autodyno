@@ -60,6 +60,6 @@ function createGitHubMirror(opts={}){
  function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.github-mirror-queue')continue;const p=path.join(dir,e.name);if(e.isDirectory())walk(p,out);else if(e.isFile())out.push(p)}return out}
  async function backfill(){if(!enabled)return {enabled:false,queued:0};let n=0;for(const f of walk(dataDir)){if(await queueLocal(f))n++}schedule(100);return {enabled:true,queued:n}}
  function status(){let pending=0;try{pending=fs.readdirSync(queueDir).filter(x=>x.endsWith('.json')).length}catch{}return {enabled,repo:enabled?repo:null,branch:enabled?branch:null,prefix:enabled?prefix:null,pending,sent,lastOk,lastError}}
- return {enabled,queueLocal,run,backfill,status};
+ const api={enabled,queueLocal,run,backfill,status};globalThis.MotoLabGitHubMirror=api;return api;
 }
 module.exports={createGitHubMirror};
