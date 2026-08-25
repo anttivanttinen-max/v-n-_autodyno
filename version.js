@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.8",label:"v34.8 BETA",build:"2026-08-22-raw-ui-instant-v2"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-08-25-raw-force-session-zip"};
 (() => {
  if(typeof document==='undefined')return;
  const BUILD=globalThis.MOTOLAB_RELEASE.build;
@@ -13,24 +13,8 @@ globalThis.MOTOLAB_RELEASE={version:"34.8",label:"v34.8 BETA",build:"2026-08-22-
   const loadGuard=()=>{if(!globalThis.MotoLabAuthSessionGuard&&!document.querySelector('script[data-ml-auth-guard-early]'))loadScript('./auth_session_guard.js?build='+encodeURIComponent(BUILD),'mlAuthGuardEarly',loadPassword);else loadPassword()};
   if(!globalThis.MotoLabUser&&!document.querySelector('script[data-ml-identity-early]'))loadScript('./user_identity.js?build='+encodeURIComponent(BUILD),'mlIdentityEarly',loadGuard);else loadGuard();
  }
- function applyReleaseLabels(){
-   const badge=document.getElementById('appVersionBadge');if(badge)badge.textContent=LABEL;
-   const full=document.getElementById('motolabFullVersion');if(full)full.textContent=`VÄNÄ MotorLab ${LABEL} • ${BUILD}`;
-   document.title=`VÄNÄ MOTOLAB ${LABEL}`;
- }
- function mount(){
-  if(!document.getElementById('motolabBootSplash')){const d=document.createElement('div');d.id='motolabBootSplash';d.innerHTML=`<img id="motolabBootImage" src="./assets/motolab-start-v34.png?build=${encodeURIComponent(BUILD)}" alt="VäNä Motorsport MotorLab"><div class="mls-version"><b>${LABEL}</b></div><div id="motolabBootPanel"></div><div id="motolabBootStatus">LADATAAN MOTORLABIA…</div>`;document.body.prepend(d)}
-  document.documentElement.classList.remove('ml-early-boot');applyReleaseLabels();ensureBootLogic();
-  setTimeout(applyReleaseLabels,250);setTimeout(applyReleaseLabels,1500);
- }
- async function forceSwUpdate(){
-  if(!('serviceWorker' in navigator)||!window.isSecureContext)return;
-  try{
-   const reg=await navigator.serviceWorker.register('./sw.js?build='+encodeURIComponent(BUILD),{updateViaCache:'none'});
-   await reg.update().catch(()=>{});
-   if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
-   navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='MOTOLAB_SW_ACTIVE'&&e.data.build===BUILD){const k='motolab_sw_reload_'+BUILD;if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');location.reload()}}});
-  }catch{}
- }
+ function applyReleaseLabels(){const badge=document.getElementById('appVersionBadge');if(badge)badge.textContent=LABEL;const full=document.getElementById('motolabFullVersion');if(full)full.textContent=`VÄNÄ MotorLab ${LABEL} • ${BUILD}`;document.title=`VÄNÄ MOTOLAB ${LABEL}`}
+ function mount(){if(!document.getElementById('motolabBootSplash')){const d=document.createElement('div');d.id='motolabBootSplash';d.innerHTML=`<img id="motolabBootImage" src="./assets/motolab-start-v34.png?build=${encodeURIComponent(BUILD)}" alt="VäNä Motorsport MotorLab"><div class="mls-version"><b>${LABEL}</b></div><div id="motolabBootPanel"></div><div id="motolabBootStatus">LADATAAN MOTORLABIA…</div>`;document.body.prepend(d)}document.documentElement.classList.remove('ml-early-boot');applyReleaseLabels();ensureBootLogic();setTimeout(applyReleaseLabels,250);setTimeout(applyReleaseLabels,1500)}
+ async function forceSwUpdate(){if(!('serviceWorker' in navigator)||!window.isSecureContext)return;try{const reg=await navigator.serviceWorker.register('./sw.js?build='+encodeURIComponent(BUILD),{updateViaCache:'none'});await reg.update().catch(()=>{});if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='MOTOLAB_SW_ACTIVE'&&e.data.build===BUILD){const k='motolab_sw_reload_'+BUILD;if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');location.reload()}}})}catch{}}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{mount();forceSwUpdate()},{once:true});else{mount();forceSwUpdate()}
 })();
