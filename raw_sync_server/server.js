@@ -14,6 +14,7 @@ const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||'https://anttivanttinen-max.git
 const MAX_BODY=Number(process.env.MAX_BODY_BYTES||8*1024*1024);
 fs.mkdirSync(DATA_DIR,{recursive:true});
 const mirror=createGitHubMirror({dataDir:DATA_DIR});
+globalThis.MotoLabGitHubMirror=mirror;
 
 function corsHeaders(origin){const allow=origin===ALLOWED_ORIGIN?origin:'';return {...(allow?{'Access-Control-Allow-Origin':allow}:{}),'Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,HEAD,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Ingest-Key,X-MotoLab-Read-Key','Access-Control-Max-Age':'86400'}}
 function json(res,status,obj,origin,headOnly=false){const body=Buffer.from(JSON.stringify(obj));res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store',...(origin?corsHeaders(origin):{})});res.end(headOnly?undefined:body)}
