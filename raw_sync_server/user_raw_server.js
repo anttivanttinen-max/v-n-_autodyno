@@ -11,6 +11,7 @@ const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||'https://anttivanttinen-max.git
 const MAX_BODY_BYTES=Math.max(65536,Number(process.env.MAX_BODY_BYTES||8*1024*1024));
 const USERS_FILE=path.join(DATA_DIR,'users','registry.json');
 const RAW_DIR=path.join(DATA_DIR,'users','raw');
+const RAW_FORCE_DIR=path.join(DATA_DIR,'users','raw-force');
 
 function unb64(v){return Buffer.from(v,'base64url').toString('utf8')}
 function verify(token){
@@ -41,12 +42,40 @@ function identity(req){
  return {payload:p,user:u};
 }
 function atomicJson(file,obj){fs.mkdirSync(path.dirname(file),{recursive:true});const tmp=file+'.tmp-'+process.pid+'-'+Date.now();fs.writeFileSync(tmp,JSON.stringify(obj));fs.renameSync(tmp,file)}
+function forceFile(userId){return path.join(RAW_FORCE_DIR,safe(userId)+'.json')}
+function forceState(userId){return readJson(forceFile(userId),null)}
+function setForce(userId,by){const current=forceState(userId);if(current?.status==='pending')return current;const cmd={schema:'motolab_raw_force_v1',userId,requestedAt:new Date().toISOString(),requestedBy:by,status:'pending',attempts:0};atomicJson(forceFile(userId),cmd);return cmd}
+function ackForce(userId,deviceId,ok,state){const f=forceFile(userId),cmd=readJson(f,null);if(!cmd)return null;cmd.attempts=Number(cmd.attempts||0)+1;cmd.lastAttemptAt=new Date().toISOString();cmd.lastDeviceId=deviceId;cmd.result=state||null;if(ok){cmd.status='done';cmd.completedAt=cmd.lastAttemptAt}else cmd.status='pending';atomicJson(f,cmd);return cmd}
+function crc32(buf){let c=0xffffffff;for(const b of buf){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0)}return (c^0xffffffff)>>>0}
+function zipStore(entries){const locals=[],centrals=[];let offset=0;for(const e of entries){const name=Buffer.from(e.name.replace(/\\/g,'/')),data=Buffer.isBuffer(e.data)?e.data:Buffer.from(String(e.data)),crc=crc32(data),lh=Buffer.alloc(30);lh.writeUInt32LE(0x04034b50,0);lh.writeUInt16LE(20,4);lh.writeUInt16LE(0x0800,6);lh.writeUInt32LE(crc,14);lh.writeUInt32LE(data.length,18);lh.writeUInt32LE(data.length,22);lh.writeUInt16LE(name.length,26);locals.push(lh,name,data);const ch=Buffer.alloc(46);ch.writeUInt32LE(0x02014b50,0);ch.writeUInt16LE(20,4);ch.writeUInt16LE(20,6);ch.writeUInt16LE(0x0800,8);ch.writeUInt32LE(crc,16);ch.writeUInt32LE(data.length,20);ch.writeUInt32LE(data.length,24);ch.writeUInt16LE(name.length,28);ch.writeUInt32LE(offset,42);centrals.push(ch,name);offset+=lh.length+name.length+data.length}const central=Buffer.concat(centrals),end=Buffer.alloc(22);end.writeUInt32LE(0x06054b50,0);end.writeUInt16LE(entries.length,8);end.writeUInt16LE(entries.length,10);end.writeUInt32LE(central.length,12);end.writeUInt32LE(offset,16);return Buffer.concat([...locals,central,end])}
+function writeSessionZip(userId,sessionId){const dir=path.join(RAW_DIR,safe(userId)),files=fs.existsSync(dir)?fs.readdirSync(dir).filter(n=>n.endsWith('.json')):[],entries=[],chunks=[];for(const n of files){const f=path.join(dir,n),j=readJson(f,null);if(j?.chunk?.sessionId!==sessionId)continue;entries.push({name:'chunks/'+n,data:fs.readFileSync(f)});chunks.push({file:n,chunkId:j?.chunk?.id||null,receivedAt:j?.receivedAt||null,deviceId:j?.deviceId||null,deviceLabel:j?.deviceLabel||''})}if(!entries.length)return null;const manifest={schema:'motolab_user_raw_session_zip_v1',userId,sessionId,createdAt:new Date().toISOString(),chunkCount:entries.length,chunks};entries.unshift({name:'manifest.json',data:JSON.stringify(manifest,null,2)});const zipFile=path.join(dir,safe(sessionId)+'.zip'),tmp=zipFile+'.tmp-'+process.pid+'-'+Date.now();fs.writeFileSync(tmp,zipStore(entries));fs.renameSync(tmp,zipFile);globalThis.MotoLabGitHubMirror?.queueLocal?.(zipFile).catch(()=>{});return zipFile}
 
 http.createServer=function(listener){return originalCreateServer(async(req,res)=>{
  const origin=String(req.headers.origin||'');let u;try{u=new URL(req.url,'http://localhost')}catch{return listener(req,res)}
- if(req.method==='OPTIONS'&&u.pathname==='/api/users/v1/raw-chunk'){
+ const forcePath=u.pathname==='/api/users/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force-all';
+ if(req.method==='OPTIONS'&&(u.pathname==='/api/users/v1/raw-chunk'||forcePath)){
   if(origin&&origin!==ALLOWED_ORIGIN){res.writeHead(403);return res.end()}
-  res.writeHead(204,{'Access-Control-Allow-Origin':origin||ALLOWED_ORIGIN,'Vary':'Origin','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Beta-Token','Access-Control-Max-Age':'86400'});return res.end()
+  res.writeHead(204,{'Access-Control-Allow-Origin':origin||ALLOWED_ORIGIN,'Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Beta-Token','Access-Control-Max-Age':'86400'});return res.end()
+ }
+ if(req.method==='GET'&&u.pathname==='/api/users/v1/raw-force'){
+  const x=identity(req);if(!x)return send(res,401,{ok:false,error:'Active user session required'},origin);
+  const cmd=forceState(x.user.userId);return send(res,200,{ok:true,pending:!!cmd&&cmd.status==='pending',command:cmd&&cmd.status==='pending'?cmd:null},origin)
+ }
+ if(req.method==='POST'&&u.pathname==='/api/users/v1/raw-force'){
+  const x=identity(req);if(!x)return send(res,401,{ok:false,error:'Active user session required'},origin);
+  let data={};try{data=JSON.parse((await readBody(req,65536)).toString('utf8'))}catch{}
+  return send(res,200,{ok:true,command:ackForce(x.user.userId,x.payload.deviceId,data.ok===true,data.state||null)},origin)
+ }
+ if(req.method==='POST'&&u.pathname==='/api/admin/v1/raw-force'){
+  const x=identity(req);if(!x||x.user.role!=='admin')return send(res,403,{ok:false,error:'Admin required'},origin);
+  let data;try{data=JSON.parse((await readBody(req,65536)).toString('utf8'))}catch{return send(res,400,{ok:false,error:'Invalid JSON'},origin)}
+  const target=safe(data.userId),db=readJson(USERS_FILE,{users:[]});if(!(db.users||[]).some(v=>v.userId===target&&v.status==='active'))return send(res,404,{ok:false,error:'Active target user not found'},origin);
+  return send(res,201,{ok:true,command:setForce(target,x.user.userId)},origin)
+ }
+ if(req.method==='POST'&&u.pathname==='/api/admin/v1/raw-force-all'){
+  const x=identity(req);if(!x||x.user.role!=='admin')return send(res,403,{ok:false,error:'Admin required'},origin);
+  const db=readJson(USERS_FILE,{users:[]}),commands=[];for(const target of (db.users||[]).filter(v=>v.status==='active'))commands.push(setForce(target.userId,x.user.userId));
+  return send(res,201,{ok:true,count:commands.length,pending:commands.filter(c=>c.status==='pending').length,commands:commands.map(c=>({userId:c.userId,status:c.status,requestedAt:c.requestedAt}))},origin)
  }
  if(req.method!=='POST'||u.pathname!=='/api/users/v1/raw-chunk')return listener(req,res);
  const x=identity(req);if(!x)return send(res,401,{ok:false,error:'Active user session required'},origin);
@@ -57,6 +86,7 @@ http.createServer=function(listener){return originalCreateServer(async(req,res)=
  const item={schema:'motolab_user_raw_v1',userId:x.user.userId,deviceId:x.payload.deviceId,receivedAt:new Date().toISOString(),deviceLabel:String(data.deviceLabel||'').slice(0,80),moduleVersion:String(data.moduleVersion||'').slice(0,80),chunk};
  const file=path.join(RAW_DIR,safe(x.user.userId),chunkId+'.json');
  atomicJson(file,item);
- return send(res,201,{ok:true,userId:x.user.userId,chunkId,receivedAt:item.receivedAt},origin)
+ const sessionId=safe(chunk.sessionId||'no-session');let sessionZip=null;try{sessionZip=writeSessionZip(x.user.userId,sessionId)}catch(e){console.error('MotoLab session ZIP:',e)}
+ return send(res,201,{ok:true,userId:x.user.userId,chunkId,sessionId,sessionZip:sessionZip?path.basename(sessionZip):null,receivedAt:item.receivedAt},origin)
 })};
 console.log('MotoLab authenticated user RAW endpoint enabled');
