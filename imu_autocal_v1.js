@@ -68,10 +68,15 @@
     state.latest=rec;state.events.push(rec);
     if(state.events.length>MAX_EVENTS)state.events.splice(0,state.events.length-MAX_EVENTS);
     globalThis.MOTOLAB_IMU_AUTOCAL={version:VERSION,schema:RAW_SCHEMA,...snapshot()};
+    globalThis.dispatchEvent(new CustomEvent('motolab-imu-fusion',{detail:{
+      t:rec.t,longitudinalMps2:rec.longitudinalMps2,confidence:rec.confidence,
+      correlation:rec.correlation,mountState:rec.mountState,rotationMag:rec.rotationMag,
+      userAccelMag:rec.userAccelMag
+    }}));
   }
 
   function calibrateFromGps(sample){
-    const gpsA=n(sample?.a);
+    const gpsA=n(sample?.gpsAccelMps2??sample?.a);
     const rec=state.latest;
     if(gpsA==null||!rec||Date.now()-rec.t>350)return;
     const a=[rec.ax||0,rec.ay||0,rec.az||0],am=mag(a);
@@ -148,7 +153,7 @@
         imuMountState:r.mountState,imuUserAccelMag:r.userAccelMag,imuRotationMag:r.rotationMag
       });
     }
-    chunk.imu={schema:RAW_SCHEMA,calibrationVersion:VERSION,mode:'shadow_only',...snapshot()};
+    chunk.imu={schema:RAW_SCHEMA,calibrationVersion:VERSION,mode:'test_fusion_and_raw',...snapshot()};
     return chunk;
   }
 
@@ -175,5 +180,5 @@
   },250);
   patchCollect();patchPut();
   globalThis.MotoLabImuAutoCal={version:VERSION,schema:RAW_SCHEMA,snapshot,enrichChunk};
-  try{globalThis.addLearningEvent?.('imu_autocal_loaded',{module:VERSION,schema:RAW_SCHEMA,mode:'shadow_only'})}catch{}
+  try{globalThis.addLearningEvent?.('imu_autocal_loaded',{module:VERSION,schema:RAW_SCHEMA,mode:'test_fusion_and_raw'})}catch{}
 })();
