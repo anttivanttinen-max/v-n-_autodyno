@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-08-25-raw-force-session-zip"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-08-30-imu-autocal-raw-v1"};
 (() => {
  if(typeof document==='undefined')return;
  const BUILD=globalThis.MOTOLAB_RELEASE.build;
