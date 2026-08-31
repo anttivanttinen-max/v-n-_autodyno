@@ -1,0 +1,20 @@
+ref,qty,value_or_part,minimum_rating,status,notes
+U1,1,ESP32-S3 DevKit N16R8,3.3 V GPIO,VARMISTETTAVA,"Aiemmin sovittu kortti soveltuu; varmista tarkka pinout ja että GPIO4 on vapaa"
+U2,1,74LVC1G17 Schmitt buffer,SOT-23-5 1.65-5.5 V,TARVITAAN,"SN74LVC1G17DBVR tai vastaava; ei 5 V syöttöä"
+D1,1,BAV99 dual switching diode,>=70 V SOT-23,TARVITAAN,"Kytke clampiksi 0 V ja 3.3 V kiskoihin"
+D2,1,SMBJ5.0CA bidirectional TVS,600 W,TARVITAAN,"Pickup-sisääntulosta pickup-paluujohtoon, johtimet lyhyiksi"
+R1,1,100 kOhm,0.25 W 1%,TARVITAAN,"Sarja pickupista suojattuun solmuun"
+R2,1,10 kOhm,0.25 W 1%,TARVITAAN,"Sarja Schmitt-tuloon"
+R3,1,1 MOhm,0.25 W 1%,TARVITAAN,"Schmitt-tulo maahan; purku/bias"
+R4,1,100 Ohm,0.25 W 1%,TARVITAAN,"Schmitt-lähdöstä GPIO4:ään"
+C1,1,1 nF C0G/NP0,50 V,TARVITAAN,"Schmitt-tulosta maahan; R2+C1 noin 16 kHz alipäästö"
+C2,1,100 nF X7R,16 V,TARVITAAN,"U2 VCC-GND ohitus, aivan piirin viereen"
+C3,1,10 uF X7R/electrolytic,6.3 V,TARVITAAN,"3.3 V bulk lähelle U2:ta"
+J1,1,2-pin locking connector,>=50 V,TARVITAAN,"Pickup ja pickup return; esim. JST-XH prototyypissä"
+W1,1,PTFE-insulated stranded wire 0.25-0.5 mm2,600 V insulation preferred,TARVITAAN,"Pickup 3-6 kierrosta tulpanjohdon eristeen päälle"
+W2,1,Shielded twisted pair,2 conductors,TARVITAAN,"Pickup-päistä kotelolle; suojavaippa vain kotelon GND:hen"
+ENC1,1,Insulating enclosure,IP54 minimum,TARVITAAN,"Vedonpoisto ja ei paljaita johtavia osia"
+PS1,1,USB power bank or isolated USB supply,5 V >=500 mA,TARVITAAN,"Ensitestissä ei pyörän 12 V sähköjärjestelmästä"
+H1,2,Heat-shrink and cable ties,automotive temperature,TARVITAAN,"Pickupin mekaaninen lukitus; ei liian tiukalle"
+
+
