@@ -22,5 +22,8 @@ targets:
         CODE_SIGN_STYLE: Automatic
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 0.1
+        GENERATE_INFOPLIST_FILE: NO
     scheme:
       testTargets: []
+      archive:
+        config: Release
