@@ -3,6 +3,16 @@ import CoreLocation
 import CoreMotion
 import Combine
 
+enum MovementClass: String, Codable, CaseIterable, Identifiable {
+    case moto = "MOTO"
+    case bus = "BUS"
+    case car = "CAR"
+    case walk = "WALK"
+    case stationary = "STATIONARY"
+    case unknown = "UNKNOWN"
+    var id: String { rawValue }
+}
+
 struct RidePoint: Codable {
     let timestamp: Date
     let latitude: Double
@@ -18,6 +28,17 @@ struct RidePoint: Codable {
     let motionMagnitude: Double?
 }
 
+struct MovementSession: Codable {
+    let schema: String
+    let id: String
+    let startedAt: Date
+    let endedAt: Date
+    var movementClass: MovementClass
+    var classSource: String
+    var labeledAt: Date?
+    let points: [RidePoint]
+}
+
 @MainActor
 final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     static let shared = AutoRideManager()
@@ -26,6 +47,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published private(set) var rideActive = false
     @Published private(set) var pointCount = 0
     @Published private(set) var motionMagnitude = 0.0
+    @Published private(set) var lastSessionId: String?
+    @Published private(set) var lastSessionClass: MovementClass = .unknown
 
     private let manager = CLLocationManager()
     private let motionManager = CMMotionManager()
@@ -33,6 +56,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     private var movingHits = 0
     private var stoppedSince: Date?
     private var points: [RidePoint] = []
+    private var sessionId: String?
+    private var sessionStartedAt: Date?
     private let startSpeedKmh = 8.0
     private let requiredMovingHits = 3
     private let stopDelay: TimeInterval = 180
@@ -48,6 +73,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func start() {
         startMotionCapture()
+        loadLastSessionSummary()
         manager.requestAlwaysAuthorization()
         if manager.authorizationStatus == .authorizedAlways { armStandby() }
         status = "Auto Ride valmiina"
@@ -125,10 +151,12 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         movingHits = 0
         stoppedSince = nil
         points = []
+        sessionId = UUID().uuidString.lowercased()
+        sessionStartedAt = location.timestamp
         configureRideTracking()
         manager.startUpdatingLocation()
         append(location)
-        status = "AJO TALLENTUU"
+        status = "LIIKE TALLENTUU • UNKNOWN"
         NotificationCenter.default.post(name: .motorLabRideStarted, object: nil)
     }
 
@@ -160,28 +188,57 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         persistCompletedRide()
         points = []
         pointCount = 0
+        sessionId = nil
+        sessionStartedAt = nil
         armStandby()
         status = "Auto Ride valmiina"
         NotificationCenter.default.post(name: .motorLabRideStopped, object: nil)
     }
 
+    func labelLastSession(_ movementClass: MovementClass) {
+        guard let id = lastSessionId else { return }
+        let url = ridesDirectory.appendingPathComponent("session-\(id).json")
+        guard let data = try? Data(contentsOf: url), var session = try? JSONDecoder().decode(MovementSession.self, from: data) else { return }
+        session.movementClass = movementClass
+        session.classSource = "user"
+        session.labeledAt = Date()
+        guard let out = try? JSONEncoder().encode(session) else { return }
+        try? out.write(to: url, options: .atomic)
+        lastSessionClass = movementClass
+        UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
+    }
+
     private var ridesDirectory: URL {
         let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let dir = base.appendingPathComponent("MotorLabAutoRides", isDirectory: true)
+        let dir = base.appendingPathComponent("MotorLabMovementSessions", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
 
     private func persistCurrentRide() {
-        guard let data = try? JSONEncoder().encode(points) else { return }
+        guard let id = sessionId, let startedAt = sessionStartedAt else { return }
+        let session = MovementSession(schema: "motorlab_movement_session_v1", id: id, startedAt: startedAt, endedAt: Date(), movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, points: points)
+        guard let data = try? JSONEncoder().encode(session) else { return }
         try? data.write(to: ridesDirectory.appendingPathComponent("current.json"), options: .atomic)
     }
 
     private func persistCompletedRide() {
-        guard !points.isEmpty, let data = try? JSONEncoder().encode(points) else { return }
-        let name = "ride-\(Int(Date().timeIntervalSince1970)).json"
-        try? data.write(to: ridesDirectory.appendingPathComponent(name), options: .atomic)
+        guard !points.isEmpty, let id = sessionId, let startedAt = sessionStartedAt else { return }
+        let session = MovementSession(schema: "motorlab_movement_session_v1", id: id, startedAt: startedAt, endedAt: Date(), movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, points: points)
+        guard let data = try? JSONEncoder().encode(session) else { return }
+        try? data.write(to: ridesDirectory.appendingPathComponent("session-\(id).json"), options: .atomic)
         try? FileManager.default.removeItem(at: ridesDirectory.appendingPathComponent("current.json"))
+        lastSessionId = id
+        lastSessionClass = .unknown
+        UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
+    }
+
+    private func loadLastSessionSummary() {
+        guard let id = UserDefaults.standard.string(forKey: "MotorLabLastMovementSessionId") else { return }
+        let url = ridesDirectory.appendingPathComponent("session-\(id).json")
+        guard let data = try? Data(contentsOf: url), let session = try? JSONDecoder().decode(MovementSession.self, from: data) else { return }
+        lastSessionId = session.id
+        lastSessionClass = session.movementClass
     }
 }
 
