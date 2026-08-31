@@ -73,6 +73,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published private(set) var lastSessionId: String?
     @Published private(set) var lastSessionClass: MovementClass = .unknown
     @Published private(set) var lastSessionFeatures: MovementFeatures?
+    @Published private(set) var movementFingerprints: [MovementFingerprint] = []
+    @Published private(set) var lastSessionMatches: [MovementMatch] = []
 
     private let manager = CLLocationManager()
     private let motionManager = CMMotionManager()
@@ -98,6 +100,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     func start() {
         startMotionCapture()
         loadLastSessionSummary()
+        refreshMovementComparisons()
         manager.requestAlwaysAuthorization()
         if manager.authorizationStatus == .authorizedAlways { armStandby() }
         status = "Auto Ride valmiina"
@@ -232,6 +235,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         lastSessionClass = movementClass
         lastSessionFeatures = session.features
         UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
+        refreshMovementComparisons()
     }
 
     private var ridesDirectory: URL {
@@ -261,6 +265,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         lastSessionClass = .unknown
         lastSessionFeatures = features
         UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
+        refreshMovementComparisons()
     }
 
     private func loadLastSessionSummary() {
@@ -270,6 +275,30 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         lastSessionId = session.id
         lastSessionClass = session.movementClass
         lastSessionFeatures = session.features ?? summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt)
+    }
+
+    private func loadCompletedSessions(excluding excludedId: String? = nil) -> [MovementSession] {
+        let urls = (try? FileManager.default.contentsOfDirectory(at: ridesDirectory, includingPropertiesForKeys: nil)) ?? []
+        return urls.compactMap { url -> MovementSession? in
+            guard url.lastPathComponent.hasPrefix("session-"), url.pathExtension == "json",
+                  let data = try? Data(contentsOf: url),
+                  var session = try? JSONDecoder().decode(MovementSession.self, from: data),
+                  session.id != excludedId else { return nil }
+            if session.features == nil {
+                session.features = summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt)
+            }
+            return session
+        }
+    }
+
+    private func refreshMovementComparisons() {
+        let training = loadCompletedSessions(excluding: lastSessionId)
+        movementFingerprints = MovementClassifier.fingerprints(from: training)
+        guard let features = lastSessionFeatures else {
+            lastSessionMatches = []
+            return
+        }
+        lastSessionMatches = MovementClassifier.matches(features: features, fingerprints: movementFingerprints)
     }
 
     private func summarize(_ points: [RidePoint], startedAt: Date, endedAt: Date) -> MovementFeatures {
