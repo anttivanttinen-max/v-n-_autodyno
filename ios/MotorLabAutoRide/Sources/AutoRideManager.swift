@@ -13,6 +13,40 @@ enum MovementClass: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+struct IMUSample: Codable {
+    let timestamp: Date
+    let accelerationX: Double
+    let accelerationY: Double
+    let accelerationZ: Double
+    let rotationX: Double
+    let rotationY: Double
+    let rotationZ: Double
+    let motionMagnitude: Double
+    let rotationMagnitude: Double
+}
+
+struct IMUSampleRingBuffer {
+    private(set) var samples: [IMUSample] = []
+    let capacity: Int
+
+    mutating func append(_ sample: IMUSample) {
+        samples.append(sample)
+        if samples.count > capacity {
+            samples.removeFirst(samples.count - capacity)
+        }
+    }
+
+    mutating func drain() -> [IMUSample] {
+        let drained = samples
+        samples.removeAll(keepingCapacity: true)
+        return drained
+    }
+
+    mutating func clear() {
+        samples.removeAll(keepingCapacity: true)
+    }
+}
+
 struct RidePoint: Codable {
     let timestamp: Date
     let latitude: Double
@@ -48,6 +82,7 @@ struct MovementFeatures: Codable {
     let rotationStdDevRadS: Double
     let hardAccelEvents: Int
     let hardBrakeEvents: Int
+    let imuSampleCount: Int?
 }
 
 struct MovementSession: Codable {
@@ -60,15 +95,17 @@ struct MovementSession: Codable {
     var labeledAt: Date?
     var features: MovementFeatures?
     let points: [RidePoint]
+    var imuSamples: [IMUSample]?
 }
 
 @MainActor
-final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class AutoRideManager: NSObject, ObservableObject, @preconcurrency CLLocationManagerDelegate {
     static let shared = AutoRideManager()
 
     @Published private(set) var status = "Valmis"
     @Published private(set) var rideActive = false
     @Published private(set) var pointCount = 0
+    @Published private(set) var imuSampleCount = 0
     @Published private(set) var motionMagnitude = 0.0
     @Published private(set) var lastSessionId: String?
     @Published private(set) var lastSessionClass: MovementClass = .unknown
@@ -79,6 +116,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     private let manager = CLLocationManager()
     private let motionManager = CMMotionManager()
     private var latestMotion: CMDeviceMotion?
+    private var imuRing = IMUSampleRingBuffer(capacity: 1200) // 120 s at 10 Hz
+    private var sessionIMUSamples: [IMUSample] = []
     private var movingHits = 0
     private var stoppedSince: Date?
     private var points: [RidePoint] = []
@@ -127,7 +166,21 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
             guard let self, let motion else { return }
             self.latestMotion = motion
             let a = motion.userAcceleration
-            self.motionMagnitude = sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
+            let r = motion.rotationRate
+            let motionMag = sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
+            let rotationMag = sqrt(r.x * r.x + r.y * r.y + r.z * r.z)
+            self.motionMagnitude = motionMag
+
+            guard self.rideActive else { return }
+            self.imuRing.append(IMUSample(timestamp: Date(),
+                                          accelerationX: a.x,
+                                          accelerationY: a.y,
+                                          accelerationZ: a.z,
+                                          rotationX: r.x,
+                                          rotationY: r.y,
+                                          rotationZ: r.z,
+                                          motionMagnitude: motionMag,
+                                          rotationMagnitude: rotationMag))
         }
     }
 
@@ -166,6 +219,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
+        flushIMURing()
         append(location)
         if speed < 2 {
             if stoppedSince == nil { stoppedSince = location.timestamp }
@@ -178,6 +232,9 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         movingHits = 0
         stoppedSince = nil
         points = []
+        sessionIMUSamples = []
+        imuRing.clear()
+        imuSampleCount = 0
         sessionId = UUID().uuidString.lowercased()
         sessionStartedAt = location.timestamp
         configureRideTracking()
@@ -185,6 +242,13 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         append(location)
         status = "LIIKE TALLENTUU • UNKNOWN"
         NotificationCenter.default.post(name: .motorLabRideStarted, object: nil)
+    }
+
+    private func flushIMURing() {
+        let drained = imuRing.drain()
+        guard !drained.isEmpty else { return }
+        sessionIMUSamples.append(contentsOf: drained)
+        imuSampleCount = sessionIMUSamples.count
     }
 
     private func append(_ location: CLLocation) {
@@ -210,11 +274,14 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func finishRide() {
         guard rideActive else { return }
+        flushIMURing()
         rideActive = false
         stoppedSince = nil
         persistCompletedRide()
         points = []
+        sessionIMUSamples = []
         pointCount = 0
+        imuSampleCount = 0
         sessionId = nil
         sessionStartedAt = nil
         armStandby()
@@ -229,7 +296,9 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         session.movementClass = movementClass
         session.classSource = "user"
         session.labeledAt = Date()
-        if session.features == nil { session.features = summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt) }
+        if session.features == nil {
+            session.features = summarize(session.points, imuSamples: session.imuSamples ?? [], startedAt: session.startedAt, endedAt: session.endedAt)
+        }
         guard let out = try? JSONEncoder().encode(session) else { return }
         try? out.write(to: url, options: .atomic)
         lastSessionClass = movementClass
@@ -248,7 +317,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     private func persistCurrentRide() {
         guard let id = sessionId, let startedAt = sessionStartedAt else { return }
         let now = Date()
-        let session = MovementSession(schema: "motorlab_movement_session_v2", id: id, startedAt: startedAt, endedAt: now, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: summarize(points, startedAt: startedAt, endedAt: now), points: points)
+        let features = summarize(points, imuSamples: sessionIMUSamples, startedAt: startedAt, endedAt: now)
+        let session = MovementSession(schema: "motorlab_movement_session_v3", id: id, startedAt: startedAt, endedAt: now, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: features, points: points, imuSamples: sessionIMUSamples)
         guard let data = try? JSONEncoder().encode(session) else { return }
         try? data.write(to: ridesDirectory.appendingPathComponent("current.json"), options: .atomic)
     }
@@ -256,8 +326,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     private func persistCompletedRide() {
         guard !points.isEmpty, let id = sessionId, let startedAt = sessionStartedAt else { return }
         let endedAt = Date()
-        let features = summarize(points, startedAt: startedAt, endedAt: endedAt)
-        let session = MovementSession(schema: "motorlab_movement_session_v2", id: id, startedAt: startedAt, endedAt: endedAt, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: features, points: points)
+        let features = summarize(points, imuSamples: sessionIMUSamples, startedAt: startedAt, endedAt: endedAt)
+        let session = MovementSession(schema: "motorlab_movement_session_v3", id: id, startedAt: startedAt, endedAt: endedAt, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: features, points: points, imuSamples: sessionIMUSamples)
         guard let data = try? JSONEncoder().encode(session) else { return }
         try? data.write(to: ridesDirectory.appendingPathComponent("session-\(id).json"), options: .atomic)
         try? FileManager.default.removeItem(at: ridesDirectory.appendingPathComponent("current.json"))
@@ -274,7 +344,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         guard let data = try? Data(contentsOf: url), let session = try? JSONDecoder().decode(MovementSession.self, from: data) else { return }
         lastSessionId = session.id
         lastSessionClass = session.movementClass
-        lastSessionFeatures = session.features ?? summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt)
+        lastSessionFeatures = session.features ?? summarize(session.points, imuSamples: session.imuSamples ?? [], startedAt: session.startedAt, endedAt: session.endedAt)
     }
 
     private func loadCompletedSessions(excluding excludedId: String? = nil) -> [MovementSession] {
@@ -285,7 +355,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
                   var session = try? JSONDecoder().decode(MovementSession.self, from: data),
                   session.id != excludedId else { return nil }
             if session.features == nil {
-                session.features = summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt)
+                session.features = summarize(session.points, imuSamples: session.imuSamples ?? [], startedAt: session.startedAt, endedAt: session.endedAt)
             }
             return session
         }
@@ -301,13 +371,13 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         lastSessionMatches = MovementClassifier.matches(features: features, fingerprints: movementFingerprints)
     }
 
-    private func summarize(_ points: [RidePoint], startedAt: Date, endedAt: Date) -> MovementFeatures {
+    private func summarize(_ points: [RidePoint], imuSamples: [IMUSample], startedAt: Date, endedAt: Date) -> MovementFeatures {
         let speeds = points.map(\.speedKmh)
-        let motion = points.compactMap(\.motionMagnitude)
-        let rotation = points.compactMap { p -> Double? in
+        let motion = imuSamples.isEmpty ? points.compactMap(\.motionMagnitude) : imuSamples.map(\.motionMagnitude)
+        let rotation = imuSamples.isEmpty ? points.compactMap { p -> Double? in
             guard let x = p.rotationX, let y = p.rotationY, let z = p.rotationZ else { return nil }
             return sqrt(x*x + y*y + z*z)
-        }
+        } : imuSamples.map(\.rotationMagnitude)
         let duration = max(0, endedAt.timeIntervalSince(startedAt))
         let moving = speeds.filter { $0 >= 3 }.count
         let stopped = speeds.filter { $0 < 2 }.count
@@ -344,7 +414,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
                                 rotationP90RadS: percentile(rotation, 0.90),
                                 rotationStdDevRadS: stddev(rotation),
                                 hardAccelEvents: hardAccel,
-                                hardBrakeEvents: hardBrake)
+                                hardBrakeEvents: hardBrake,
+                                imuSampleCount: imuSamples.isEmpty ? nil : imuSamples.count)
     }
 
     private func mean(_ a: [Double]) -> Double { a.isEmpty ? 0 : a.reduce(0,+) / Double(a.count) }
