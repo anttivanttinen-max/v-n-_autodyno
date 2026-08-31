@@ -1,0 +1,51 @@
+name: MotorLab iOS Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/MotorLabAutoRide/**'
+      - '.github/workflows/ios-motorlab-build.yml'
+  pull_request:
+    paths:
+      - 'ios/MotorLabAutoRide/**'
+      - '.github/workflows/ios-motorlab-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios/MotorLabAutoRide
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build MotorLab for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project MotorLabAutoRide.xcodeproj \
+            -scheme MotorLabAutoRide \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tee xcodebuild.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: motorlab-ios-build-log
+          path: ios/MotorLabAutoRide/xcodebuild.log
+          if-no-files-found: ignore
