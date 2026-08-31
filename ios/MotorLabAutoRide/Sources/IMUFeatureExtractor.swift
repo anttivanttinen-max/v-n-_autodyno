@@ -11,6 +11,8 @@ struct IMUDynamicsFeatures: Codable {
 }
 
 enum IMUFeatureExtractor {
+    private static let maxSpectralSamples = 1024
+
     static func extract(_ samples: [IMUSample]) -> IMUDynamicsFeatures? {
         guard samples.count >= 8 else { return nil }
         let sorted = samples.sorted { $0.timestamp < $1.timestamp }
@@ -22,19 +24,24 @@ enum IMUFeatureExtractor {
         jerk.reserveCapacity(sorted.count - 1)
         for i in 1..<sorted.count {
             let dt = sorted[i].timestamp.timeIntervalSince(sorted[i - 1].timestamp)
-            guard dt > 0.02, dt < 1.0 else { continue }
+            guard dt > 0.005, dt < 1.0 else { continue }
             jerk.append(abs(sorted[i].motionMagnitude - sorted[i - 1].motionMagnitude) / dt)
         }
 
-        let signal = sorted.map(\.motionMagnitude)
+        let spectralSamples = Array(sorted.suffix(maxSpectralSamples))
+        let spectralDuration = spectralSamples.last!.timestamp.timeIntervalSince(spectralSamples.first!.timestamp)
+        let spectralHz = spectralDuration > 0 ? Double(spectralSamples.count - 1) / spectralDuration : hz
+        let signal = spectralSamples.map(\.motionMagnitude)
+        let nyquist = max(0, spectralHz * 0.5)
+
         return IMUDynamicsFeatures(
             sampleCount: sorted.count,
             effectiveSampleHz: hz,
             jerkRMSGPerSec: rms(jerk),
             jerkP90GPerSec: percentile(jerk, 0.90),
-            vibrationLow: bandEnergy(signal, sampleHz: hz, lowHz: 0.5, highHz: 1.5),
-            vibrationMid: bandEnergy(signal, sampleHz: hz, lowHz: 1.5, highHz: 3.0),
-            vibrationHigh: bandEnergy(signal, sampleHz: hz, lowHz: 3.0, highHz: min(4.8, hz * 0.48))
+            vibrationLow: bandEnergy(signal, sampleHz: spectralHz, lowHz: 0.5, highHz: min(3.0, nyquist * 0.95)),
+            vibrationMid: bandEnergy(signal, sampleHz: spectralHz, lowHz: 3.0, highHz: min(10.0, nyquist * 0.95)),
+            vibrationHigh: bandEnergy(signal, sampleHz: spectralHz, lowHz: 10.0, highHz: min(20.0, nyquist * 0.95))
         )
     }
 
