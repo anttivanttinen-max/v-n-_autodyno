@@ -16,6 +16,11 @@ struct MovementFingerprint: Codable, Identifiable {
     let rotationStdDevRadS: Double
     let hardAccelPerMinute: Double
     let hardBrakePerMinute: Double
+    let jerkRMSGPerSec: Double?
+    let jerkP90GPerSec: Double?
+    let vibrationLow: Double?
+    let vibrationMid: Double?
+    let vibrationHigh: Double?
     var id: String { movementClass.rawValue }
 }
 
@@ -33,6 +38,7 @@ enum MovementClassifier {
         return Dictionary(grouping: usable, by: \.movementClass).compactMap { movementClass, group in
             let f = group.compactMap(\.features)
             guard !f.isEmpty else { return nil }
+            let dynamics = group.compactMap(\.imuDynamics)
             return MovementFingerprint(
                 movementClass: movementClass,
                 sampleCount: f.count,
@@ -48,14 +54,19 @@ enum MovementClassifier {
                 rotationP90RadS: mean(f.map(\.rotationP90RadS)),
                 rotationStdDevRadS: mean(f.map(\.rotationStdDevRadS)),
                 hardAccelPerMinute: mean(f.map { perMinute(Double($0.hardAccelEvents), $0.durationSec) }),
-                hardBrakePerMinute: mean(f.map { perMinute(Double($0.hardBrakeEvents), $0.durationSec) })
+                hardBrakePerMinute: mean(f.map { perMinute(Double($0.hardBrakeEvents), $0.durationSec) }),
+                jerkRMSGPerSec: optionalMean(dynamics.map(\.jerkRMSGPerSec)),
+                jerkP90GPerSec: optionalMean(dynamics.map(\.jerkP90GPerSec)),
+                vibrationLow: optionalMean(dynamics.map(\.vibrationLow)),
+                vibrationMid: optionalMean(dynamics.map(\.vibrationMid)),
+                vibrationHigh: optionalMean(dynamics.map(\.vibrationHigh))
             )
         }.sorted { $0.movementClass.rawValue < $1.movementClass.rawValue }
     }
 
-    static func matches(features f: MovementFeatures, fingerprints: [MovementFingerprint]) -> [MovementMatch] {
+    static func matches(features f: MovementFeatures, dynamics: IMUDynamicsFeatures?, fingerprints: [MovementFingerprint]) -> [MovementMatch] {
         fingerprints.map { fp in
-            let values: [(Double, Double, Double)] = [
+            var values: [(Double, Double, Double)] = [
                 (f.meanSpeedKmh, fp.meanSpeedKmh, 15),
                 (f.p90SpeedKmh, fp.p90SpeedKmh, 20),
                 (f.speedStdDevKmh, fp.speedStdDevKmh, 10),
@@ -70,11 +81,23 @@ enum MovementClassifier {
                 (perMinute(Double(f.hardAccelEvents), f.durationSec), fp.hardAccelPerMinute, 2.0),
                 (perMinute(Double(f.hardBrakeEvents), f.durationSec), fp.hardBrakePerMinute, 2.0)
             ]
-            let d = sqrt(values.map { a,b,s in pow((a-b)/max(s, 0.0001), 2) }.reduce(0,+) / Double(values.count))
+            if let d = dynamics {
+                appendIfPresent(&values, d.jerkRMSGPerSec, fp.jerkRMSGPerSec, 2.0)
+                appendIfPresent(&values, d.jerkP90GPerSec, fp.jerkP90GPerSec, 3.0)
+                appendIfPresent(&values, d.vibrationLow, fp.vibrationLow, max(0.0005, (fp.vibrationLow ?? 0) * 0.75))
+                appendIfPresent(&values, d.vibrationMid, fp.vibrationMid, max(0.0005, (fp.vibrationMid ?? 0) * 0.75))
+                appendIfPresent(&values, d.vibrationHigh, fp.vibrationHigh, max(0.0005, (fp.vibrationHigh ?? 0) * 0.75))
+            }
+            let distance = sqrt(values.map { a,b,s in pow((a-b)/max(s, 0.0001), 2) }.reduce(0,+) / Double(values.count))
             let support = min(1.0, Double(fp.sampleCount) / 5.0)
-            let confidence = max(0, min(1, exp(-d) * support))
-            return MovementMatch(movementClass: fp.movementClass, distance: d, confidence: confidence, trainingSamples: fp.sampleCount)
+            let confidence = max(0, min(1, exp(-distance) * support))
+            return MovementMatch(movementClass: fp.movementClass, distance: distance, confidence: confidence, trainingSamples: fp.sampleCount)
         }.sorted { $0.distance < $1.distance }
+    }
+
+    private static func appendIfPresent(_ values: inout [(Double, Double, Double)], _ current: Double, _ reference: Double?, _ scale: Double) {
+        guard let reference else { return }
+        values.append((current, reference, scale))
     }
 
     private static func perMinute(_ count: Double, _ duration: Double) -> Double {
@@ -82,4 +105,5 @@ enum MovementClassifier {
         return count * 60.0 / duration
     }
     private static func mean(_ a: [Double]) -> Double { a.isEmpty ? 0 : a.reduce(0,+) / Double(a.count) }
+    private static func optionalMean(_ a: [Double]) -> Double? { a.isEmpty ? nil : mean(a) }
 }
