@@ -29,6 +29,30 @@ struct ContentView: View {
                             }
                             .font(.caption.monospacedDigit())
                         }
+
+                        if !ride.lastSessionMatches.isEmpty {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("Lähimmät aiemmat liikkumisluokat").font(.footnote.bold())
+                                ForEach(Array(ride.lastSessionMatches.prefix(3))) { match in
+                                    Text(String(format: "%@ • vertailu %.0f%% • etäisyys %.2f • %d näytettä",
+                                                match.movementClass.rawValue,
+                                                match.confidence * 100,
+                                                match.distance,
+                                                match.trainingSamples))
+                                }
+                                Text("Vertailu on oppimisen apu, ei vielä automaattinen MOTO-päätös.")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .font(.caption.monospacedDigit())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
+                        if !ride.movementFingerprints.isEmpty {
+                            Text("Opetusdata: " + ride.movementFingerprints.map { "\($0.movementClass.rawValue) \($0.sampleCount)" }.joined(separator: " • "))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
                         Text("Mikä liikkumistapa tämä oli?").font(.footnote)
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 8) {
                             ForEach(MovementClass.allCases.filter { $0 != .unknown }) { movementClass in
@@ -41,7 +65,7 @@ struct ContentView: View {
                     .padding(.top, 8)
                 }
 
-                Text("MotorLab tallentaa GPS- ja IMU-liikedatan ensin UNKNOWN-luokkaan ja laskee sessiosta vertailufeaturet. Luokka voidaan merkitä jälkikäteen ilman raakadatamuutoksia. Ääni ei vaikuta liikkumistavan tunnistukseen.")
+                Text("MotorLab tallentaa GPS- ja IMU-liikedatan ensin UNKNOWN-luokkaan ja vertaa sessiota aiemmin merkittyihin MOTO-, BUS-, CAR-, WALK- ja STATIONARY-näytteisiin. Luokka voidaan merkitä jälkikäteen ilman raakadatamuutoksia. Ääni ei vaikuta liikkumistavan tunnistukseen.")
                     .font(.footnote).multilineTextAlignment(.center)
             }
             .padding(24)
