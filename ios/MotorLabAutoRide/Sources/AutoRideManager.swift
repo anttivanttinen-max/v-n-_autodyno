@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import CoreMotion
 import Combine
 
 struct RidePoint: Codable {
@@ -8,6 +9,13 @@ struct RidePoint: Codable {
     let longitude: Double
     let speedKmh: Double
     let accuracyM: Double
+    let accelerationX: Double?
+    let accelerationY: Double?
+    let accelerationZ: Double?
+    let rotationX: Double?
+    let rotationY: Double?
+    let rotationZ: Double?
+    let motionMagnitude: Double?
 }
 
 @MainActor
@@ -17,8 +25,11 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published private(set) var status = "Valmis"
     @Published private(set) var rideActive = false
     @Published private(set) var pointCount = 0
+    @Published private(set) var motionMagnitude = 0.0
 
     private let manager = CLLocationManager()
+    private let motionManager = CMMotionManager()
+    private var latestMotion: CMDeviceMotion?
     private var movingHits = 0
     private var stoppedSince: Date?
     private var points: [RidePoint] = []
@@ -36,6 +47,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func start() {
+        startMotionCapture()
         manager.requestAlwaysAuthorization()
         if manager.authorizationStatus == .authorizedAlways { armStandby() }
         status = "Auto Ride valmiina"
@@ -55,9 +67,18 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
+    private func startMotionCapture() {
+        guard motionManager.isDeviceMotionAvailable, !motionManager.isDeviceMotionActive else { return }
+        motionManager.deviceMotionUpdateInterval = 0.1
+        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
+            guard let self, let motion else { return }
+            self.latestMotion = motion
+            let a = motion.userAcceleration
+            self.motionMagnitude = sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
+        }
+    }
+
     private func configureStandby() {
-        // Keep a low-power continuous location session alive so ride detection does not depend
-        // only on significant-change delivery latency. iOS still controls actual fix cadence.
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         manager.distanceFilter = 25
         manager.pausesLocationUpdatesAutomatically = false
@@ -71,14 +92,12 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func armStandby() {
         configureStandby()
-        manager.startMonitoringSignificantLocationChanges() // fallback relaunch path
-        manager.startUpdatingLocation()                     // low-power fast detection path
+        manager.startMonitoringSignificantLocationChanges()
+        manager.startUpdatingLocation()
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        for location in locations where location.horizontalAccuracy >= 0 {
-            consume(location)
-        }
+        for location in locations where location.horizontalAccuracy >= 0 { consume(location) }
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -87,13 +106,9 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func consume(_ location: CLLocation) {
         let speed = max(0, location.speed * 3.6)
-
         if !rideActive {
-            if speed >= startSpeedKmh && location.horizontalAccuracy <= 75 {
-                movingHits += 1
-            } else {
-                movingHits = max(0, movingHits - 1)
-            }
+            if speed >= startSpeedKmh && location.horizontalAccuracy <= 75 { movingHits += 1 }
+            else { movingHits = max(0, movingHits - 1) }
             if movingHits >= requiredMovingHits { beginRide(at: location) }
             return
         }
@@ -101,12 +116,8 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         append(location)
         if speed < 2 {
             if stoppedSince == nil { stoppedSince = location.timestamp }
-            if let stoppedSince, location.timestamp.timeIntervalSince(stoppedSince) >= stopDelay {
-                finishRide()
-            }
-        } else {
-            stoppedSince = nil
-        }
+            if let stoppedSince, location.timestamp.timeIntervalSince(stoppedSince) >= stopDelay { finishRide() }
+        } else { stoppedSince = nil }
     }
 
     private func beginRide(at location: CLLocation) {
@@ -122,11 +133,22 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     private func append(_ location: CLLocation) {
+        let motion = latestMotion
+        let a = motion?.userAcceleration
+        let r = motion?.rotationRate
+        let mag = a.map { sqrt($0.x * $0.x + $0.y * $0.y + $0.z * $0.z) }
         points.append(RidePoint(timestamp: location.timestamp,
                                 latitude: location.coordinate.latitude,
                                 longitude: location.coordinate.longitude,
                                 speedKmh: max(0, location.speed * 3.6),
-                                accuracyM: location.horizontalAccuracy))
+                                accuracyM: location.horizontalAccuracy,
+                                accelerationX: a?.x,
+                                accelerationY: a?.y,
+                                accelerationZ: a?.z,
+                                rotationX: r?.x,
+                                rotationY: r?.y,
+                                rotationZ: r?.z,
+                                motionMagnitude: mag))
         pointCount = points.count
         persistCurrentRide()
     }
