@@ -42,10 +42,24 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build | tee xcodebuild.log
 
-      - name: Upload build log
+      - name: Verify iPhone Release archive without signing
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project MotorLabAutoRide.xcodeproj \
+            -scheme MotorLabAutoRide \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/MotorLab.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            archive | tee xcodearchive.log
+
+      - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: motorlab-ios-build-log
-          path: ios/MotorLabAutoRide/xcodebuild.log
+          name: motorlab-ios-build-logs
+          path: |
+            ios/MotorLabAutoRide/xcodebuild.log
+            ios/MotorLabAutoRide/xcodearchive.log
           if-no-files-found: ignore
