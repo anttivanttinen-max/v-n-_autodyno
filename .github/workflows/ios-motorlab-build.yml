@@ -42,17 +42,37 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build | tee xcodebuild.log
 
-      - name: Verify iPhone Release archive without signing
+      - name: Build unsigned iPhone Release app
         run: |
           set -o pipefail
           xcodebuild \
             -project MotorLabAutoRide.xcodeproj \
             -scheme MotorLabAutoRide \
             -configuration Release \
+            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -archivePath "$RUNNER_TEMP/MotorLab.xcarchive" \
+            -derivedDataPath "$RUNNER_TEMP/MotorLabDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
-            archive | tee xcodearchive.log
+            build | tee xcodearchive.log
+
+      - name: Package unsigned IPA for sideloading
+        run: |
+          set -euo pipefail
+          APP_PATH="$RUNNER_TEMP/MotorLabDerivedData/Build/Products/Release-iphoneos/MotorLabAutoRide.app"
+          test -d "$APP_PATH"
+          rm -rf "$RUNNER_TEMP/Payload"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          /usr/bin/zip -qry MotorLabAutoRide-unsigned.ipa Payload
+          /usr/bin/unzip -l MotorLabAutoRide-unsigned.ipa | head -40
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotorLabAutoRide-unsigned-ipa
+          path: ${{ runner.temp }}/MotorLabAutoRide-unsigned.ipa
+          if-no-files-found: error
 
       - name: Upload build logs
         if: always()
