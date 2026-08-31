@@ -28,6 +28,28 @@ struct RidePoint: Codable {
     let motionMagnitude: Double?
 }
 
+struct MovementFeatures: Codable {
+    let durationSec: Double
+    let pointCount: Int
+    let maxSpeedKmh: Double
+    let meanSpeedKmh: Double
+    let medianSpeedKmh: Double
+    let p90SpeedKmh: Double
+    let speedStdDevKmh: Double
+    let movingShare: Double
+    let stoppedShare: Double
+    let stopCount: Int
+    let accelMeanG: Double
+    let accelP90G: Double
+    let accelP99G: Double
+    let accelStdDevG: Double
+    let rotationMeanRadS: Double
+    let rotationP90RadS: Double
+    let rotationStdDevRadS: Double
+    let hardAccelEvents: Int
+    let hardBrakeEvents: Int
+}
+
 struct MovementSession: Codable {
     let schema: String
     let id: String
@@ -36,6 +58,7 @@ struct MovementSession: Codable {
     var movementClass: MovementClass
     var classSource: String
     var labeledAt: Date?
+    var features: MovementFeatures?
     let points: [RidePoint]
 }
 
@@ -49,6 +72,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published private(set) var motionMagnitude = 0.0
     @Published private(set) var lastSessionId: String?
     @Published private(set) var lastSessionClass: MovementClass = .unknown
+    @Published private(set) var lastSessionFeatures: MovementFeatures?
 
     private let manager = CLLocationManager()
     private let motionManager = CMMotionManager()
@@ -202,9 +226,11 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         session.movementClass = movementClass
         session.classSource = "user"
         session.labeledAt = Date()
+        if session.features == nil { session.features = summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt) }
         guard let out = try? JSONEncoder().encode(session) else { return }
         try? out.write(to: url, options: .atomic)
         lastSessionClass = movementClass
+        lastSessionFeatures = session.features
         UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
     }
 
@@ -217,19 +243,23 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func persistCurrentRide() {
         guard let id = sessionId, let startedAt = sessionStartedAt else { return }
-        let session = MovementSession(schema: "motorlab_movement_session_v1", id: id, startedAt: startedAt, endedAt: Date(), movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, points: points)
+        let now = Date()
+        let session = MovementSession(schema: "motorlab_movement_session_v2", id: id, startedAt: startedAt, endedAt: now, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: summarize(points, startedAt: startedAt, endedAt: now), points: points)
         guard let data = try? JSONEncoder().encode(session) else { return }
         try? data.write(to: ridesDirectory.appendingPathComponent("current.json"), options: .atomic)
     }
 
     private func persistCompletedRide() {
         guard !points.isEmpty, let id = sessionId, let startedAt = sessionStartedAt else { return }
-        let session = MovementSession(schema: "motorlab_movement_session_v1", id: id, startedAt: startedAt, endedAt: Date(), movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, points: points)
+        let endedAt = Date()
+        let features = summarize(points, startedAt: startedAt, endedAt: endedAt)
+        let session = MovementSession(schema: "motorlab_movement_session_v2", id: id, startedAt: startedAt, endedAt: endedAt, movementClass: .unknown, classSource: "unlabeled", labeledAt: nil, features: features, points: points)
         guard let data = try? JSONEncoder().encode(session) else { return }
         try? data.write(to: ridesDirectory.appendingPathComponent("session-\(id).json"), options: .atomic)
         try? FileManager.default.removeItem(at: ridesDirectory.appendingPathComponent("current.json"))
         lastSessionId = id
         lastSessionClass = .unknown
+        lastSessionFeatures = features
         UserDefaults.standard.set(id, forKey: "MotorLabLastMovementSessionId")
     }
 
@@ -239,6 +269,67 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         guard let data = try? Data(contentsOf: url), let session = try? JSONDecoder().decode(MovementSession.self, from: data) else { return }
         lastSessionId = session.id
         lastSessionClass = session.movementClass
+        lastSessionFeatures = session.features ?? summarize(session.points, startedAt: session.startedAt, endedAt: session.endedAt)
+    }
+
+    private func summarize(_ points: [RidePoint], startedAt: Date, endedAt: Date) -> MovementFeatures {
+        let speeds = points.map(\.speedKmh)
+        let motion = points.compactMap(\.motionMagnitude)
+        let rotation = points.compactMap { p -> Double? in
+            guard let x = p.rotationX, let y = p.rotationY, let z = p.rotationZ else { return nil }
+            return sqrt(x*x + y*y + z*z)
+        }
+        let duration = max(0, endedAt.timeIntervalSince(startedAt))
+        let moving = speeds.filter { $0 >= 3 }.count
+        let stopped = speeds.filter { $0 < 2 }.count
+        var stopCount = 0, inStop = false
+        for v in speeds {
+            if v < 2 { if !inStop { stopCount += 1; inStop = true } }
+            else if v >= 4 { inStop = false }
+        }
+        var hardAccel = 0, hardBrake = 0
+        if points.count > 1 {
+            for i in 1..<points.count {
+                let dt = points[i].timestamp.timeIntervalSince(points[i-1].timestamp)
+                if dt <= 0 || dt > 10 { continue }
+                let a = ((points[i].speedKmh - points[i-1].speedKmh) / 3.6) / dt
+                if a >= 2.0 { hardAccel += 1 }
+                if a <= -2.5 { hardBrake += 1 }
+            }
+        }
+        return MovementFeatures(durationSec: duration,
+                                pointCount: points.count,
+                                maxSpeedKmh: speeds.max() ?? 0,
+                                meanSpeedKmh: mean(speeds),
+                                medianSpeedKmh: percentile(speeds, 0.50),
+                                p90SpeedKmh: percentile(speeds, 0.90),
+                                speedStdDevKmh: stddev(speeds),
+                                movingShare: speeds.isEmpty ? 0 : Double(moving) / Double(speeds.count),
+                                stoppedShare: speeds.isEmpty ? 0 : Double(stopped) / Double(speeds.count),
+                                stopCount: stopCount,
+                                accelMeanG: mean(motion),
+                                accelP90G: percentile(motion, 0.90),
+                                accelP99G: percentile(motion, 0.99),
+                                accelStdDevG: stddev(motion),
+                                rotationMeanRadS: mean(rotation),
+                                rotationP90RadS: percentile(rotation, 0.90),
+                                rotationStdDevRadS: stddev(rotation),
+                                hardAccelEvents: hardAccel,
+                                hardBrakeEvents: hardBrake)
+    }
+
+    private func mean(_ a: [Double]) -> Double { a.isEmpty ? 0 : a.reduce(0,+) / Double(a.count) }
+    private func stddev(_ a: [Double]) -> Double {
+        guard a.count > 1 else { return 0 }
+        let m = mean(a)
+        return sqrt(a.reduce(0) { $0 + ($1-m)*($1-m) } / Double(a.count))
+    }
+    private func percentile(_ a: [Double], _ p: Double) -> Double {
+        guard !a.isEmpty else { return 0 }
+        let s = a.sorted(), x = max(0,min(1,p))*Double(s.count-1), lo = Int(floor(x)), hi = Int(ceil(x))
+        if lo == hi { return s[lo] }
+        let f = x-Double(lo)
+        return s[lo]*(1-f)+s[hi]*f
     }
 }
 
