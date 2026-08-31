@@ -30,23 +30,21 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         super.init()
         manager.delegate = self
         manager.activityType = .automotiveNavigation
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.distanceFilter = 5
-        manager.pausesLocationUpdatesAutomatically = false
         manager.allowsBackgroundLocationUpdates = true
         manager.showsBackgroundLocationIndicator = true
+        configureStandby()
     }
 
     func start() {
         manager.requestAlwaysAuthorization()
-        manager.startMonitoringSignificantLocationChanges()
+        if manager.authorizationStatus == .authorizedAlways { armStandby() }
         status = "Auto Ride valmiina"
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedAlways:
-            manager.startMonitoringSignificantLocationChanges()
+            armStandby()
             status = "Auto Ride valmiina"
         case .authorizedWhenInUse:
             status = "Salli sijainti: Aina"
@@ -55,6 +53,26 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         default:
             break
         }
+    }
+
+    private func configureStandby() {
+        // Keep a low-power continuous location session alive so ride detection does not depend
+        // only on significant-change delivery latency. iOS still controls actual fix cadence.
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = 25
+        manager.pausesLocationUpdatesAutomatically = false
+    }
+
+    private func configureRideTracking() {
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.distanceFilter = kCLDistanceFilterNone
+        manager.pausesLocationUpdatesAutomatically = false
+    }
+
+    private func armStandby() {
+        configureStandby()
+        manager.startMonitoringSignificantLocationChanges() // fallback relaunch path
+        manager.startUpdatingLocation()                     // low-power fast detection path
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -71,7 +89,7 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         let speed = max(0, location.speed * 3.6)
 
         if !rideActive {
-            if speed >= startSpeedKmh && location.horizontalAccuracy <= 50 {
+            if speed >= startSpeedKmh && location.horizontalAccuracy <= 75 {
                 movingHits += 1
             } else {
                 movingHits = max(0, movingHits - 1)
@@ -96,8 +114,9 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         movingHits = 0
         stoppedSince = nil
         points = []
-        append(location)
+        configureRideTracking()
         manager.startUpdatingLocation()
+        append(location)
         status = "AJO TALLENTUU"
         NotificationCenter.default.post(name: .motorLabRideStarted, object: nil)
     }
@@ -116,10 +135,10 @@ final class AutoRideManager: NSObject, ObservableObject, CLLocationManagerDelega
         guard rideActive else { return }
         rideActive = false
         stoppedSince = nil
-        manager.stopUpdatingLocation()
         persistCompletedRide()
         points = []
         pointCount = 0
+        armStandby()
         status = "Auto Ride valmiina"
         NotificationCenter.default.post(name: .motorLabRideStopped, object: nil)
     }
