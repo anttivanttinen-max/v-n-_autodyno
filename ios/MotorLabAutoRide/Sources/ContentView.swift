@@ -11,7 +11,7 @@ struct ContentView: View {
                 Text(ride.status).font(.title3.bold())
 
                 if ride.rideActive {
-                    Text("GPS/IMU-pisteitä \(ride.pointCount)")
+                    Text("GPS-pisteitä \(ride.pointCount) • IMU-näytteitä \(ride.imuSampleCount)")
                     Text(String(format: "IMU %.3f g", ride.motionMagnitude))
                         .font(.footnote.monospacedDigit())
                 }
@@ -21,7 +21,8 @@ struct ContentView: View {
                         Text("Edellinen sessio: \(ride.lastSessionClass.rawValue)").font(.headline)
                         if let f = ride.lastSessionFeatures {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(String(format: "Kesto %.0f s • pisteitä %d", f.durationSec, f.pointCount))
+                                Text(String(format: "Kesto %.0f s • GPS-pisteitä %d", f.durationSec, f.pointCount))
+                                if let imuCount = f.imuSampleCount { Text("IMU-näytteitä \(imuCount)") }
                                 Text(String(format: "Nopeus ka %.1f • p90 %.1f • max %.1f km/h", f.meanSpeedKmh, f.p90SpeedKmh, f.maxSpeedKmh))
                                 Text(String(format: "IMU ka %.3f g • p90 %.3f • p99 %.3f", f.accelMeanG, f.accelP90G, f.accelP99G))
                                 Text(String(format: "Rotaatio ka %.3f • p90 %.3f rad/s", f.rotationMeanRadS, f.rotationP90RadS))
@@ -65,7 +66,7 @@ struct ContentView: View {
                     .padding(.top, 8)
                 }
 
-                Text("MotorLab tallentaa GPS- ja IMU-liikedatan ensin UNKNOWN-luokkaan ja vertaa sessiota aiemmin merkittyihin MOTO-, BUS-, CAR-, WALK- ja STATIONARY-näytteisiin. Luokka voidaan merkitä jälkikäteen ilman raakadatamuutoksia. Ääni ei vaikuta liikkumistavan tunnistukseen.")
+                Text("MotorLab tallentaa GPS-datan ja erillisen nopean IMU-näytevirran ensin UNKNOWN-luokkaan ja vertaa sessiota aiemmin merkittyihin MOTO-, BUS-, CAR-, WALK- ja STATIONARY-näytteisiin. Luokka voidaan merkitä jälkikäteen ilman raakadatamuutoksia. Ääni ei vaikuta liikkumistavan tunnistukseen.")
                     .font(.footnote).multilineTextAlignment(.center)
             }
             .padding(24)
