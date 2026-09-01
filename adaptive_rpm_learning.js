@@ -1,6 +1,7 @@
 (() => {
 'use strict';
-const MODULE='adaptive-rpm-learning-v1';
+const MODULE='adaptive-rpm-learning-v3-gps-mic-fusion';
+const HARMONIC_CORRECTIONS=[0.25,1/3,0.5,2/3,1,1.5,2,3,4];
 const MODEL_URL='./rpm-learning-model.json';
 const MODEL_KEY='motolab_v32_rpm_learning_model';
 const MODEL_META_KEY='motolab_v32_rpm_learning_meta';
@@ -12,7 +13,7 @@ function safeJson(s,fallback=null){try{return JSON.parse(s)}catch{return fallbac
 function median(a){if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2}
 function percentile(a,p){if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),i=clamp(Math.round((b.length-1)*p),0,b.length-1);return b[i]}
 function activeMode(){return $a('rpmSourceMode')?.value||'fusion'}
-function gpsRef(){try{const r=+lastUi?.speedRpm||0,c=+lastUi?.speedConf||0;if(r>0&&c>.2)return {rpm:r,conf:c}}catch{}return null}
+function gpsRef(){try{const r=+lastUi?.speedRpm||0,c=+lastUi?.speedConf||0,age=Number.isFinite(+lastUi?.gpsAgeMs)?Math.max(0,+lastUi.gpsAgeMs):0;const freshness=age<=350?1:age>=2500?0:clamp(1-(age-350)/2150,0,1);if(r>0&&c>.08&&freshness>0)return {rpm:r,conf:c,ageMs:age,freshness}}catch{}return null}
 function bandFor(rpm,m=model){const bands=m?.bands||[];return bands.find(b=>rpm>=+b.minRpm&&rpm<+b.maxRpm)||bands.reduce((best,b)=>!best||Math.abs(((+b.minRpm)+(+b.maxRpm))/2-rpm)<Math.abs(((+best.minRpm)+(+best.maxRpm))/2-rpm)?b:best,null)}
 function storedModel(){return safeJson(localStorage.getItem(MODEL_KEY)||'',null)}
 function validModel(m){return !!(m&&m.schema==='motolab_rpm_learning_model_v1'&&Array.isArray(m.bands))}
@@ -50,14 +51,14 @@ function chooseCandidate(incoming){
  const band=bandFor(expected),preferred=+band?.correction||1,tolPct=clamp(+band?.tolerancePct||12,5,35);
  let scored=[];
  for(const c0 of candidates){
-   for(const corr of [1,.5,2]){
+   for(const corr of HARMONIC_CORRECTIONS){
      const rpm=c0.rpm*corr;if(rpm<800||rpm>15000)continue;
      const spectral=clamp((c0.baseScore||c0.q||.2),0,1);
      const gpsScore=gps?expScore(Math.abs(rpm-gps.rpm),Math.max(180,gps.rpm*tolPct/100)):.5;
      const dt=lastChosenAt?clamp((now-lastChosenAt)/1000,.02,1):.1;
      const continuity=lastChosen?expScore(Math.abs(rpm-lastChosen),Math.max(260,lastChosen*(.07+dt*.08))):.65;
-     const prior=expScore(Math.abs(corr-preferred),.32);
-     const score=spectral*.22+continuity*.33+prior*.17+(gps?gpsScore*.28:0);
+     const prior=expScore(Math.abs(Math.log(Math.max(.001,corr)/Math.max(.001,preferred))),.38);
+     const gpsWeight=gps?(.08+.34*gps.freshness):0;const remain=1-gpsWeight;const score=spectral*(.30*remain)+continuity*(.46*remain)+prior*(.24*remain)+(gps?gpsScore*gpsWeight:0);
      scored.push({rpm,corr,c:c0,score,gpsScore,continuity,prior})
    }
  }
@@ -65,7 +66,7 @@ function chooseCandidate(incoming){
  const best=scored[0],runner=scored.find(x=>Math.abs(x.rpm-best.rpm)>Math.max(160,best.rpm*.045));
  const gap=runner?clamp((best.score-runner.score)/Math.max(.01,best.score),0,1):1;
  lastChosen=best.rpm;lastChosenAt=now;
- return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0};
+ return {...incoming,rpm:+best.rpm.toFixed(1),rawRpm:incoming.rawRpm||best.c.rawRpm||best.c.rpm,conf:clamp((+incoming.conf||0)*.55+best.score*.30+gap*.15,0,1),candidateGap:Math.max(+incoming.candidateGap||0,gap),runnerRpm:runner?.rpm||incoming.runnerRpm||0,observedF0:best.c.f0||incoming.observedF0||0,adaptiveCorrection:best.corr,adaptiveModel:true,adaptiveModelVersion:model?.version||null,adaptiveGpsRef:gps?.rpm||0,adaptiveGpsAgeMs:gps?.ageMs??null,adaptiveGpsFreshness:gps?.freshness||0};
 }
 function patchMeasurementInput(){
  try{
@@ -89,7 +90,7 @@ function patchLearningRows(){
   const wrapped=function(s){
     const a=globalThis.MOTOLAB_AUDIO_LAST,p=globalThis.MOTOLAB_PHONE_RPM,ad=globalThis.MOTOLAB_ADAPTIVE_RPM;
     const before=learningBuffer?.length||0;orig(s);
-    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveModelVersion=model?.version||null}}catch{}
+    try{if((learningBuffer?.length||0)>before){const row=learningBuffer[learningBuffer.length-1];row.audioCandidates=Array.isArray(a?.candidates)?a.candidates:(Array.isArray(p?.topCandidates)?p.topCandidates:null);row.adaptiveRpm=Number.isFinite(ad?.rpm)?ad.rpm:null;row.adaptiveCorrection=Number.isFinite(ad?.adaptiveCorrection)?ad.adaptiveCorrection:null;row.adaptiveGpsAgeMs=Number.isFinite(ad?.adaptiveGpsAgeMs)?ad.adaptiveGpsAgeMs:null;row.adaptiveGpsFreshness=Number.isFinite(ad?.adaptiveGpsFreshness)?ad.adaptiveGpsFreshness:null;row.adaptiveModelVersion=model?.version||null}}catch{}
   };
   wrapped.__adaptivePatched=true;collectLearningSample=wrapped;return true
  }catch{return false}
@@ -98,17 +99,17 @@ function extractSamples(chunks){const out=[];for(const c of chunks||[]){if(Array
 function bestCorrection(row,gps){
  const cand=Array.isArray(row.audioCandidates)?row.audioCandidates.map(normalizeCandidate):[];
  let choices=[];
- if(cand.length){for(const c of cand)for(const corr of [.5,1,2]){const rpm=c.rpm*corr;if(rpm>0)choices.push({corr,rpm,err:Math.abs(rpm-gps)/gps*100})}}
+ if(cand.length){for(const c of cand)for(const corr of HARMONIC_CORRECTIONS){const rpm=c.rpm*corr;if(rpm>0)choices.push({corr,rpm,err:Math.abs(rpm-gps)/gps*100,source:'candidate',f0:c.f0||0,q:c.q||0,fp:c.fp||0,baseScore:c.baseScore||0,candidateRpm:c.rpm||0})}}
  const observed=+row.micShadowRpm||+row.audioRpm||+row.audioRawRpm||0;
- if(observed>0)for(const corr of [.5,1,2])choices.push({corr,rpm:observed*corr,err:Math.abs(observed*corr-gps)/gps*100});
+ if(observed>0)for(const corr of HARMONIC_CORRECTIONS)choices.push({corr,rpm:observed*corr,err:Math.abs(observed*corr-gps)/gps*100,source:'observed',f0:+row.observedF0Hz||0,q:+row.audioConf||0,fp:+row.fingerprintScore||0,baseScore:+row.sampleQuality||0,candidateRpm:observed});
  choices.sort((a,b)=>a.err-b.err);return choices[0]||null
 }
 function trainFromSamples(samples){
  const usable=[];
- for(const r of samples){const gps=+r.gpsReferenceRpm||+r.speedRpm||0;if(gps<1000||gps>14000)continue;if(r.micLearningEligible===false)continue;const b=bestCorrection(r,gps);if(!b||b.err>35)continue;usable.push({gps,corr:b.corr,err:b.err})}
+ for(const r of samples){const gps=+r.gpsReferenceRpm||+r.speedRpm||0;if(gps<1000||gps>14000)continue;if(r.micLearningEligible===false)continue;const b=bestCorrection(r,gps);if(!b||b.err>35)continue;usable.push({gps,corr:b.corr,err:b.err,f0:b.f0||+r.observedF0Hz||0,audioConf:+r.audioConf||b.q||0,fingerprintScore:+r.fingerprintScore||b.fp||0,candidateGap:+r.candidateGap||0,audioLevel:+r.audioLevel||0,motionMag:+r.motionMag||0})}
  const bands=[];
- for(let min=1000;min<14000;min+=500){const rows=usable.filter(x=>x.gps>=min&&x.gps<min+500);if(!rows.length)continue;const corrVotes=[.5,1,2].map(c=>({c,n:rows.filter(x=>x.corr===c).length})).sort((a,b)=>b.n-a.n);const corr=corrVotes[0].c,errs=rows.filter(x=>x.corr===corr).map(x=>x.err);bands.push({minRpm:min,maxRpm:min+500,correction:corr,tolerancePct:+clamp(percentile(errs,.9)||12,6,28).toFixed(1),samples:rows.length,medianErrorPct:+(median(errs)||0).toFixed(2),p90ErrorPct:+(percentile(errs,.9)||0).toFixed(2),agreement:+(corrVotes[0].n/rows.length).toFixed(3)})}
- return {schema:'motolab_rpm_learning_model_v1',version:'local-'+new Date().toISOString().replace(/[:.]/g,'-'),createdAt:new Date().toISOString(),baseline:'v32.4',source:'local_raw_replay',sampleCount:samples.length,usablePairs:usable.length,bands,acceptance:{minSamplesPerBand:20,maxMedianErrorPct:12,maxP90ErrorPct:24}}
+ for(let min=1000;min<14000;min+=500){const rows=usable.filter(x=>x.gps>=min&&x.gps<min+500);if(!rows.length)continue;const corrVotes=HARMONIC_CORRECTIONS.map(c=>({c,n:rows.filter(x=>Math.abs(x.corr-c)<1e-9).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);const corr=corrVotes[0].c,errs=rows.filter(x=>x.corr===corr).map(x=>x.err);bands.push({minRpm:min,maxRpm:min+500,correction:corr,tolerancePct:+clamp(percentile(errs,.9)||12,6,28).toFixed(1),samples:rows.length,medianErrorPct:+(median(errs)||0).toFixed(2),p90ErrorPct:+(percentile(errs,.9)||0).toFixed(2),agreement:+(corrVotes[0].n/rows.length).toFixed(3)})}
+ return {schema:'motolab_rpm_learning_model_v1',teacher:'gps-master-harmonic-v2',candidateMultipliers:HARMONIC_CORRECTIONS,version:'local-'+new Date().toISOString().replace(/[:.]/g,'-'),createdAt:new Date().toISOString(),baseline:'v32.4',source:'local_raw_replay',sampleCount:samples.length,usablePairs:usable.length,bands,acceptance:{minSamplesPerBand:20,maxMedianErrorPct:12,maxP90ErrorPct:24}}
 }
 function validateModel(m){const good=m.bands.filter(b=>b.samples>=5&&b.medianErrorPct<=15&&b.agreement>=.45);return {ok:good.length>=2,goodBands:good.length,totalBands:m.bands.length}}
 async function replayLocalRaw(){
