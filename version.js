@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-02-imu-3d-corner-aware-v2-2"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-02-post-run-curve-check-v1"};
 
 window.addEventListener("DOMContentLoaded",()=>{
  const originalSuggestProfile=window.suggestProfile;
