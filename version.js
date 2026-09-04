@@ -1,4 +1,5 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-pwa-migration-v6"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-pwa-migration-v7"};
+if(typeof window!=="undefined"){
 
 window.addEventListener("DOMContentLoaded",()=>{
  const originalSuggestProfile=window.suggestProfile;
@@ -28,3 +29,5 @@ window.addEventListener("DOMContentLoaded",()=>{
  migrate();
  window.addEventListener("load",()=>setTimeout(migrate,250),{once:true});
 })();
+
+}
