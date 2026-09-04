@@ -2,7 +2,7 @@
   "name": "VäNä MotorLab v34.0",
   "short_name": "MotorLab",
   "description": "VäNä Motorsport MotorLab — motorcycle road dyno, RPM learning, run analysis and tuning tools",
-  "start_url": "./index.html?v=34.0",
+  "start_url": "./index.html?launch=motolab-live-v1",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
