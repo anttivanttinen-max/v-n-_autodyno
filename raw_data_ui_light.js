@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='motolab-raw-data-ui-light-v2-instant';
+const VERSION='motolab-raw-data-ui-light-v3-dual-sync';
 const DB_NAME='VanaMotoLabResearch',DB_VERSION=1,SENT_KEY='motolab_research_raw_sent_v1';
 const $=id=>document.getElementById(id);
 function reqP(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
@@ -14,11 +14,27 @@ function styles(){if($('mlRawDataStyle'))return;const s=document.createElement('
 async function showKeys(){const list=$('mlRawDataList');if(!list)return;list.innerHTML='<div class="ml-raw-data-row">Luetaan vain viimeisimmät tunnisteet…</div>';let db;try{db=await openDb();const done=sentSet(),[sessions,timeline]=await Promise.all([recentKeys(db,'sessions',5),recentKeys(db,'timelineChunks',5)]);list.innerHTML=[...sessions.map(id=>`<div class="ml-raw-data-row"><b>SESSION • ${id||'–'}</b>${done.has(`sessions:${id}`)?'lähetetty':'odottaa lähetystä'}</div>`),...timeline.map(id=>`<div class="ml-raw-data-row"><b>TIMELINE • ${id||'–'}</b>${done.has(`timelineChunks:${id}`)?'lähetetty':'odottaa lähetystä'}</div>`)].join('')||'<div class="ml-raw-data-row">Ei paikallisia tunnisteita.</div>'}catch(e){list.innerHTML='<div class="ml-raw-data-row">VIRHE: '+(e?.message||e)+'</div>'}finally{db?.close()}}
 function openResearchRawData(){
  styles();$('mlRawDataPanel')?.remove();
- const panel=document.createElement('div');panel.id='mlRawDataPanel';panel.className='ml-raw-data-overlay';panel.innerHTML='<div class="ml-raw-data-card"><h2>OMA RAW-DATA</h2><div id="mlRawDataStatus" class="ml-raw-data-copy">Näkymä valmis. RAW-payloadia ei ladata tähän ruutuun.</div><div id="mlRawDataList" class="ml-raw-data-list"><div class="ml-raw-data-row">Paina “NÄYTÄ VIIMEISIMMÄT ID:T” vain jos haluat nähdä tunnisteet.</div></div><button id="mlRawDataIds" class="ml-raw-data-action ml-raw-data-secondary" type="button">NÄYTÄ VIIMEISIMMÄT ID:T</button><button id="mlRawDataSend" class="ml-raw-data-action" type="button">LÄHETÄ RAW-DATA NYT</button><button id="mlRawDataClose" class="ml-raw-data-action ml-raw-data-close" type="button">SULJE</button></div>';
+ const panel=document.createElement('div');panel.id='mlRawDataPanel';panel.className='ml-raw-data-overlay';panel.innerHTML='<div class="ml-raw-data-card"><h2>OMA RAW-DATA</h2><div id="mlRawDataStatus" class="ml-raw-data-copy">Näkymä valmis. RAW-payloadia ei ladata tähän ruutuun.</div><div id="mlRawDataList" class="ml-raw-data-list"><div class="ml-raw-data-row">Paina “NÄYTÄ VIIMEISIMMÄT ID:T” vain jos haluat nähdä tunnisteet.</div></div><button id="mlRawDataIds" class="ml-raw-data-action ml-raw-data-secondary" type="button">NÄYTÄ VIIMEISIMMÄT ID:T</button><button id="mlRawDataSend" data-ml-learning-raw-bound="1" class="ml-raw-data-action" type="button">LÄHETÄ KAIKKI RAW-DATA NYT</button><button id="mlRawDataClose" class="ml-raw-data-action ml-raw-data-close" type="button">SULJE</button></div>';
  document.body.appendChild(panel);const status=$('mlRawDataStatus'),send=$('mlRawDataSend');
  $('mlRawDataClose').onclick=()=>panel.remove();$('mlRawDataIds').onclick=showKeys;
- setTimeout(async()=>{try{const s=await summary();if(panel.isConnected)status.textContent=summaryText(s)+(!s.sessions&&!s.timelineChunks?'\n\nEI PAIKALLISTA RAW-DATAA TÄLLÄ PUHELIMELLA.':'')}catch(e){if(panel.isConnected)status.textContent='Yhteenveto ei auennut, mutta näkymää voi silti käyttää. '+(e?.message||e)}},250);
- send.onclick=async()=>{send.disabled=true;status.textContent='RAW-dataa lähetetään nyt…';try{const report=await globalThis.MotoLabV34RuntimeFixes?.syncResearchRaw?.();if(!report)throw Error('RAW-synkka ei ole latautunut.');status.textContent=`${summaryText(report.after)}\n\nTällä ajolla lähetetty: sessions ${report.sentThisRun.sessions} • timelineChunks ${report.sentThisRun.timelineChunks}${report.error?`\n\nVIRHE: ${report.error}`:'\n\nLÄHETYS VALMIS.'}`}catch(e){status.textContent='VIRHE: '+(e?.message||e)}finally{send.disabled=false}};
+ setTimeout(async()=>{try{const s=await summary();if(panel.isConnected)status.textContent=summaryText(s)+(!s.sessions&&!s.timelineChunks?'\n\nEI PAIKALLISTA RESEARCH-RAW-DATAA TÄLLÄ PUHELIMELLA.':'')}catch(e){if(panel.isConnected)status.textContent='Yhteenveto ei auennut, mutta näkymää voi silti käyttää. '+(e?.message||e)}},250);
+ send.onclick=async()=>{
+  send.disabled=true;status.textContent='Kaikki RAW-data lähetetään nyt…';
+  let report=null,researchError='',learning=null,learningError='';
+  try{report=await globalThis.MotoLabV34RuntimeFixes?.syncResearchRaw?.();if(!report)throw Error('Research RAW -synkka ei ole latautunut.');if(report.error)researchError=String(report.error)}catch(e){researchError=String(e?.message||e)}
+  try{const sync=globalThis.MotoLabRawSync;if(!sync?.flushAll)throw Error('Learning RAW -synkka ei ole latautunut.');learning=await sync.flushAll()}catch(e){learningError=String(e?.message||e)}
+  try{
+   let after=report?.after||null;if(!after){try{after=await summary()}catch{}}
+   const lines=[];
+   if(after)lines.push(summaryText(after));
+   if(report)lines.push(`Tällä ajolla Research RAW: sessions ${report.sentThisRun?.sessions||0} • timelineChunks ${report.sentThisRun?.timelineChunks||0}`);
+   if(researchError)lines.push('RESEARCH RAW VIRHE: '+researchError);
+   if(learning)lines.push(`LEARNING RAW: jonossa ${learning.pending||0} • lähetetty yhteensä ${learning.sent||0}${learning.lastError?`\nViimeisin virhe: ${learning.lastError}`:''}`);
+   if(learningError)lines.push('LEARNING RAW VIRHE: '+learningError);
+   if(!researchError&&!learningError&&!(learning?.pending||0))lines.push('KAIKKI RAW-LÄHETYKSET VALMIIT.');
+   status.textContent=lines.join('\n\n')||'RAW-lähetys päättyi ilman tilatietoa.';
+  }finally{send.disabled=false}
+ };
  return panel
 }
 function install(){const rt=globalThis.MotoLabV34RuntimeFixes;if(!rt){setTimeout(install,100);return}rt.openResearchRawData=openResearchRawData;rt.lightRawUiVersion=VERSION}
