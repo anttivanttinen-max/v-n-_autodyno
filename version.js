@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-raw-sync-public-route-v2"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-raw-dual-sync-button-v3"};
 
 window.addEventListener("DOMContentLoaded",()=>{
  const originalSuggestProfile=window.suggestProfile;
