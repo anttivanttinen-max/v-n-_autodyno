@@ -83,7 +83,9 @@ async function sendResearchRow(store,row){
  const safeId=String(row?.id||('row-'+Date.now())).replace(/[^a-zA-Z0-9._-]/g,'_');
  const chunk={id:`research-${store}-${safeId}`,schema:'motolab_research_raw_bridge_v1',sourceDb:RESEARCH_DB,sourceStore:store,recoveredAt:new Date().toISOString(),payload:row};
  const response=await fetch(server+'/api/users/v1/raw-chunk',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','X-MotoLab-Beta-Token':token},body:JSON.stringify({moduleVersion:VERSION,deviceLabel:navigator.platform||'iPhone',chunk})});
- if(!response.ok)throw Error('Research RAW sync HTTP '+response.status);
+ let receipt={};try{receipt=await response.json()}catch{}
+ if(!response.ok)throw Error(receipt.error||('Research RAW sync HTTP '+response.status));
+ if(receipt.ok!==true||receipt.chunkId!==chunk.id)throw Error('Research RAW -palvelinkuittaus ei vastaa lähetettyä chunkia.');
 }
 async function syncResearchRaw(){
  let before;try{before=await researchRawSummary()}catch(e){return {before:{sessions:0,timelineChunks:0,sessionsMarkedSent:0,timelineChunksMarkedSent:0},after:{sessions:0,timelineChunks:0,sessionsMarkedSent:0,timelineChunksMarkedSent:0},sentThisRun:{sessions:0,timelineChunks:0},error:String(e?.message||e)}}const report={before,after:before,sentThisRun:{sessions:0,timelineChunks:0},error:null};
