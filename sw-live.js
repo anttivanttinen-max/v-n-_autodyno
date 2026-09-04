@@ -1,7 +1,7 @@
-importScripts('./version.js?build=2026-09-04-pwa-migration-v6');
+importScripts('./version.js?build=2026-09-04-pwa-migration-v7');
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.9';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.9 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-04-pwa-migration-v6';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-04-pwa-migration-v7';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD),CACHE='vana-motorlab-v34-9-i-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 const MODULES=['splash_boot','diagnostics','vehicle_catalog_finland_v2_loader','vehicle_lookup','technical_specs','maintenance','gps_master_learning','raw_sync','dyno_curve_v2','post_run_curve_check_v1','ui_compact','default_dt','trip_research','research_sync','user_identity','auth_session_guard','admin_pending_notify','password_login','user_features','feedback','community','merit','beta_menu','beta_release','mic_authority','sensor_persistence','sensor_autostart','admin_test_tools','phone_rpm_smart','adaptive_rpm_learning','imu_autocal_v1','trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard','motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34','v34_runtime_fixes','raw_data_ui_light'];
 const STATIC=['manifest.webmanifest','bike.png','icon-192.png','icon-512.png','rpm-learning-model.json','vehicle_catalog.json','maintenance_catalog.json','version.js','assets/motolab-start-v34.png'];
