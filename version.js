@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-raw-ui-touch-fix-v5"};
+globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-04-pwa-migration-v6"};
 
 window.addEventListener("DOMContentLoaded",()=>{
  const originalSuggestProfile=window.suggestProfile;
@@ -14,3 +14,17 @@ window.addEventListener("DOMContentLoaded",()=>{
   if(ratioMismatch)return originalSuggestProfile(r);
  };
 });
+(function motorLabPwaMigrationV6(){
+ if(!("serviceWorker" in navigator)||!window.isSecureContext)return;
+ let reloading=false;
+ const migrate=async()=>{
+  try{
+   const reg=await navigator.serviceWorker.register("./sw-live.js",{scope:"./",updateViaCache:"none"});
+   await reg.update().catch(()=>{});
+   if(reg.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"});
+  }catch{}
+ };
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{if(reloading)return;reloading=true;location.reload()});
+ migrate();
+ window.addEventListener("load",()=>setTimeout(migrate,250),{once:true});
+})();
