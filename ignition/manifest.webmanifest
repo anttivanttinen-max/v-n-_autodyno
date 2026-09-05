@@ -1,0 +1,12 @@
+{
+  "name": "MotorLab Ignition",
+  "short_name": "Ignition",
+  "description": "MotorLab VäNä Ignition — direct Web Bluetooth control, off-network road use",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101114",
+  "theme_color": "#101114",
+  "orientation": "portrait-primary",
+  "lang": "fi"
+}
