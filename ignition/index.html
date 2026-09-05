@@ -3,87 +3,151 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" content="#101114">
+  <meta name="theme-color" content="#0a0d12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MotorLab Ignition">
   <title>MotorLab Ignition</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main class="shell">
-    <header>
-      <div class="brand">Motor<span>LAB</span></div>
-      <div class="subtitle">VäNä Ignition · Off-network BLE</div>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <div class="eyebrow">VÄNÄ · ROAD CONTROL</div>
+        <div class="brand">Motor<span>LAB</span> <b>IGNITION</b></div>
+      </div>
+      <div id="connectionBadge" class="connection-badge offline"><i></i><span>EI YHTEYTTÄ</span></div>
     </header>
 
-    <section class="status-card">
-      <div id="mainStatus" class="main-status" data-tone="idle">Käynnistetään…</div>
-      <div class="badges">
-        <div>BLE <b id="supportBluetooth">—</b></div>
-        <div>GPS <b id="supportGps">—</b></div>
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <div id="heroState" class="hero-state">VALMIS</div>
+        <div id="heroMessage" class="hero-message">Yhdistä VäNä aloittaaksesi.</div>
+        <div id="heroMeta" class="hero-meta">Julkinen HTTPS · suora BLE · ei Tailscalea ajossa</div>
       </div>
+      <button id="connectBtn" class="connect-button"><span class="connect-icon">◉</span><span>YHDISTÄ VÄNÄ</span></button>
     </section>
 
-    <section class="grid two">
-      <article class="card">
-        <small>VäNä</small>
-        <strong id="bleState" data-on="0">EI YHTEYTTÄ</strong>
-        <button id="connectBtn" class="primary">Yhdistä VäNä</button>
+    <section class="dash-grid">
+      <article class="rpm-card dash-card">
+        <div class="card-kicker">MOOTTORI</div>
+        <div class="rpm-wrap">
+          <div id="rpmGauge" class="rpm-gauge" style="--rpm-pct:0%">
+            <div class="rpm-core">
+              <div id="rpm" class="rpm-value">0</div>
+              <div class="rpm-unit">RPM</div>
+            </div>
+          </div>
+        </div>
+        <div class="rpm-foot">
+          <span id="rpmStatus">ODOTTAA SIGNAALIA</span>
+          <span id="periodUs">— µs</span>
+        </div>
       </article>
-      <article class="card">
-        <small>AutoTune</small>
-        <strong id="sessionState" data-on="0">EI SESSIOTA</strong>
-        <button id="statusBtn">Päivitä tila</button>
+
+      <article class="dash-card telemetry-card">
+        <div class="card-kicker">SYTYTYS</div>
+        <div class="telemetry-grid">
+          <div class="telemetry-cell emphasis">
+            <span>Ennakko</span>
+            <strong id="appliedDeg">—</strong>
+            <small>°</small>
+          </div>
+          <div class="telemetry-cell">
+            <span>Prediction</span>
+            <strong id="prediction">—</strong>
+            <small id="predictionMeta">status</small>
+          </div>
+          <div class="telemetry-cell">
+            <span>Nopeus</span>
+            <strong id="speed">—</strong>
+            <small>km/h</small>
+          </div>
+          <div class="telemetry-cell">
+            <span>Vaihde</span>
+            <strong id="gear">—</strong>
+            <small id="gearMeta">auto</small>
+          </div>
+        </div>
+      </article>
+
+      <article class="dash-card autotune-status-card">
+        <div class="card-kicker">AUTOTUNE</div>
+        <div id="sessionState" class="session-state">EI SESSIOTA</div>
+        <div class="status-line"><span>Puhelin-ID</span><code id="ownerId">—</code></div>
+        <div class="status-line"><span>GPS</span><b id="gpsState">EI KÄYTÖSSÄ</b></div>
+        <div class="status-line"><span>Lähetetty</span><b><span id="gpsCount">0</span> näytettä</b></div>
+        <div class="status-line"><span>Hylätty</span><b><span id="gpsDropped">0</span> näytettä</b></div>
       </article>
     </section>
 
-    <section class="live card">
-      <div class="metric"><small>RPM</small><strong id="rpm">0</strong></div>
-      <div class="metric"><small>Nopeus</small><strong><span id="speed">—</span> <em>km/h</em></strong></div>
-      <div class="metric"><small>GPS-ikä</small><strong id="gpsAge">—</strong></div>
-      <div class="metric"><small>Lähetetty</small><strong id="gpsCount">0</strong></div>
-    </section>
-
-    <section class="card controls">
-      <label>
-        Kuljettaja / profiilin nimi
-        <input id="riderName" maxlength="32" placeholder="esim. Antti / veli">
-      </label>
-      <div class="identity">
-        <div><small>Puhelimen AutoTune-ID</small><code id="ownerId">—</code></div>
-        <button id="newOwnerBtn" class="small">Uusi ID</button>
+    <section class="panel map-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">AKTIIVINEN KARTTA</div>
+          <h2>Sytytyskäyrä</h2>
+        </div>
+        <button id="mapRefreshBtn" class="ghost-button">PÄIVITÄ KARTTA</button>
       </div>
-      <label>
-        Vaihdeapu
-        <select id="gearHint">
-          <option value="0">Automaattinen</option>
-          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        </select>
-      </label>
-      <p class="hint">Normaalisti jätä <b>Automaattinen</b>. VäNä päättelee vaihteen RPM + GPS -suhteesta.</p>
+      <div id="map" class="map-strip"><div class="empty-state">Yhdistä VäNä ja lataa kartta.</div></div>
+      <div class="map-legend"><span><i class="dot current"></i> lähin RPM-piste</span><span><i class="dot normal"></i> karttapiste</span></div>
     </section>
 
-    <section class="actions">
-      <button id="startBtn" class="primary big">Aloita AutoTune</button>
-      <button id="finishBtn" class="good big">Finish · tallenna BEST</button>
-      <button id="cancelBtn" class="danger">Cancel · palauta alkukartta</button>
+    <section class="panel control-panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">AJONAIKAINEN SÄÄTÖ</div>
+          <h2>AutoTune</h2>
+        </div>
+        <div id="autotuneBadge" class="mini-badge">VALMIS</div>
+      </div>
+
+      <div class="control-grid">
+        <label class="field">
+          <span>Kuljettaja / profiili</span>
+          <input id="riderName" maxlength="32" placeholder="esim. Antti / veli">
+        </label>
+        <label class="field">
+          <span>Vaihdeapu</span>
+          <select id="gearHint">
+            <option value="0">Automaattinen</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="action-grid">
+        <button id="startBtn" class="action primary">ALOITA AUTOTUNE</button>
+        <button id="finishBtn" class="action good">FINISH · TALLENNA BEST</button>
+        <button id="cancelBtn" class="action danger">CANCEL · PALAUTA ALKUKARTTA</button>
+      </div>
+      <div class="safety-note">VäNä tekee ajonaikaisen AutoTunen itse. Puhelin välittää GPS:n ja ohjauksen BLE:llä. G20, koti-WiFi ja internet eivät kuulu sytytyksen reaaliaikaiseen silmukkaan.</div>
     </section>
 
-    <section class="card safety">
-      <h2>Ajonaikainen turva</h2>
-      <p>G20, koti-WiFi ja internet eivät kuulu ajosilmukkaan. Jos BLE/GPS katkeaa, sytytys jatkuu VäNässä nykyisellä kartalla ja katkennut veto hylätään AutoTune-datana.</p>
-      <div class="mini">GPS-hylkäykset tässä puhelimessa: <b id="gpsDropped">0</b></div>
-    </section>
-
-    <section class="card log-card">
-      <h2>Tapahtumat</h2>
-      <div id="log" class="log"></div>
+    <section class="panel diagnostics-panel">
+      <details>
+        <summary>Yhteys ja tapahtumat</summary>
+        <div class="diag-grid">
+          <div class="diag-row"><span>BLE-laite</span><b id="deviceName">Ei valittu</b></div>
+          <div class="diag-row"><span>Selain</span><b id="browserSupport">Tarkistetaan…</b></div>
+          <div class="diag-row"><span>Offline-cache</span><b id="cacheState">Tarkistetaan…</b></div>
+        </div>
+        <div class="diag-actions">
+          <button id="disconnectBtn" class="ghost-button danger-outline">IRROTA BLE</button>
+          <button id="newOwnerBtn" class="ghost-button">UUSI PUHELIN-ID</button>
+        </div>
+        <div id="log" class="event-log"></div>
+      </details>
     </section>
 
     <footer>
-      iPhone: Bluefy · Android: Chrome · suora VäNä BLE
+      <span>MotorLab Ignition · direct Web Bluetooth</span>
+      <span>iPhone: Bluefy · Android: Chrome</span>
     </footer>
   </main>
   <script type="module" src="./app.js"></script>
