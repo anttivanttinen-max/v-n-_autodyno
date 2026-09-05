@@ -3,18 +3,20 @@
 const MODULE='motolab-phone-bridge-v1';
 const PREF_KEY='motolab_v32_sensor_prefs';
 const AUTO_RIDE_KEY='motorlab_auto_ride_enabled';
+const AUTO_RIDE_SAVED_KEY='motolab_phone_bridge_auto_ride_saved';
 const $=id=>document.getElementById(id);
 let enabled=false,busy=false,timer=null,lastError='';
 
 function readPrefs(){try{return {...{gps:false,imu:false,mic:false},...JSON.parse(localStorage.getItem(PREF_KEY)||'{}')}}catch{return {gps:false,imu:false,mic:false}}}
 function writePrefs(next){localStorage.setItem(PREF_KEY,JSON.stringify({...readPrefs(),...next}))}
 function logEvent(type,data={}){try{if(typeof addLearningEvent==='function')addLearningEvent(type,{module:MODULE,...data})}catch{}}
-function micActive(){try{return !!globalThis.MotoLabMicAuthority?.active}catch{return !!globalThis.extMicOn}}
-function gpsActive(){try{return !!globalThis.gpsOn}catch{return !!$('gpsDot')?.classList.contains('on')}}
-function imuActive(){try{return !!globalThis.imuOn}catch{return !!$('imuDot')?.classList.contains('on')}}
+function currentUi(){try{return typeof lastUi!=='undefined'&&lastUi?lastUi:{}}catch{return {}}}
+function micActive(){try{return !!globalThis.MotoLabMicAuthority?.active}catch{return false}}
+function gpsActive(){try{return typeof gpsOn!=='undefined'?!!gpsOn:!!$('gpsDot')?.classList.contains('on')}catch{return !!$('gpsDot')?.classList.contains('on')}}
+function imuActive(){try{return typeof imuOn!=='undefined'?!!imuOn:!!$('imuDot')?.classList.contains('on')}catch{return !!$('imuDot')?.classList.contains('on')}}
 function phoneRpm(){const p=globalThis.MOTOLAB_PHONE_RPM||{};return {rpm:+p.rpm||0,rawRpm:+p.rawRpm||0,conf:+p.conf||0,f0:+p.observedF0||0,trackLabel:p.trackLabel||''}}
 function snapshot(){
- const p=phoneRpm(),u=globalThis.lastUi||{};
+ const p=phoneRpm(),u=currentUi();
  return {
   module:MODULE,t:Date.now(),enabled,busy,lastError,
   sensors:{mic:micActive(),gps:gpsActive(),imu:imuActive()},
@@ -24,6 +26,19 @@ function snapshot(){
  };
 }
 function emit(){const s=snapshot();globalThis.MOTOLAB_PHONE_BRIDGE_STATE=s;try{window.dispatchEvent(new CustomEvent('motolab-phone-bridge-state',{detail:s}))}catch{}return s}
+function suspendAutoRide(){
+ try{
+  if(localStorage.getItem(AUTO_RIDE_SAVED_KEY)===null){const current=localStorage.getItem(AUTO_RIDE_KEY);localStorage.setItem(AUTO_RIDE_SAVED_KEY,current===null?'1':current)}
+  localStorage.setItem(AUTO_RIDE_KEY,'0');
+ }catch{}
+ try{globalThis.MotoLabSensorAutostart?.setAutoRide?.(false)}catch{}
+}
+function restoreAutoRidePreference(){
+ try{
+  const saved=localStorage.getItem(AUTO_RIDE_SAVED_KEY);
+  if(saved!==null){localStorage.setItem(AUTO_RIDE_KEY,saved);localStorage.removeItem(AUTO_RIDE_SAVED_KEY)}
+ }catch{}
+}
 
 function styleButton(b,kind='normal'){
  if(!b)return;
@@ -65,15 +80,16 @@ function paint(){
 }
 async function start(){
  if(busy)return false;busy=true;lastError='';paint();
+ restoreAutoRidePreference();
  writePrefs({gps:true,imu:true,mic:true});
  const errors=[];
  try{
   // iOS motion permission is the most gesture-sensitive, so ask it first.
-  try{if(typeof globalThis.startIMU==='function')await globalThis.startIMU()}catch(e){errors.push('IMU '+(e?.message||e))}
-  try{if(typeof globalThis.startGPS==='function')await globalThis.startGPS()}catch(e){errors.push('GPS '+(e?.message||e))}
+  try{if(typeof startIMU==='function')await startIMU()}catch(e){errors.push('IMU '+(e?.message||e))}
+  try{if(typeof startGPS==='function')await startGPS()}catch(e){errors.push('GPS '+(e?.message||e))}
   try{
    if(globalThis.MotoLabMicAuthority?.on)await globalThis.MotoLabMicAuthority.on('phone_bridge');
-   else if(typeof globalThis.startAudio==='function')await globalThis.startAudio();
+   else if(typeof startAudio==='function')await startAudio();
   }catch(e){errors.push('MIC '+(e?.message||e))}
   enabled=true;lastError=errors.join(' • ');
   logEvent('phone_bridge_on',{sensors:snapshot().sensors,errors});
@@ -85,12 +101,11 @@ async function masterOff(){
  try{
   enabled=false;
   writePrefs({gps:false,imu:false,mic:false});
-  try{localStorage.setItem(AUTO_RIDE_KEY,'0')}catch{}
-  try{globalThis.MotoLabSensorAutostart?.setAutoRide?.(false)}catch{}
+  suspendAutoRide();
   const errors=[];
-  try{if(globalThis.MotoLabMicAuthority?.off)await globalThis.MotoLabMicAuthority.off('phone_bridge_master_off');else if(typeof globalThis.stopAudio==='function')await globalThis.stopAudio()}catch(e){errors.push('MIC '+(e?.message||e))}
-  try{if(typeof globalThis.stopGPS==='function')globalThis.stopGPS()}catch(e){errors.push('GPS '+(e?.message||e))}
-  try{if(typeof globalThis.stopIMU==='function')globalThis.stopIMU()}catch(e){errors.push('IMU '+(e?.message||e))}
+  try{if(globalThis.MotoLabMicAuthority?.off)await globalThis.MotoLabMicAuthority.off('phone_bridge_master_off');else if(typeof stopAudio==='function')await stopAudio()}catch(e){errors.push('MIC '+(e?.message||e))}
+  try{if(typeof stopGPS==='function')stopGPS()}catch(e){errors.push('GPS '+(e?.message||e))}
+  try{if(typeof stopIMU==='function')stopIMU()}catch(e){errors.push('IMU '+(e?.message||e))}
   lastError=errors.join(' • ');
   logEvent('phone_bridge_master_off',{errors});
   return errors.length===0;
