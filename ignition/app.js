@@ -300,9 +300,6 @@ async function bindDevice(device) {
   const service = await withTimeout(server.getPrimaryService(SERVICE_UUID), 6000, 'BLE-palvelun haku');
   const rx = await withTimeout(service.getCharacteristic(RX_UUID), 4000, 'BLE RX');
   const tx = await withTimeout(service.getCharacteristic(TX_UUID), 4000, 'BLE TX');
-  await withTimeout(tx.startNotifications(), 5000, 'BLE-notifikaatiot');
-  tx.removeEventListener?.('characteristicvaluechanged', onNotification);
-  tx.addEventListener('characteristicvaluechanged', onNotification);
 
   state.server = server;
   state.rx = rx;
@@ -312,13 +309,24 @@ async function bindDevice(device) {
   state.reconnectAttempt = 0;
   localStorage.setItem('motorlab.autotune.lastDeviceId', device.id || '');
   localStorage.setItem('motorlab.autotune.lastDeviceName', device.name || 'VANA-Ignition');
-  addLog(`BLE yhdistetty: ${device.name || device.id}`, 'good');
-  await keepAwake(true);
+  addLog(`BLE GATT yhdistetty: ${device.name || device.id}`, 'good');
   updateUi();
-  await refreshStatus();
-  await requestMap();
-  setTimeout(requestExtendedStatus, 450);
-  startStatusPolling();
+  keepAwake(true);
+
+  tx.removeEventListener?.('characteristicvaluechanged', onNotification);
+  tx.addEventListener('characteristicvaluechanged', onNotification);
+  withTimeout(tx.startNotifications(), 5000, 'BLE-notifikaatiot')
+    .then(async () => {
+      addLog('BLE-notifikaatiot aktiiviset.', 'good');
+      await refreshStatus();
+      await requestMap();
+      setTimeout(requestExtendedStatus, 450);
+      startStatusPolling();
+    })
+    .catch((err) => {
+      addLog(`Notifikaatiot: ${err.message}`, 'warn');
+      startStatusPolling();
+    });
   } catch (err) {
     state.connected = false;
     state.connecting = false;
@@ -533,12 +541,21 @@ function wireUi() {
     localStorage.setItem('motorlab.autotune.riderName', state.riderName);
   });
   $('gearHint').addEventListener('change', updateUi);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && state.connected) {
-      keepAwake(true);
+  const resumeBleUi = () => {
+    if (state.device?.gatt?.connected && state.rx && state.tx) {
+      state.connected = true;
+      state.connecting = false;
+      updateUi();
       refreshStatus();
+    } else if (!state.device?.gatt?.connected && state.connecting) {
+      updateUi();
     }
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { keepAwake(true); resumeBleUi(); }
   });
+  window.addEventListener('focus', resumeBleUi);
+  window.addEventListener('pageshow', resumeBleUi);
 }
 
 async function registerOffline() {
