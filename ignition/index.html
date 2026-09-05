@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#101114">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>MotorLab Ignition</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">Motor<span>LAB</span></div>
+      <div class="subtitle">VäNä Ignition · Off-network BLE</div>
+    </header>
+
+    <section class="status-card">
+      <div id="mainStatus" class="main-status" data-tone="idle">Käynnistetään…</div>
+      <div class="badges">
+        <div>BLE <b id="supportBluetooth">—</b></div>
+        <div>GPS <b id="supportGps">—</b></div>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <small>VäNä</small>
+        <strong id="bleState" data-on="0">EI YHTEYTTÄ</strong>
+        <button id="connectBtn" class="primary">Yhdistä VäNä</button>
+      </article>
+      <article class="card">
+        <small>AutoTune</small>
+        <strong id="sessionState" data-on="0">EI SESSIOTA</strong>
+        <button id="statusBtn">Päivitä tila</button>
+      </article>
+    </section>
+
+    <section class="live card">
+      <div class="metric"><small>RPM</small><strong id="rpm">0</strong></div>
+      <div class="metric"><small>Nopeus</small><strong><span id="speed">—</span> <em>km/h</em></strong></div>
+      <div class="metric"><small>GPS-ikä</small><strong id="gpsAge">—</strong></div>
+      <div class="metric"><small>Lähetetty</small><strong id="gpsCount">0</strong></div>
+    </section>
+
+    <section class="card controls">
+      <label>
+        Kuljettaja / profiilin nimi
+        <input id="riderName" maxlength="32" placeholder="esim. Antti / veli">
+      </label>
+      <div class="identity">
+        <div><small>Puhelimen AutoTune-ID</small><code id="ownerId">—</code></div>
+        <button id="newOwnerBtn" class="small">Uusi ID</button>
+      </div>
+      <label>
+        Vaihdeapu
+        <select id="gearHint">
+          <option value="0">Automaattinen</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        </select>
+      </label>
+      <p class="hint">Normaalisti jätä <b>Automaattinen</b>. VäNä päättelee vaihteen RPM + GPS -suhteesta.</p>
+    </section>
+
+    <section class="actions">
+      <button id="startBtn" class="primary big">Aloita AutoTune</button>
+      <button id="finishBtn" class="good big">Finish · tallenna BEST</button>
+      <button id="cancelBtn" class="danger">Cancel · palauta alkukartta</button>
+    </section>
+
+    <section class="card safety">
+      <h2>Ajonaikainen turva</h2>
+      <p>G20, koti-WiFi ja internet eivät kuulu ajosilmukkaan. Jos BLE/GPS katkeaa, sytytys jatkuu VäNässä nykyisellä kartalla ja katkennut veto hylätään AutoTune-datana.</p>
+      <div class="mini">GPS-hylkäykset tässä puhelimessa: <b id="gpsDropped">0</b></div>
+    </section>
+
+    <section class="card log-card">
+      <h2>Tapahtumat</h2>
+      <div id="log" class="log"></div>
+    </section>
+
+    <footer>
+      iPhone: Bluefy · Android: Chrome · suora VäNä BLE
+    </footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
