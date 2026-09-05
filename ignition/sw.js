@@ -1,4 +1,4 @@
-const CACHE = 'motorlab-ignition-v2';
+const CACHE = 'motorlab-ignition-v3';
 const ASSETS = [
   './',
   './index.html',
