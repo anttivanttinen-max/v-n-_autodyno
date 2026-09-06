@@ -42,6 +42,9 @@ function identity(req){
  return {payload:p,user:u};
 }
 function atomicJson(file,obj){fs.mkdirSync(path.dirname(file),{recursive:true});const tmp=file+'.tmp-'+process.pid+'-'+Date.now();fs.writeFileSync(tmp,JSON.stringify(obj));fs.renameSync(tmp,file)}
+function rawUserInfo(userId){const target=safe(userId),db=readJson(USERS_FILE,{users:[]}),user=(db.users||[]).find(v=>v.userId===target);return user?{userId:user.userId,nickname:user.nickname||'',status:user.status||''}:null}
+function rawUserIndex(userId){const dir=path.join(RAW_DIR,safe(userId));if(!fs.existsSync(dir))return {items:[],bytes:0};const items=[],names=fs.readdirSync(dir).filter(n=>n.endsWith('.json')).sort();for(const name of names){const file=path.join(dir,name),st=fs.statSync(file),j=readJson(file,null);if(!j)continue;items.push({file:name,chunkId:j?.chunk?.id||name.slice(0,-5),sessionId:j?.chunk?.sessionId||null,receivedAt:j?.receivedAt||null,createdAt:j?.chunk?.created||j?.chunk?.createdAt||null,deviceId:j?.deviceId||null,deviceLabel:j?.deviceLabel||'',moduleVersion:j?.moduleVersion||'',bytes:st.size})}items.sort((a,b)=>(Date.parse(a.receivedAt||0)-Date.parse(b.receivedAt||0))||String(a.file).localeCompare(String(b.file)));return {items,bytes:items.reduce((n,x)=>n+x.bytes,0)}}
+function rawUserChunk(userId,chunkId){const id=safe(String(chunkId||'').replace(/\.json$/i,''));if(!id)return null;const file=path.join(RAW_DIR,safe(userId),id+'.json');return readJson(file,null)}
 function forceFile(userId){return path.join(RAW_FORCE_DIR,safe(userId)+'.json')}
 function forceState(userId){return readJson(forceFile(userId),null)}
 function setForce(userId,by){const current=forceState(userId);if(current?.status==='pending')return current;const cmd={schema:'motolab_raw_force_v1',userId,requestedAt:new Date().toISOString(),requestedBy:by,status:'pending',attempts:0};atomicJson(forceFile(userId),cmd);return cmd}
@@ -52,10 +55,22 @@ function writeSessionZip(userId,sessionId){const dir=path.join(RAW_DIR,safe(user
 
 http.createServer=function(listener){return originalCreateServer(async(req,res)=>{
  const origin=String(req.headers.origin||'');let u;try{u=new URL(req.url,'http://localhost')}catch{return listener(req,res)}
- const forcePath=u.pathname==='/api/users/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force-all';
+ const adminRawRead=u.pathname==='/api/admin/v1/raw-user-index'||u.pathname==='/api/admin/v1/raw-user-chunk';
+ const forcePath=u.pathname==='/api/users/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force'||u.pathname==='/api/admin/v1/raw-force-all'||adminRawRead;
  if(req.method==='OPTIONS'&&(u.pathname==='/api/users/v1/raw-chunk'||forcePath)){
   if(origin&&origin!==ALLOWED_ORIGIN){res.writeHead(403);return res.end()}
   res.writeHead(204,{'Access-Control-Allow-Origin':origin||ALLOWED_ORIGIN,'Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type,X-MotoLab-Beta-Token','Access-Control-Max-Age':'86400'});return res.end()
+ }
+ if(req.method==='GET'&&u.pathname==='/api/admin/v1/raw-user-index'){
+  const x=identity(req);if(!x||x.user.role!=='admin')return send(res,403,{ok:false,error:'Admin required'},origin);
+  const target=rawUserInfo(u.searchParams.get('userId'));if(!target)return send(res,404,{ok:false,error:'Target user not found'},origin);
+  const index=rawUserIndex(target.userId);return send(res,200,{ok:true,user:target,count:index.items.length,bytes:index.bytes,latestReceivedAt:index.items.length?index.items[index.items.length-1].receivedAt:null,items:index.items},origin)
+ }
+ if(req.method==='GET'&&u.pathname==='/api/admin/v1/raw-user-chunk'){
+  const x=identity(req);if(!x||x.user.role!=='admin')return send(res,403,{ok:false,error:'Admin required'},origin);
+  const target=rawUserInfo(u.searchParams.get('userId'));if(!target)return send(res,404,{ok:false,error:'Target user not found'},origin);
+  const chunkId=u.searchParams.get('chunkId'),item=rawUserChunk(target.userId,chunkId);if(!item)return send(res,404,{ok:false,error:'RAW chunk not found'},origin);
+  return send(res,200,{ok:true,userId:target.userId,chunkId:item?.chunk?.id||safe(chunkId),item},origin)
  }
  if(req.method==='GET'&&u.pathname==='/api/users/v1/raw-force'){
   const x=identity(req);if(!x)return send(res,401,{ok:false,error:'Active user session required'},origin);
