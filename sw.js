@@ -1,8 +1,8 @@
-importScripts('./version.js?build=2026-09-05-0538-phone-bridge-v1');
+importScripts('./version.js?build=2026-09-06-raw-reserve-safe-v1');
 
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.9';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.9 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-05-0538-phone-bridge-v1';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-06-raw-reserve-safe-v1';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-9-stable-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
