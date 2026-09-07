@@ -1,7 +1,7 @@
 (() => {
 'use strict';
-const MODULE_VERSION='v1-tv-live-telemetry-1hz';
-const URL='https://motorlab-server.tail3764b7.ts.net/raw/api/users/v1/live-telemetry';
+const MODULE_VERSION='v2-railway-live-telemetry-1hz';
+const URL='https://v-n-autodyno-production.up.railway.app/api/users/v1/live-telemetry';
 const TOKEN_KEY='motolab_v32_beta_token';
 const INTERVAL_MS=1000;
 let seq=0,busy=false,lastOk=0,lastError=null,lastStatus=0;
