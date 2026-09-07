@@ -1,9 +1,9 @@
-importScripts('./version.js?build=2026-09-07-mic-primary-imu60-v1');
-importScripts('./sw_mic_primary_patch.js?build=2026-09-07-mic-primary-imu60-v1');
+importScripts('./version.js?build=2026-09-07-mic-primary-imu60-perfref-v1');
+importScripts('./sw_mic_primary_patch.js?build=2026-09-07-mic-primary-imu60-perfref-v1');
 
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.9';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.9 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-07-mic-primary-imu60-v1';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-07-mic-primary-imu60-perfref-v1';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v34-9-stable-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
