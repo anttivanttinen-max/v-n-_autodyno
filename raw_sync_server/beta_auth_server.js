@@ -9,6 +9,7 @@ require('./feedback_server');
 require('./owner_bootstrap_server');
 require('./user_server');
 require('./user_raw_server');
+require('./user_live_server');
 require('./password_auth_server');
 require('./owner_device_session_server');
 const http=require('http');
