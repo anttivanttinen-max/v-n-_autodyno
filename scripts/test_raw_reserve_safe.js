@@ -22,6 +22,6 @@ if(!sync.includes("const MODULE_VERSION='v40-reserve-safe-id-queue'"))fail('raw 
 if(!light.includes('countStore')||!light.includes('recentKeys'))fail('light RAW UI lost nonblocking implementation');
 if(runtime.includes("objectStore('rawChunks').delete")||sync.includes("objectStore('rawChunks').delete"))fail('RAW deletion introduced');
 const build=(version.match(/build:\"([^\"]+)\"/)||[])[1];
-if(build!=='2026-09-07-mic-primary-v1')fail('unexpected build '+build);
+if(build!=='2026-09-07-mic-primary-imu60-v1')fail('unexpected build '+build);
 if(!sw.includes(build))fail('service worker build mismatch');
 console.log('RAW_RESERVE_SAFE_OK',JSON.stringify({build,researchSummary:'count-only',researchView:'8-keys-only',researchSync:'key-list+single-row',learningQueue:'id-only',rawDelete:false}));
