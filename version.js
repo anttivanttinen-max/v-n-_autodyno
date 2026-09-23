@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"34.9",label:"v34.9 BETA",build:"2026-09-07-mic-primary-imu60-perfref-live1hz-railway-v2"};
+globalThis.MOTOLAB_RELEASE={version:"35.0",label:"v35.0 BETA",build:"2026-09-23-dyno-audio-v1"};
 (() => {
  if(typeof document==='undefined')return;
  const BUILD=globalThis.MOTOLAB_RELEASE.build;
