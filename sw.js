@@ -1,16 +1,16 @@
-importScripts('./version.js?build=2026-09-07-mic-primary-imu60-perfref-live1hz-v1');
-importScripts('./sw_mic_primary_patch.js?build=2026-09-07-mic-primary-imu60-perfref-live1hz-v1');
+importScripts('./version.js?build=2026-09-23-dyno-audio-v1');
+importScripts('./sw_mic_primary_patch.js?build=2026-09-23-dyno-audio-v1');
 
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||'34.9';
-const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v34.9 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-07-mic-primary-imu60-perfref-live1hz-v1';
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||'35.0';
+const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v35.0 BETA';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-23-dyno-audio-v1';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
-const CACHE='vana-motorlab-v34-9-stable-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
+const CACHE='vana-motorlab-v35-0-beta-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
 const MODULES=[
  'splash_boot',
  'diagnostics','vehicle_catalog_finland_v2_loader','vehicle_lookup','technical_specs','maintenance',
- 'gps_master_learning','raw_sync','dyno_curve_v2','post_run_curve_check_v1','ui_compact','default_dt','trip_research','research_sync',
+ 'gps_master_learning','raw_sync','dyno_curve_v2','dyno_audio_power_v1','post_run_curve_check_v1','ui_compact','default_dt','trip_research','research_sync',
  'user_identity','auth_session_guard','admin_pending_notify','password_login','user_features','feedback','community','merit','beta_menu','beta_release',
  'mic_authority','sensor_persistence','sensor_autostart','imu_autocal_v1','admin_test_tools','phone_rpm_smart','mic_primary_runtime','adaptive_rpm_learning',
  'trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard','live_telemetry',
