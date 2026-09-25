@@ -1,9 +1,9 @@
-importScripts('./version.js?build=2026-09-25-dyno-only-v3');
-importScripts('./sw_mic_primary_patch.js?build=2026-09-25-dyno-only-v3');
+importScripts('./version.js?build=2026-09-25-dyno-only-v4');
+importScripts('./sw_mic_primary_patch.js?build=2026-09-25-dyno-only-v4');
 
 const VERSION=globalThis.MOTOLAB_RELEASE?.version||'35.1';
 const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v35.1 DYNO';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-25-dyno-only-v3';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-25-dyno-only-v4';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
 const CACHE='vana-motorlab-v35-1-dyno-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
