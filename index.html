@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VÄNÄ MOTOLAB v32.4</title>
+<title>VÄNÄ MOTOLAB v35.1 DYNO</title>
 <style>
 :root{
  --bg:#050304;--panel:#0c0d11;--panel2:#111319;--red:#ff263f;--red2:#ff596c;
@@ -87,8 +87,9 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
+<link rel="stylesheet" href="./dyno_only_v351.css?build=2026-09-25-dyno-only-v1">
 
-<link rel="manifest" href="manifest.webmanifest?v=32.3">
+<link rel="manifest" href="manifest.webmanifest?v=35.1">
 <meta name="theme-color" content="#0b0b0e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -111,7 +112,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
  </div>
 
  <section class="hero">
-   <div class="logo"><div class="logo1">VÄNÄ</div><div class="logo2">MOTOLAB</div><div class="tag">DYNO • TUNE • RIDE</div></div>
+   <div class="logo"><div class="logo1">VÄNÄ</div><div class="logo2">MOTOLAB</div><div class="tag">ROAD DYNO</div></div>
    <img src="bike.png?v=26" class="bike" alt="">
    <div class="heroChartBox"><div class="heroChartTitle">NYKYINEN VETO • HP / Nm</div><canvas id="heroChart" width="230" height="178"></canvas></div>
    <div class="gauge">
@@ -133,9 +134,9 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
  <div class="controls">
    <button id="sensorBtn" class="ctl"><span class="ib" data-info="sensors">i</span><div class="ico">📡</div><div class="lbl">ANTURIT</div><div id="sensorState" class="state">POIS</div></button>
    <button id="extMicBtn" class="ctl"><span class="ib" data-info="ext">i</span><div class="ico">🎧</div><div class="lbl">BT KUULOKE</div><div id="extState" class="state">POIS</div></button>
-   <button id="armBtn" class="ctl hot"><span class="ib" data-info="arm">i</span><div class="ico">🎯</div><div class="lbl">ARM AUTO</div><div id="armState" class="state">VALMIS</div></button>
+   <button id="armBtn" class="ctl hot"><span class="ib" data-info="arm">i</span><div class="ico">🎯</div><div class="lbl">ALOITA DYNO</div><div id="armState" class="state">VALMIS</div></button>
    <button id="manualBtn" class="ctl"><span class="ib" data-info="manual">i</span><div class="ico">▶</div><div class="lbl">MANUAALI</div><div id="manualState" class="state">VALMIS</div></button>
-   <button id="stopBtn" class="ctl"><span class="ib" data-info="stop">i</span><div class="ico">■</div><div class="lbl">STOP</div><div class="state">VALMIS</div></button>
+   <button id="stopBtn" class="ctl"><span class="ib" data-info="stop">i</span><div class="ico">■</div><div class="lbl">LOPETA</div><div class="state">VALMIS</div></button>
  </div>
 
  <section id="screen-measure" class="screen active">
@@ -155,7 +156,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
        <div class="card"><span>Auto Gear Learn</span><b id="learnState">ODOTTAA RPM:ÄÄ</b></div>
        <div class="card"><span>Mittausputki</span><b id="engineHealth">OK</b></div>
      </div>
-     <div id="measureStatus" class="statusbox">Valmis. RPM-lähde valitaan Asetuksista: GPS ONLY / BT MIC ONLY / AUTO FUSION.</div>
+     <div id="measureStatus" class="statusbox">Valmis dynomittaukseen. Paina ALOITA DYNO.</div>
    </div>
  </section>
 
@@ -226,8 +227,8 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
    <div class="form">
     <label>RPM-lähde<select id="rpmSourceMode"><option value="gps">GPS ONLY</option><option value="bt">BT MIC ONLY</option><option value="fusion" selected>AUTO FUSION</option></select></label>
     <label>Vedon / kalibroinnin vaihde<input id="manualGear" type="number" min="1" max="6" value="3"></label>
-    <label>AutoRide aloitus RPM<input id="recordFrom" type="number" value="1500"></label><label>AutoRide lopetus RPM<input id="stopRpm" type="number" value="10500"></label>
-    <label>AutoRide herkkyys G<input id="autoSensitivity" type="number" value=".28" step=".01"></label><label>Auto-stop viive s<input id="autoStopDelay" type="number" value=".7" step=".1"></label>
+    <label>Dyno aloitus RPM<input id="recordFrom" type="number" value="1500"></label><label>Dyno lopetus RPM<input id="stopRpm" type="number" value="10500"></label>
+    <label>Dyno herkkyys G<input id="autoSensitivity" type="number" value=".28" step=".01"></label><label>Auto-stop viive s<input id="autoStopDelay" type="number" value=".7" step=".1"></label>
     <div class="switchrow"><div><b style="font-size:9px">Auto Gear Learn</b><div class="tiny">Oppii vaihdesuhteita luotettavasta BT-RPM + GPS -datasta.</div></div><button id="gearLearnToggle" class="switch on"></button></div>
    </div>
    <div id="sourceModeStatus" class="statusbox">AUTO FUSION: BT-RPM + GPS/nopeus tukevat toisiaan.</div>
@@ -375,7 +376,7 @@ const infoDefs={
  ext:"BT / EXT MIC käyttää valittua ulkoista audiotuloa, jos selain ja iPhone sallivat sen reitityksen. Toinen painallus pysäyttää streamin ja vapauttaa laitteen.",
  arm:"ARM AUTO odottaa kiihtyvyyttä ja RPM:ää. Mittausmoottori toimii Workerissa, käyttöliittymä päivittyy harvemmin.",
  manual:"Manuaalinen veto käynnistyy heti ja päättyy vain STOP-painikkeella.",
- stop:"STOP lopettaa manuaalivedon tai käynnissä olevan AutoRide-vedon. Liian lyhyttä vetoa ei tallenneta."
+ stop:"STOP lopettaa manuaalivedon tai käynnissä olevan dynovedon. Liian lyhyttä vetoa ei tallenneta."
 };
 
 function log(msg){const d=$("diagLog");if(d)d.textContent=new Date().toLocaleTimeString("fi-FI")+"  "+msg+"\n"+d.textContent.slice(0,3500)}
@@ -385,7 +386,7 @@ const measurementWorkerSource=`
 "use strict";
 let cfg={mass:190,cda:.55,crr:.015,rho:1.225,recordFrom:1500,stopRpm:10500,autoSensitivity:.28,autoStopDelay:.7,manualRatio:0,gearLearn:true,gearRatios:[],fusionMinRpm:3000,audioHighConf:.62,audioMidConf:.34,slipThreshold:.18,speedRpmMinKmh:12,micCal:[],rpmSourceMode:"fusion",selectedGear:3,gpsCalibrations:[],audioMaxRpm:12500};
 let gps={kmh:0,acc:999,t:0},motion={mag:0,t:0},rpmSources={ext:{rpm:0,rawRpm:0,fpScore:0,observedF0:0,level:0,conf:0,candidateGap:0,runnerRpm:0,t:0}};
-let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[],autoSession=false,rearmPending=false,rearmReadyAt=0;
+let armed=false,recording=false,mode="none",pre=[],run=[],lastGps=null,accel=0,accelEnd=0,lastUi=0,gearClusters=[],autoSession=false,rearmPending=false,rearmReadyAt=0,spectrumFrames=[],lastSpectrumFrameT=0;
 let lastGear=null,lastGearConf=0,lastFusionRpm=0;
 function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
 function nearestGearFromRatio(ratio){
@@ -416,8 +417,8 @@ function calibratedAudioRpm(raw){
 }
 function audioEstimate(){
  const now=Date.now(),s=rpmSources.ext;
- if(!s||s.rpm<cfg.fusionMinRpm||s.conf<.12||now-s.t>=1100)return {rpm:0,rawRpm:0,fpScore:s?.fpScore||0,observedF0:s?.observedF0||0,level:s?.level||0,conf:0,source:"NO BT AUDIO"};
- return {rpm:calibratedAudioRpm(s.rpm),rawRpm:s.rawRpm||s.rpm,fpScore:s.fpScore||0,observedF0:s.observedF0||0,level:s.level||0,conf:s.conf,candidateGap:s.candidateGap||0,runnerRpm:s.runnerRpm||0,source:"BT MIC"};
+ if(!s||s.rpm<cfg.fusionMinRpm||s.conf<.12||now-s.t>=1100)return {rpm:0,rawRpm:0,fpScore:s?.fpScore||0,observedF0:s?.observedF0||0,level:s?.level||0,conf:0,spectrumDb:s?.spectrumDb||null,source:"NO BT AUDIO"};
+ return {rpm:calibratedAudioRpm(s.rpm),rawRpm:s.rawRpm||s.rpm,fpScore:s.fpScore||0,observedF0:s.observedF0||0,level:s.level||0,conf:s.conf,candidateGap:s.candidateGap||0,runnerRpm:s.runnerRpm||0,spectrumDb:s.spectrumDb||null,source:"BT MIC"};
 }
 function fuseRpm(){
  const a=audioEstimate();
@@ -436,7 +437,7 @@ function fuseRpm(){
    if(gearRatio>0){speedRpm=gps.kmh*gearRatio;speedConf=selectedCal?.ratio===gearRatio?.82:clamp(.48+.42*gearConf,0,.92)}
    else if(cfg.manualRatio>0){speedRpm=gps.kmh*cfg.manualRatio;speedConf=.58}
  }
- const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioFpScore=a.fpScore||0,audioObservedF0=a.observedF0||0,audioLevel=a.level||0,audioConf=a.conf||0,audioCandidateGap=a.candidateGap||0,audioRunnerRpm=a.runnerRpm||0;
+ const audioRpm=a.rpm||0,audioRawRpm=a.rawRpm||0,audioFpScore=a.fpScore||0,audioObservedF0=a.observedF0||0,audioLevel=a.level||0,audioConf=a.conf||0,audioCandidateGap=a.candidateGap||0,audioRunnerRpm=a.runnerRpm||0,audioSpectrumDb=a.spectrumDb||null;
  let slip=false,agreement=0;
  if(audioRpm&&speedRpm){
    agreement=Math.abs(audioRpm-speedRpm)/Math.max(audioRpm,speedRpm,1);
@@ -468,7 +469,7 @@ function fuseRpm(){
  if(rpm)lastFusionRpm=lastFusionRpm?lastFusionRpm*.72+rpm*.28:rpm;
  if(rpm&&conf<.28){rpm=0;source="NO SIGNAL";fusionMode="REJECTED"}
  const ratio=(audioRpm&&audioConf>=cfg.audioHighConf&&gps.kmh>=cfg.speedRpmMinKmh&&!slip)?audioRpm/gps.kmh:0;
- return {rpm,conf,source,fusionMode,gear,gearConf,ratio,audioRpm,audioRawRpm,audioFpScore,audioObservedF0,audioLevel,audioConf,audioCandidateGap,audioRunnerRpm,speedRpm,speedConf,slip,agreement}
+ return {rpm,conf,source,fusionMode,gear,gearConf,ratio,audioRpm,audioRawRpm,audioFpScore,audioObservedF0,audioLevel,audioConf,audioCandidateGap,audioRunnerRpm,audioSpectrumDb,speedRpm,speedConf,slip,agreement}
 }
 function learnGear(f){
  if(!cfg.gearLearn||f.audioConf<cfg.audioHighConf||gps.kmh<cfg.speedRpmMinKmh||!f.ratio||f.slip)return;
@@ -496,6 +497,7 @@ function sample(){
  if(armed&&!recording&&!rearmPending&&f.rpm>=cfg.recordFrom&&g>=cfg.autoSensitivity){recording=true;mode="auto";run=pre.slice();accelEnd=0;postMessage({type:"state",state:"AUTO RUN"})}
  if(recording){
    run.push(s);
+   if(Array.isArray(f.audioSpectrumDb)&&f.audioSpectrumDb.length&&s.t-lastSpectrumFrameT>=250){spectrumFrames.push({t:s.t,db:f.audioSpectrumDb});lastSpectrumFrameT=s.t}
    if(mode==="auto"){
      if(g<.03){if(!accelEnd)accelEnd=s.t}else accelEnd=0;
      if(f.rpm>=cfg.stopRpm||(accelEnd&&s.t-accelEnd>=cfg.autoStopDelay*1000))finish("Auto stop");
@@ -506,7 +508,7 @@ function sample(){
 function finish(reason){
  if(!recording){postMessage({type:"state",state:"NO RUN"});return}
  const completedMode=mode,keepAuto=completedMode==="auto"&&autoSession&&reason!=="STOP";
- const data=run.slice();recording=false;mode="none";run=[];accelEnd=0;
+ const data=run.slice(),spectra=spectrumFrames.slice();recording=false;mode="none";run=[];spectrumFrames=[];lastSpectrumFrameT=0;accelEnd=0;
  if(keepAuto){armed=true;rearmPending=true;rearmReadyAt=Date.now()+450}else{armed=false;rearmPending=false;rearmReadyAt=0}
  if(data.length<12){postMessage({type:"state",state:"TOO SHORT"});return}
  const maxHp=Math.max(...data.map(x=>x.hp||0)),maxNm=Math.max(...data.map(x=>x.nm||0)),maxRpm=Math.max(...data.map(x=>x.rpm||0));
@@ -514,16 +516,16 @@ function finish(reason){
  const ratios=data.map(x=>x.ratio).filter(x=>x>0),gearRatioMedian=ratios.length?ratios.sort((a,b)=>a-b)[Math.floor(ratios.length/2)]:0;
  const gears=data.map(x=>x.gear).filter(Boolean),gear=gears.length?gears.sort((a,b)=>gears.filter(v=>v===a).length-gears.filter(v=>v===b).length).pop():null;
  const slipPct=Math.round(100*data.filter(x=>x.slip).length/Math.max(1,data.length));
- postMessage({type:"runComplete",reason,run:{id:Date.now()+"-"+Math.random().toString(16).slice(2),date:new Date().toISOString(),mode:completedMode==="auto"?"AUTO RIDE":"MANUAL",quality,status:quality>=78?"good":quality>=55?"warn":"bad",maxHp,maxNm,maxRpm,gear,gearRatioMedian,slipPct,data}});postMessage({type:"state",state:keepAuto?"ARMED":"READY"});
+ postMessage({type:"runComplete",reason,run:{id:Date.now()+"-"+Math.random().toString(16).slice(2),date:new Date().toISOString(),mode:completedMode==="auto"?"DYNO AUTO":"MANUAL",quality,status:quality>=78?"good":quality>=55?"warn":"bad",maxHp,maxNm,maxRpm,gear,gearRatioMedian,slipPct,data,audioSpectrum:{startHz:20,endHz:1000,stepHz:5,frames:spectra}}});postMessage({type:"state",state:keepAuto?"ARMED":"READY"});
 }
 onmessage=e=>{
  const m=e.data;
  if(m.type==="config"){cfg={...cfg,...m.config};gearClusters=(cfg.gearRatios||[]).map(x=>({...x}))}
  if(m.type==="gps"){const now=m.t||Date.now(),v=m.kmh/3.6;if(lastGps&&now-lastGps.t>120){const raw=(v-lastGps.v)/((now-lastGps.t)/1000);if(Number.isFinite(raw))accel=accel*.76+raw*.24}lastGps={v,t:now};gps={kmh:m.kmh||0,acc:m.acc||999,t:now}}
  if(m.type==="motion")motion={mag:m.mag||0,t:m.t||Date.now()}
- if(m.type==="rpm")if(m.source==="ext")rpmSources.ext={rpm:m.rpm||0,rawRpm:m.rawRpm||0,fpScore:m.fpScore||0,observedF0:m.observedF0||0,level:m.level||0,conf:m.conf||0,candidateGap:m.candidateGap||0,runnerRpm:m.runnerRpm||0,t:m.t||Date.now()}
- if(m.type==="arm"){autoSession=true;armed=true;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];pre=[];postMessage({type:"state",state:"ARMED"})}
- if(m.type==="manual"){autoSession=false;armed=false;rearmPending=false;rearmReadyAt=0;recording=true;mode="manual";run=[];pre=[];postMessage({type:"state",state:"MANUAL RUN"})}
+ if(m.type==="rpm")if(m.source==="ext")rpmSources.ext={rpm:m.rpm||0,rawRpm:m.rawRpm||0,fpScore:m.fpScore||0,observedF0:m.observedF0||0,level:m.level||0,conf:m.conf||0,candidateGap:m.candidateGap||0,runnerRpm:m.runnerRpm||0,spectrumDb:Array.isArray(m.spectrumDb)?m.spectrumDb:null,t:m.t||Date.now()}
+ if(m.type==="arm"){autoSession=true;armed=true;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];pre=[];spectrumFrames=[];lastSpectrumFrameT=0;postMessage({type:"state",state:"ARMED"})}
+ if(m.type==="manual"){autoSession=false;armed=false;rearmPending=false;rearmReadyAt=0;recording=true;mode="manual";run=[];pre=[];spectrumFrames=[];lastSpectrumFrameT=0;postMessage({type:"state",state:"MANUAL RUN"})}
  if(m.type==="stop"){autoSession=false;rearmPending=false;rearmReadyAt=0;if(recording)finish("STOP");else{armed=false;mode="none";run=[];postMessage({type:"state",state:"STOPPED"})}}
  if(m.type==="cancel"){autoSession=false;armed=false;recording=false;rearmPending=false;rearmReadyAt=0;mode="none";run=[];postMessage({type:"state",state:"CANCELLED"})}
 };
@@ -580,6 +582,11 @@ function goertzel(x,fs,f){
  const power=s1*s1+s2*s2-coeff*s1*s2;
  return 10*Math.log10(Math.max(1e-12,power/(x.length*x.length)));
 }
+function wideSpectrum(x,fs){
+ const out=[];
+ for(let f=20;f<=1000;f+=5)out.push(Math.round(goertzel(x,fs,f)*10)/10);
+ return out;
+}
 function nearestTemplate(rpm){
  let best=null;
  for(const p of fingerprint){
@@ -607,7 +614,7 @@ function estimate(arr,sr,source){
  const ds=Math.max(1,Math.round(sr/8000)),n=Math.floor(arr.length/ds),x=new Float32Array(n);let mean=0;
  for(let i=0;i<n;i++){let v=arr[i*ds];x[i]=v;mean+=v}mean/=n;
  let rms=0;for(let i=0;i<n;i++){x[i]-=mean;rms+=x[i]*x[i]}rms=Math.sqrt(rms/n);if(rms<.0015)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
- const fs=sr/ds;
+ const fs=sr/ds,spectrumDb=wideSpectrum(x,fs);
  // Wide frequency search: collected reference f0 does not equal RPM/60 exactly.
  const minF=35,maxF=Math.min(260,fs/3),minLag=Math.max(2,Math.floor(fs/maxF)),maxLag=Math.min(n-4,Math.ceil(fs/minF));
  let candidates=[];
@@ -619,7 +626,7 @@ function estimate(arr,sr,source){
      candidates.push({lag,q});candidates.sort((a,b)=>b.q-a.q);if(candidates.length>12)candidates.pop();
    }
  }
- if(!candidates.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
+ if(!candidates.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms,spectrumDb};
  const prev=last[source]||0;
  let scored=[];
  for(const c of candidates){
@@ -633,23 +640,23 @@ function estimate(arr,sr,source){
      scored.push({rpm:rr,rawRpm:f*60,q:c.q,fp,score,f,mult});
    }
  }
- if(!scored.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms};
+ if(!scored.length)return {rpm:0,conf:0,rawRpm:0,fpScore:0,level:rms,spectrumDb};
  scored.sort((a,b)=>b.score-a.score);const allCandidates=scored.map(x=>[Math.round(x.rpm*10)/10,Math.round(x.f*100)/100,Math.round(x.rawRpm*10)/10,Math.round(x.q*10000)/10000,Math.round(x.fp*10000)/10000,Math.round(x.score*10000)/10000,x.mult]);const b=scored[0];
  const runner=scored.find(x=>Math.abs(x.rpm-b.rpm)/Math.max(1,b.rpm)>.06)||null;
  const candidateGap=runner?clamp((b.score-runner.score)/Math.max(.01,Math.abs(b.score)),0,1):1;
  let conf=clamp((b.q-.10)/.55,0,1)*.50+b.fp*.35+candidateGap*.15;
  if(b.fp<.22)conf*=.55;
  if(candidateGap<.08)conf*=.62;else if(candidateGap<.15)conf*=.80;
- if(conf<.14)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
+ if(conf<.14)return {rpm:0,conf,rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates,spectrumDb};
  last[source]=prev?prev*.68+b.rpm*.32:b.rpm;
- return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates};
+ return {rpm:last[source],conf:clamp(conf,0,1),rawRpm:b.rawRpm,fpScore:b.fp,observedF0:b.f,level:rms,candidateGap,runnerRpm:runner?.rpm||0,candidates:allCandidates,spectrumDb};
 }
 onmessage=e=>{
  const m=e.data;
  if(m.type==="config"){minR=m.min||3000;maxR=m.max||12500;fingerprint=m.fingerprint||fingerprint}
  if(m.type==="pcm"){
    const a=new Float32Array(m.buffer),r=estimate(a,m.sampleRate||48000,m.source);
-   postMessage({type:"rpm",source:"ext",rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,level:r.level||0,candidateGap:r.candidateGap||0,runnerRpm:r.runnerRpm||0,candidates:r.candidates||[],t:Date.now()})
+   postMessage({type:"rpm",source:"ext",rpm:r.rpm,rawRpm:r.rawRpm,conf:r.conf,fpScore:r.fpScore||0,observedF0:r.observedF0||0,level:r.level||0,candidateGap:r.candidateGap||0,runnerRpm:r.runnerRpm||0,candidates:r.candidates||[],spectrumDb:r.spectrumDb||[],t:Date.now()})
  }
 };
 `;
@@ -1374,5 +1381,6 @@ updateDiag();requestWake();enumerateAudio();registerServiceWorker();log("Boot "+
 })();
 window.addEventListener("pagehide",()=>{if(learningEnabled)flushLearningChunk(true)});
 </script>
+<script src="./dyno_only_v351.js?build=2026-09-25-dyno-only-v1"></script>
 </body>
 </html>
