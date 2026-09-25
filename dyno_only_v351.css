@@ -1,0 +1,31 @@
+/* MotorLab v35.1 Dyno-only UI */
+body.dyno-only-v351 .devOnly,
+body.dyno-only-v351 #screen-analysis,
+body.dyno-only-v351 #screen-autotune,
+body.dyno-only-v351 .nav[data-screen="analysis"],
+body.dyno-only-v351 .nav[data-screen="autotune"],
+body.dyno-only-v351 #sensorBtn,
+body.dyno-only-v351 #extMicBtn,
+body.dyno-only-v351 #manualBtn,
+body.dyno-only-v351 #imuChip{display:none!important}
+
+body.dyno-only-v351 .controls{grid-template-columns:2fr 1fr}
+body.dyno-only-v351 #armBtn{min-height:86px;border-color:#ff263f;background:linear-gradient(#721323,#34080f)}
+body.dyno-only-v351 #armBtn .lbl{font-size:12px}
+body.dyno-only-v351 #stopBtn{min-height:86px}
+body.dyno-only-v351 .bottomNav{grid-template-columns:repeat(3,1fr)}
+body.dyno-only-v351 .dyno-hidden{display:none!important}
+
+.dynoReady{
+ margin:8px;padding:10px;border-radius:13px;border:1px solid #3a252b;
+ background:linear-gradient(#101217,#08090c)
+}
+.dynoReadyTitle{font-size:11px;font-weight:1000;font-style:italic;margin-bottom:8px}
+.dynoReadyGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dynoReadyItem{padding:8px 5px;border-radius:10px;background:#07080a;border:1px solid #2d3137;text-align:center}
+.dynoReadyItem span{display:block;font-size:7px;color:#969ca5;font-weight:900}
+.dynoReadyItem b{display:block;margin-top:4px;font-size:10px}
+.dynoReadyItem.ok{border-color:#245f2d}
+.dynoReadyItem.warn{border-color:#715817}
+.dynoReadyItem.bad{border-color:#6b2430}
+#dynoReadyStatus{margin-top:8px;font-size:9px;line-height:1.4;color:#d4d7dc}
