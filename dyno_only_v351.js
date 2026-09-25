@@ -21,9 +21,9 @@
     });
     document.querySelectorAll(".bottomNav .ml-user-nav").forEach(n=>n.classList.add("dyno-hidden"));
 
-    const mnav=document.querySelector('.nav[data-screen="measure"] .txt'); if(mnav)mnav.textContent="DYNO";
-    const rnav=document.querySelector('.nav[data-screen="runs"] .txt'); if(rnav)rnav.textContent="VEDOT";
-    const snav=document.querySelector('.nav[data-screen="settings"] .txt'); if(snav)snav.textContent="ASETUKSET";
+    const mnav=document.querySelector('.nav[data-screen="measure"] .txt'); if(mnav&&mnav.textContent!=="DYNO")mnav.textContent="DYNO";
+    const rnav=document.querySelector('.nav[data-screen="runs"] .txt'); if(rnav&&rnav.textContent!=="VEDOT")rnav.textContent="VEDOT";
+    const snav=document.querySelector('.nav[data-screen="settings"] .txt'); if(snav&&snav.textContent!=="ASETUKSET")snav.textContent="ASETUKSET";
 
     const arm=$("armBtn"); if(arm){
       const ico=arm.querySelector(".ico"),lbl=arm.querySelector(".lbl");
