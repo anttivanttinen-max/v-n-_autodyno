@@ -1,0 +1,24 @@
+'use strict';
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const ui=fs.readFileSync('dyno_only_v351.js','utf8');
+const css=fs.readFileSync('dyno_only_v351.css','utf8');
+const version=fs.readFileSync('version.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+function need(ok,msg){if(!ok)throw new Error(msg)}
+need(/version:"35\.1"/.test(version),'v35.1 release missing');
+need(/2026-09-25-dyno-only-v1/.test(version),'v35.1 build missing');
+need(html.includes('dyno_only_v351.css'),'dyno css not linked');
+need(html.includes('dyno_only_v351.js'),'dyno js not linked');
+need(ui.includes('["measure","runs","settings"]'),'three-screen allowlist missing');
+need(ui.includes('ALOITA DYNO'),'dyno start label missing');
+need(ui.includes('await startGPS()'),'GPS autostart missing');
+need(ui.includes('await startIMU()'),'IMU autostart missing');
+need(ui.includes('await startAudio()'),'audio autostart missing');
+need(ui.includes('switchScreen("runs")')&&ui.includes('openRun(r.id)'),'automatic result opening missing');
+need(ui.includes('learningEnabled=true'),'raw learning capture force-on missing');
+need(css.includes('#manualBtn')&&css.includes('#sensorBtn')&&css.includes('#extMicBtn'),'legacy controls not hidden');
+need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
+need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');
+need(html.includes('audioSpectrum:{startHz:20,endHz:1000,stepHz:5,frames:spectra}'),'run wide-spectrum payload missing');
+console.log('V351_DYNO_STATIC_OK');

@@ -1,11 +1,11 @@
-importScripts('./version.js?build=2026-09-23-dyno-audio-v1');
-importScripts('./sw_mic_primary_patch.js?build=2026-09-23-dyno-audio-v1');
+importScripts('./version.js?build=2026-09-25-dyno-only-v1');
+importScripts('./sw_mic_primary_patch.js?build=2026-09-25-dyno-only-v1');
 
-const VERSION=globalThis.MOTOLAB_RELEASE?.version||'35.0';
-const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v35.0 BETA';
-const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-23-dyno-audio-v1';
+const VERSION=globalThis.MOTOLAB_RELEASE?.version||'35.1';
+const LABEL=globalThis.MOTOLAB_RELEASE?.label||'v35.1 DYNO';
+const BUILD=globalThis.MOTOLAB_RELEASE?.build||'2026-09-25-dyno-only-v1';
 const V=encodeURIComponent(VERSION),B=encodeURIComponent(BUILD);
-const CACHE='vana-motorlab-v35-0-beta-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
+const CACHE='vana-motorlab-v35-1-dyno-'+BUILD.replace(/[^a-z0-9]+/gi,'-');
 
 const MODULES=[
  'splash_boot',
@@ -14,11 +14,11 @@ const MODULES=[
  'user_identity','auth_session_guard','admin_pending_notify','password_login','user_features','feedback','community','merit','beta_menu','beta_release',
  'mic_authority','sensor_persistence','sensor_autostart','imu_autocal_v1','admin_test_tools','phone_rpm_smart','mic_primary_runtime','adaptive_rpm_learning',
  'trip_phone_raw','trip_gear_guard','trip_gear_marker','live_status','live_status_guard','live_telemetry',
- 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34','v34_runtime_fixes','raw_data_ui_light','phone_bridge'
+ 'motorlab_branding','simple_user_ui','v34_dashboard_ui','motorlab_i18n','run_analysis_v34','v34_runtime_fixes','raw_data_ui_light','phone_bridge','dyno_only_v351'
 ];
 const STATIC=[
  'manifest.webmanifest','bike.png','icon-192.png','icon-512.png','rpm-learning-model.json',
- 'vehicle_catalog.json','maintenance_catalog.json','version.js','sw_mic_primary_patch.js','assets/motolab-start-v34.png'
+ 'vehicle_catalog.json','maintenance_catalog.json','version.js','sw_mic_primary_patch.js','dyno_only_v351.css','assets/motolab-start-v34.png'
 ];
 const bust=p=>'./'+p+'?v='+V+'&build='+B;
 const CORE=[...MODULES.map(n=>bust(n+'.js')),...STATIC.map(bust)];
