@@ -1,4 +1,4 @@
-globalThis.MOTOLAB_RELEASE={version:"35.1",label:"v35.1 DYNO",build:"2026-09-25-dyno-only-v2"};
+globalThis.MOTOLAB_RELEASE={version:"35.1",label:"v35.1 DYNO",build:"2026-09-25-dyno-only-v3"};
 (() => {
  if(typeof document==='undefined')return;
  const BUILD=globalThis.MOTOLAB_RELEASE.build;

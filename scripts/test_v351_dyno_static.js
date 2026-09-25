@@ -7,7 +7,7 @@ const version=fs.readFileSync('version.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 function need(ok,msg){if(!ok)throw new Error(msg)}
 need(/version:"35\.1"/.test(version),'v35.1 release missing');
-need(/2026-09-25-dyno-only-v2/.test(version),'v35.1 build missing');
+need(/2026-09-25-dyno-only-v3/.test(version),'v35.1 build missing');
 need(html.includes('dyno_only_v351.css'),'dyno css not linked');
 need(html.includes('dyno_only_v351.js'),'dyno js not linked');
 need(ui.includes('["measure","runs","settings"]'),'three-screen allowlist missing');
@@ -18,6 +18,8 @@ need(ui.includes('await startAudio()'),'audio autostart missing');
 need(ui.includes('switchScreen("runs")')&&ui.includes('openRun(r.id)'),'automatic result opening missing');
 need(ui.includes('learningEnabled=true'),'raw learning capture force-on missing');
 need(ui.includes('mnav&&mnav.textContent!==\\\"DYNO\\\"')&&ui.includes('rnav&&rnav.textContent!==\\\"VEDOT\\\"')&&ui.includes('snav&&snav.textContent!==\\\"ASETUKSET\\\"'),'nav MutationObserver writes are not idempotent');
+const legacyDash=fs.readFileSync('v34_dashboard_ui.js','utf8');
+need(legacyDash.includes("if(document.body.classList.contains('dyno-only-v351'))return"),'legacy v34 dashboard observer is not disabled in dyno-only mode');
 need(css.includes('#manualBtn')&&css.includes('#sensorBtn')&&css.includes('#extMicBtn'),'legacy controls not hidden');
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
 need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');

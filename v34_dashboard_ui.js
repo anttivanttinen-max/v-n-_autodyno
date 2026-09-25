@@ -13,6 +13,6 @@ function analysisMenu(){const sec=$('screen-analysis');if(!sec||$('mlAnalysisLau
 function settingsTitle(){const sec=$('screen-settings');if(!sec||$('mlSettingsTitle'))return;const h=document.createElement('div');h.id='mlSettingsTitle';h.className='ml-settings-title';h.textContent='Asetukset';sec.insertBefore(h,sec.firstChild)}
 function nav(){const n=document.querySelector('.bottomNav');if(!n)return;n.querySelectorAll('.nav[data-screen="live"],.nav[data-screen="autotune"]').forEach(x=>x.hidden=true);const labels={measure:'Etusivu',runs:'Vedot',analysis:'Analyysi',settings:'Asetukset'};for(const [k,v] of Object.entries(labels)){const e=n.querySelector(`.nav[data-screen="${k}"] .txt`);if(e)e.textContent=v}const u=n.querySelector('.ml-user-nav');if(u){u.hidden=false;const t=u.querySelector('.txt');if(t)t.textContent='Käyttäjä'}}
 function apply(){css();labelControl();analysisMenu();settingsTitle();nav()}
-function boot(){apply();let n=0;const t=setInterval(()=>{apply();if(++n>60)clearInterval(t)},350);new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true})}
+function boot(){if(document.body.classList.contains('dyno-only-v351'))return;apply();let n=0;const t=setInterval(()=>{apply();if(++n>60)clearInterval(t)},350);new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true})}
 globalThis.MotoLabV34UI={version:VERSION,apply};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
