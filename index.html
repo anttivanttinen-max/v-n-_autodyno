@@ -87,7 +87,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
-<link rel="stylesheet" href="./dyno_only_v351.css?build=2026-09-25-dyno-only-v3">
+<link rel="stylesheet" href="./dyno_only_v351.css?build=2026-09-25-dyno-only-v4">
 
 <link rel="manifest" href="manifest.webmanifest?v=35.1">
 <meta name="theme-color" content="#0b0b0e">
@@ -97,7 +97,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<script src="./version.js?build=2026-09-25-dyno-only-v3"></script>
+<script src="./version.js?build=2026-09-25-dyno-only-v4"></script>
 </head>
 <body>
 <div class="app">
@@ -983,7 +983,18 @@ function clearSelectedGearCalibration(){const gear=+$("calGear").value||3,p=getC
 
 function setSwitch(id,on){$(id).classList.toggle("on",!!on)}
 
-async function requestWake(){if(!$("wakeToggle").classList.contains("on")||!("wakeLock" in navigator))return;try{if(!wakeLock||wakeLock.released)wakeLock=await navigator.wakeLock.request("screen")}catch(e){log("WakeLock: "+e.message)}}
+async function requestWake(){
+ if(!$("wakeToggle").classList.contains("on")||!("wakeLock" in navigator))return;
+ try{
+  if(!wakeLock||wakeLock.released){
+   wakeLock=await navigator.wakeLock.request("screen");
+   wakeLock.addEventListener?.("release",()=>{
+    wakeLock=null;
+    if(document.visibilityState==="visible"&&$("wakeToggle").classList.contains("on"))setTimeout(requestWake,400);
+   },{once:true});
+  }
+ }catch(e){log("WakeLock: "+e.message)}
+}
 async function releaseWake(){try{if(wakeLock&&!wakeLock.released)await wakeLock.release()}catch{}wakeLock=null}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")requestWake()});
 
@@ -1381,6 +1392,6 @@ updateDiag();requestWake();enumerateAudio();registerServiceWorker();log("Boot "+
 })();
 window.addEventListener("pagehide",()=>{if(learningEnabled)flushLearningChunk(true)});
 </script>
-<script src="./dyno_only_v351.js?build=2026-09-25-dyno-only-v3"></script>
+<script src="./dyno_only_v351.js?build=2026-09-25-dyno-only-v4"></script>
 </body>
 </html>

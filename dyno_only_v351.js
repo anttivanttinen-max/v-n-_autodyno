@@ -60,6 +60,21 @@
     }
   }
 
+  function keepScreenAwake(){
+    const wake=$("wakeToggle");
+    if(wake&&!wake.classList.contains("on"))wake.classList.add("on");
+    if(wake&&!wake.dataset.dynoWakeLocked){
+      wake.dataset.dynoWakeLocked="1";
+      wake.onclick=e=>{
+        e.preventDefault();
+        wake.classList.add("on");
+        try{saveSettings()}catch{}
+        try{requestWake()}catch{}
+      };
+    }
+    if(document.visibilityState==="visible"&&typeof requestWake==="function")requestWake();
+  }
+
   function cls(el,state){
     if(!el)return;
     el.classList.remove("ok","warn","bad");
@@ -144,6 +159,7 @@
 
   function enforce(){
     simplify();
+    keepScreenAwake();
     installDynoStart();
     installAutoResult();
     updateReady();
