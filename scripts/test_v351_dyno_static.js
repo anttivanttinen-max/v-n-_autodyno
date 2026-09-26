@@ -29,7 +29,8 @@ need(html.includes('id="imuChip"')&&html.includes('$("imuChip").onclick=async e=
 need(html.includes('DeviceMotionEvent.requestPermission()'),'iOS motion permission request missing');
 need(html.includes('imu_start_failed'),'IMU start failure telemetry missing');
 const sensorPersistence=fs.readFileSync('sensor_persistence.js','utf8');
-need(sensorPersistence.includes("iosNeedsGesture")&&sensorPersistence.includes("imu_restore_waiting_for_user_gesture"),'iOS IMU auto-restore gesture guard missing');\nconst sensorAutostart=fs.readFileSync('sensor_autostart.js','utf8');
+need(sensorPersistence.includes("iosNeedsGesture")&&sensorPersistence.includes("imu_restore_waiting_for_user_gesture"),'iOS IMU auto-restore gesture guard missing');
+const sensorAutostart=fs.readFileSync('sensor_autostart.js','utf8');
 need(sensorAutostart.includes("iosNeedsGesture")&&sensorAutostart.includes("imu_autostart_waiting_for_user_gesture"),'iOS IMU sensor-autostart gesture guard missing');
 need(ui.indexOf('await startIMU()')<ui.indexOf('await startGPS()'),'IMU permission is not requested before GPS async start');
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
