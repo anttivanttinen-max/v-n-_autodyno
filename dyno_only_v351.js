@@ -119,7 +119,9 @@
       requestWake();
       if($("measureStatus"))$("measureStatus").textContent="Valmistellaan dynoa…";
 
-      const imuOk=(typeof imuOn!=="undefined"&&imuOn)||await startIMU();
+      const imuAlreadyOn=(typeof imuOn!=="undefined"&&imuOn);
+      const iosImuNeedsGesture=!imuAlreadyOn&&typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function";
+      const imuOk=imuAlreadyOn||(!iosImuNeedsGesture||e.isTrusted?await startIMU():false);
       const gpsOk=(typeof gpsOn!=="undefined"&&gpsOn)||await startGPS();
       let audioOk=true;
       if($("rpmSourceMode")?.value!=="gps"){
