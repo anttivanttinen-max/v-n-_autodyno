@@ -87,7 +87,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 
 @media(max-width:390px){.logo1{font-size:52px}.logo2{font-size:38px}.bike{width:250px}.gauge{width:252px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
-<link rel="stylesheet" href="./dyno_only_v351.css?build=2026-09-26-dyno-only-v6">
+<link rel="stylesheet" href="./dyno_only_v351.css?build=2026-09-26-dyno-only-v7">
 
 <link rel="manifest" href="manifest.webmanifest?v=35.1">
 <meta name="theme-color" content="#0b0b0e">
@@ -97,7 +97,7 @@ body{background:radial-gradient(circle at 68% 8%,rgba(255,38,63,.12),transparent
 <meta name="apple-mobile-web-app-title" content="VÄNÄ MOTOLAB">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<script src="./version.js?build=2026-09-26-dyno-only-v6"></script>
+<script src="./version.js?build=2026-09-26-dyno-only-v7"></script>
 </head>
 <body>
 <div class="app">
@@ -1012,12 +1012,24 @@ function motionHandler(e){let mag=0;if(e.acceleration){const a=e.acceleration;ma
 async function startIMU(){
  if(imuOn)return true;
  try{
-  if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){const p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("liikeanturilupaa ei myönnetty")}
-  motionHandlerRef=motionHandler;window.addEventListener("devicemotion",motionHandlerRef,{passive:true});imuOn=true;addLearningEvent("imu_on");syncSensorUI();return true
- }catch(e){$("measureStatus").textContent="IMU: "+e.message;return false}
+  if(typeof DeviceMotionEvent==="undefined")throw new Error("liikeanturia ei tueta tässä selaimessa");
+  if(typeof DeviceMotionEvent.requestPermission==="function"){
+   const p=await DeviceMotionEvent.requestPermission();
+   if(p!=="granted")throw new Error("liikeanturilupa estetty — salli Liike ja suunta iPhonen Safari-asetuksista");
+  }
+  motionHandlerRef=motionHandler;
+  window.addEventListener("devicemotion",motionHandlerRef,{passive:true});
+  imuOn=true;addLearningEvent("imu_on");syncSensorUI();$("measureStatus").textContent="IMU PÄÄLLÄ";return true
+ }catch(e){
+  if(motionHandlerRef)window.removeEventListener("devicemotion",motionHandlerRef);
+  motionHandlerRef=null;imuOn=false;syncSensorUI();
+  $("measureStatus").textContent="IMU: "+(e?.message||e);
+  addLearningEvent("imu_start_failed",{name:e?.name||"",message:e?.message||String(e)});
+  return false
+ }
 }
 function stopIMU(){if(motionHandlerRef)window.removeEventListener("devicemotion",motionHandlerRef);motionHandlerRef=null;imuOn=false;addLearningEvent("imu_off");syncSensorUI()}
-async function toggleIMU(){imuOn?stopIMU():await startIMU()}
+async function toggleIMU(){if(imuOn){stopIMU();return false}return await startIMU()}
 async function toggleSensors(){if(gpsOn||imuOn){stopGPS();stopIMU()}else{await requestWake();await startGPS();await startIMU()}}
 
 const AUDIO_DEVICE_KEY="motolab_v28_audio_device";
@@ -1282,7 +1294,7 @@ function newProfile(){const ps=getProfiles(),id="p"+Date.now();ps.push({id,name:
 document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>switchScreen(b.dataset.screen));
 document.querySelectorAll(".ib").forEach(b=>b.onclick=e=>{e.stopPropagation();$("infoText").textContent=infoDefs[b.dataset.info]||"";$("infoModal").classList.add("show")});
 $("closeInfo").onclick=()=>$("infoModal").classList.remove("show");$("closeRun").onclick=()=>$("runModal").classList.remove("show");
-$("gpsChip").onclick=toggleGPS;$("imuChip").onclick=toggleIMU;$("extChip").onclick=()=>{$("rpmSourceMode").value==="gps"?$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä. Vaihda RPM-lähde Asetuksista.":toggleAudio()};
+$("gpsChip").onclick=toggleGPS;$("imuChip").onclick=async e=>{e.preventDefault();e.stopPropagation();await toggleIMU()};$("extChip").onclick=()=>{$("rpmSourceMode").value==="gps"?$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä. Vaihda RPM-lähde Asetuksista.":toggleAudio()};
 $("sensorBtn").onclick=e=>{if(!e.target.classList.contains("ib"))toggleSensors()};$("extMicBtn").onclick=e=>{if(!e.target.classList.contains("ib")){if($("rpmSourceMode").value==="gps")$("measureStatus").textContent="GPS ONLY: BT-RPM ei ole käytössä.";else toggleAudio()}};
 $("armBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();addLearningEvent("arm_auto");measurementWorker.postMessage({type:"arm"})}};$("manualBtn").onclick=async e=>{if(!e.target.classList.contains("ib")){requestWake();if(!gpsOn)await startGPS();if($("rpmSourceMode").value!=="gps"&&!extMicOn)await startAudio();pushConfig();addLearningEvent("manual_run_start");measurementWorker.postMessage({type:"manual"})}};$("stopBtn").onclick=e=>{if(!e.target.classList.contains("ib")){addLearningEvent("stop_pressed");measurementWorker.postMessage({type:"stop"})}};
 $("compareSelectedBtn").onclick=compareSelected;$("mergeSelectedBtn").onclick=mergeSelected;$("showFailedBtn").onclick=()=>{showFailed=!showFailed;$("showFailedBtn").textContent=showFailed?"MYÖS HYLÄTYT":"VAIN HYVÄT";renderRuns()};
@@ -1392,6 +1404,6 @@ updateDiag();requestWake();enumerateAudio();registerServiceWorker();log("Boot "+
 })();
 window.addEventListener("pagehide",()=>{if(learningEnabled)flushLearningChunk(true)});
 </script>
-<script src="./dyno_only_v351.js?build=2026-09-26-dyno-only-v6"></script>
+<script src="./dyno_only_v351.js?build=2026-09-26-dyno-only-v7"></script>
 </body>
 </html>
