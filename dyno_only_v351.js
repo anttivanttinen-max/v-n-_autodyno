@@ -119,8 +119,8 @@
       requestWake();
       if($("measureStatus"))$("measureStatus").textContent="Valmistellaan dynoa…";
 
-      const gpsOk=(typeof gpsOn!=="undefined"&&gpsOn)||await startGPS();
       const imuOk=(typeof imuOn!=="undefined"&&imuOn)||await startIMU();
+      const gpsOk=(typeof gpsOn!=="undefined"&&gpsOn)||await startGPS();
       let audioOk=true;
       if($("rpmSourceMode")?.value!=="gps"){
         audioOk=(typeof extMicOn!=="undefined"&&extMicOn)||await startAudio();

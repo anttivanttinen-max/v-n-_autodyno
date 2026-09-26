@@ -6,8 +6,7 @@ body.dyno-only-v351 .nav[data-screen="analysis"],
 body.dyno-only-v351 .nav[data-screen="autotune"],
 body.dyno-only-v351 #sensorBtn,
 body.dyno-only-v351 #extMicBtn,
-body.dyno-only-v351 #manualBtn,
-body.dyno-only-v351 #imuChip{display:none!important}
+body.dyno-only-v351 #manualBtn{display:none!important}
 
 body.dyno-only-v351 .controls{grid-template-columns:2fr 1fr}
 body.dyno-only-v351 #armBtn{min-height:86px;border-color:#ff263f;background:linear-gradient(#721323,#34080f)}
