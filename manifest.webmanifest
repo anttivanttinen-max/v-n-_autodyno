@@ -2,7 +2,7 @@
   "name": "VäNä MotorLab Dyno v35.1",
   "short_name": "MotorLab Dyno",
   "description": "VäNä MotorLab Dyno — motorcycle road dyno using audio RPM, GPS and IMU",
-  "start_url": "./index.html?v=35.1&build=2026-09-26-dyno-only-v5",
+  "start_url": "./index.html?v=35.1&build=2026-09-26-dyno-only-v6",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
