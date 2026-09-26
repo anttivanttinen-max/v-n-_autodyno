@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const MODULE='sensor-autostart-v4-auto-ride';
+const MODULE='sensor-autostart-v5-ios-imu-gesture';
 const PREF_KEY='motolab_v32_sensor_prefs';
 const AUTO_RIDE_KEY='motorlab_auto_ride_enabled';
 let busy=false,lastTry={gps:0,imu:0},startupReady=false,timer=null;
@@ -30,6 +30,11 @@ async function tryStart(kind,force=false){
   }
   if(kind==='imu'){
    if(imuLive())return true;
+   const iosNeedsGesture=typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function';
+   if(iosNeedsGesture){
+    logEvent('imu_autostart_waiting_for_user_gesture',{reason:'ios_motion_permission'});
+    return false;
+   }
    if(typeof startIMU==='function')await startIMU();
    return imuLive();
   }
