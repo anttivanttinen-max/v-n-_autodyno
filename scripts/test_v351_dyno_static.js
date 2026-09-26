@@ -20,12 +20,13 @@ need(ui.includes('learningEnabled=true'),'raw learning capture force-on missing'
 need(ui.includes('keepScreenAwake()'),'dyno screen-awake enforcement missing');
 need(ui.includes('wake.dataset.dynoWakeLocked="1"'),'dyno wake toggle lock missing');
 need(html.includes('wakeLock.addEventListener?.("release"'),'wake-lock release reacquire missing');
-need(ui.includes('mnav&&mnav.textContent!==\\\"DYNO\\\"')&&ui.includes('rnav&&rnav.textContent!==\\\"VEDOT\\\"')&&ui.includes('snav&&snav.textContent!==\\\"ASETUKSET\\\"'),'nav MutationObserver writes are not idempotent');
+need(ui.includes('mnav&&mnav.textContent!=="DYNO"')&&ui.includes('rnav&&rnav.textContent!=="VEDOT"')&&ui.includes('snav&&snav.textContent!=="ASETUKSET"'),'nav MutationObserver writes are not idempotent');
 const legacyDash=fs.readFileSync('v34_dashboard_ui.js','utf8');
 need(legacyDash.includes("if(document.body.classList.contains('dyno-only-v351'))return"),'legacy v34 dashboard observer is not disabled in dyno-only mode');
 need(css.includes('#manualBtn')&&css.includes('#sensorBtn')&&css.includes('#extMicBtn'),'legacy controls not hidden');
 need(!css.includes('body.dyno-only-v351 #imuChip{display:none!important}'),'IMU control is hidden in dyno-only mode');
 need(html.includes('id="imuChip"')&&html.includes('$("imuChip").onclick=toggleIMU'),'dedicated IMU button wiring missing');
+need(ui.indexOf('await startIMU()')<ui.indexOf('await startGPS()'),'IMU permission is not requested before GPS async start');
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
 need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');
 need(html.includes('audioSpectrum:{startHz:20,endHz:1000,stepHz:5,frames:spectra}'),'run wide-spectrum payload missing');
