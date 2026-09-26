@@ -7,7 +7,7 @@ const version=fs.readFileSync('version.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 function need(ok,msg){if(!ok)throw new Error(msg)}
 need(/version:"35\.1"/.test(version),'v35.1 release missing');
-need(/2026-09-26-dyno-only-v5/.test(version),'v35.1 build missing');
+need(/2026-09-26-dyno-only-v6/.test(version),'v35.1 build missing');
 need(html.includes('dyno_only_v351.css'),'dyno css not linked');
 need(html.includes('dyno_only_v351.js'),'dyno js not linked');
 need(ui.includes('["measure","runs","settings"]'),'three-screen allowlist missing');
@@ -30,4 +30,7 @@ need(ui.indexOf('await startIMU()')<ui.indexOf('await startGPS()'),'IMU permissi
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
 need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');
 need(html.includes('audioSpectrum:{startHz:20,endHz:1000,stepHz:5,frames:spectra}'),'run wide-spectrum payload missing');
+const phoneBridge=fs.readFileSync('phone_bridge.js','utf8');
+need(phoneBridge.includes('calc(var(--ml-bottom-nav-h,76px) + 18px + env(safe-area-inset-bottom))'),'Phone Bridge bottom-nav clearance missing');
+need(phoneBridge.includes('max-height:calc(100dvh - var(--ml-bottom-nav-h,76px) - 42px - env(safe-area-inset-bottom))'),'Phone Bridge viewport max-height missing');
 console.log('V351_DYNO_STATIC_OK');
