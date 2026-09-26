@@ -32,6 +32,7 @@ const sensorPersistence=fs.readFileSync('sensor_persistence.js','utf8');
 need(sensorPersistence.includes("iosNeedsGesture")&&sensorPersistence.includes("imu_restore_waiting_for_user_gesture"),'iOS IMU auto-restore gesture guard missing');
 const sensorAutostart=fs.readFileSync('sensor_autostart.js','utf8');
 need(sensorAutostart.includes("iosNeedsGesture")&&sensorAutostart.includes("imu_autostart_waiting_for_user_gesture"),'iOS IMU sensor-autostart gesture guard missing');
+need(ui.includes('iosImuNeedsGesture')&&ui.includes('e.isTrusted?await startIMU():false'),'programmatic auto-arm can still request iOS IMU permission');
 need(ui.indexOf('await startIMU()')<ui.indexOf('await startGPS()'),'IMU permission is not requested before GPS async start');
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
 need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');
