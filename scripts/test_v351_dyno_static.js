@@ -7,7 +7,7 @@ const version=fs.readFileSync('version.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 function need(ok,msg){if(!ok)throw new Error(msg)}
 need(/version:"35\.1"/.test(version),'v35.1 release missing');
-need(/2026-09-25-dyno-only-v4/.test(version),'v35.1 build missing');
+need(/2026-09-26-dyno-only-v5/.test(version),'v35.1 build missing');
 need(html.includes('dyno_only_v351.css'),'dyno css not linked');
 need(html.includes('dyno_only_v351.js'),'dyno js not linked');
 need(ui.includes('["measure","runs","settings"]'),'three-screen allowlist missing');
@@ -24,6 +24,8 @@ need(ui.includes('mnav&&mnav.textContent!==\\\"DYNO\\\"')&&ui.includes('rnav&&rn
 const legacyDash=fs.readFileSync('v34_dashboard_ui.js','utf8');
 need(legacyDash.includes("if(document.body.classList.contains('dyno-only-v351'))return"),'legacy v34 dashboard observer is not disabled in dyno-only mode');
 need(css.includes('#manualBtn')&&css.includes('#sensorBtn')&&css.includes('#extMicBtn'),'legacy controls not hidden');
+need(!css.includes('body.dyno-only-v351 #imuChip{display:none!important}'),'IMU control is hidden in dyno-only mode');
+need(html.includes('id="imuChip"')&&html.includes('$("imuChip").onclick=toggleIMU'),'dedicated IMU button wiring missing');
 need(sw.includes("'dyno_only_v351'"),'dyno UI module not cached');
 need(sw.includes("'dyno_only_v351.css'"),'dyno UI css not cached');
 need(html.includes('audioSpectrum:{startHz:20,endHz:1000,stepHz:5,frames:spectra}'),'run wide-spectrum payload missing');
